@@ -29,30 +29,30 @@
             type: 'FeatureCollection',
             features: points
           },
-          cluster: true,
+          cluster: false,
           clusterMaxZoom: 14,
           clusterRadius: 50
         });
   
         // Add cluster circles
-        map.addLayer({
-          id: 'clusters',
-          type: 'circle',
-          source: 'points',
-          filter: ['has', 'point_count'],
-          paint: {
-            'circle-color': '#a8323a',
-            'circle-radius': [
-              'step',
-              ['get', 'point_count'],
-              20,
-              100,
-              30,
-              750,
-              40
-            ]
-          }
-        });
+        // <!-- map.addLayer({
+        //   id: 'clusters',
+        //   type: 'circle',
+        //   source: 'points',
+        //   filter: ['has', 'point_count'],
+        //   paint: {
+        //     'circle-color': '#a8323a',
+        //     'circle-radius': [
+        //       'step',
+        //       ['get', 'point_count'],
+        //       20,
+        //       100,
+        //       30,
+        //       750,
+        //       40
+        //     ]
+        //   }
+        // }); -->
   
         // Add cluster count labels
         map.addLayer({
@@ -77,7 +77,8 @@
           filter: ['!', ['has', 'point_count']],
           paint: {
             'circle-color': '#a8323a',
-            'circle-radius': 10
+            'circle-radius': 8
+            
           }
         });
 
