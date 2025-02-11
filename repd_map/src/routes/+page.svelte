@@ -29,7 +29,7 @@
   </script>
   
   <svelte:head>
-    <title>Cancelled Renewables</title>
+    <title>Broken Britain - Cancelled Renewables</title>
   </svelte:head>
   
   <div class="container">

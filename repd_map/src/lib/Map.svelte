@@ -9,14 +9,22 @@
     let map;
     let selectedFeature = false;
   
+
+    const typeColors = {
+      restaurant: '#FF5733',
+      shopping: '#33FF57',
+      entertainment: '#3357FF',
+      default: '#808080'  // fallback color
+    };
     export let sizeProperty = 'Installed Capacity (MWelec)'; 
     export let minSize = 20;
     export let maxSize = 50;
+    const allowedProperties = ['Operator (or Applicant)', 'Site Name', 'Technology Type', 'Installed Capacity (MWelec)', 'Development Status', 'Planning Authority', 'Planning Application Submitted', 'Planning Permission Refused'];
 
     onMount(() => {
       map = new maplibregl.Map({
         container: mapContainer,
-        style: 'https://demotiles.maplibre.org/style.json',
+        style: 'https://api.maptiler.com/maps/toner-v2/style.json?key=xGVG9z8FJiMrvfFTWFgs',
         center: [-4, 55.20],
         zoom: 4.8
       });
@@ -71,25 +79,37 @@
   
         // Add unclustered point circles
         map.addLayer({
-          id: 'unclustered-point',
-          type: 'circle',
-          source: 'points',
-          filter: ['!', ['has', 'point_count']],
-          paint: {
-            'circle-color': '#a8323a',
-            'circle-radius': 8
-            
-          }
-        });
+        id: 'unclustered-point',
+        type: 'circle',
+        source: 'points',
+        paint: {
+          'circle-radius': 10,
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#ffffff',
+          // Highlight selected point
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['coalesce', ['get', 'Installed Capacity (MWelec)'], 0],
+            0, 3,  // minimum radius
+            200, 20  // maximum radius at 1000 MWelec
+          ],
+          'circle-color': [
+            'case',
+            ['boolean', ['feature-state', 'selected'], false],
+            '#fbb03b',  // Selected color
+            '#a8323a'   // Default color
+          ]
+        }
+      });
 
         map.on('click', 'unclustered-point', (e) => {
         if (!e.features.length) return;
-        if (selectedFeature) {
-          map.setFeatureState(
-            { source: 'points', id: selectedFeature.id },
-            { selected: false }
-          );
-        }
+
+        map.setFeatureState(
+          { source: 'unclustered-point', id: selectedFeature.id },
+          { selected: true }
+        );
         map.on('click', 'clusters', (e) => {
           const features = map.queryRenderedFeatures(e.point, {
             layers: ['clusters']
@@ -156,16 +176,16 @@
       <div class="sidebar" transition:slide>
         <div class="sidebar-header">
           {#if selectedFeature}
-          <h2>{selectedFeature.properties.title || 'Project Details'}</h2>
+          <h2 class="text-3xl font-bold">{selectedFeature.properties.title || 'Grave Details'}</h2>          
           {:else}
-          <h2>Select A Project</h2>
+          <h2 class="text-3xl font-bold">Select A Grave</h2>
           {/if}
-
+          <p>Total Capacity Lost: <b>6584.59 MW Yearly of Generation</b> since <b>January 2022</b></p>
         </div>
         
         {#if selectedFeature}
         <div class="sidebar-content">
-          {#each Object.entries(selectedFeature.properties) as [key, value]}
+          {#each Object.entries(selectedFeature.properties).filter(([key]) => allowedProperties.includes(key)) as [key, value]}
             {#if key !== 'title'}
               <div class="property-row">
                 <strong>{key.replace(/_/g, ' ')}:</strong>
