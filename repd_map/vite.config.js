@@ -6,5 +6,8 @@ export default defineConfig({
 	plugins: [ 
 		tailwindcss(),
 		sveltekit()  
-	]
+	],
+	css: {
+		postcss: './postcss.config.js'
+	  }
 });

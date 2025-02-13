@@ -3,12 +3,13 @@
     import maplibregl from 'maplibre-gl';
     import 'maplibre-gl/dist/maplibre-gl.css';
     import { nonpassive } from 'svelte/legacy';
-    
+    import gsap from 'gsap';
+
     export let points = []; // GeoJSON features
     let mapContainer;
     let map;
     let selectedFeature = false;
-  
+    let sidebarContent;
 
     const typeColors = {
       restaurant: '#FF5733',
@@ -30,7 +31,6 @@
       });
   
       map.on('load', () => {
-        // Add points source with clustering
         map.addSource('points', {
           type: 'geojson',
           data: {
@@ -42,41 +42,6 @@
           clusterRadius: 50
         });
   
-        // Add cluster circles
-        // <!-- map.addLayer({
-        //   id: 'clusters',
-        //   type: 'circle',
-        //   source: 'points',
-        //   filter: ['has', 'point_count'],
-        //   paint: {
-        //     'circle-color': '#a8323a',
-        //     'circle-radius': [
-        //       'step',
-        //       ['get', 'point_count'],
-        //       20,
-        //       100,
-        //       30,
-        //       750,
-        //       40
-        //     ]
-        //   }
-        // }); -->
-  
-        // Add cluster count labels
-        map.addLayer({
-          id: 'cluster-count',
-          type: 'symbol',
-          source: 'points',
-          filter: ['has', 'point_count'],
-          layout: {
-            'text-field': '{point_count_abbreviated}',
-            'text-size': 12
-          },
-          paint: {
-            'text-color': '#ffffff'
-          }
-        });
-  
         // Add unclustered point circles
         map.addLayer({
         id: 'unclustered-point',
@@ -86,7 +51,6 @@
           'circle-radius': 10,
           'circle-stroke-width': 2,
           'circle-stroke-color': '#ffffff',
-          // Highlight selected point
           'circle-radius': [
             'interpolate',
             ['linear'],
@@ -106,73 +70,53 @@
         map.on('click', 'unclustered-point', (e) => {
         if (!e.features.length) return;
 
-        map.setFeatureState(
-          { source: 'unclustered-point', id: selectedFeature.id },
-          { selected: true }
-        );
-        map.on('click', 'clusters', (e) => {
-          const features = map.queryRenderedFeatures(e.point, {
-            layers: ['clusters']
-          });
-          
-          if (!features.length) return;
 
-          const clusterId = features[0].properties.cluster_id;
-          const pointCount = features[0].properties.point_count;
-          const clusterSource = map.getSource('points');
-          clusterSource.getClusterExpansionZoom(
-          clusterId,
-          (err, zoom) => {
-            if (err) return;
-
-            // Ensure we don't zoom too far in
-            const maxZoom = Math.min(zoom + 1, map.getMaxZoom());
-            
-            // Get cluster coordinates
-            const coordinates = features[0].geometry.coordinates.slice();
-
-            // Handle coordinate wrapping
-            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-              coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-            }
-
-            // Animate to the cluster
-            map.easeTo({
-              center: coordinates,
-              zoom: maxZoom,
-              duration: 500
-            });
-          }
-        );
-        })
 
         const feature = e.features[0];
         selectedFeature = feature;
 
         // Set new selection state
         map.setFeatureState(
-          { source: 'points', id: feature.id },
+          { source: 'points', id: selectedFeature.id },
           { selected: true }
         );
+        animateProperties();
 
-        
           });
 
-        // Change cursor on hover
-        map.on('mouseenter', 'unclustered-point', () => {
-            map.getCanvas().style.cursor = 'pointer';
-          });
-          map.on('mouseenter', 'clusters', () => {
-            map.getCanvas().style.cursor = 'pointer';
-          });
       
       });
 
 
     });
+
+    function animateProperties() {
+    if (!sidebarContent) return;
+    
+    // Get all property rows
+    const rows = sidebarContent.querySelectorAll('.property-row');
+    
+    // Reset any existing animations
+    gsap.set(rows, { opacity: 0, y: 20 });
+    
+    // Create stagger animation for the rows
+    gsap.to(rows, {
+      duration: 0.5,
+      opacity: 1,
+      y: 0,
+      stagger: 0.1,
+      ease: 'power2.out'
+    });
+  }
+  $: if (selectedFeature) {
+    // Wait for next tick to ensure DOM is updated
+    setTimeout(animateProperties, 0);
+  }
+
+
   </script>
   <div class="container">
-    
+
       <div class="sidebar" transition:slide>
         <div class="sidebar-header">
           {#if selectedFeature}
@@ -180,28 +124,39 @@
           {:else}
           <h2 class="text-3xl font-bold">Select A Grave</h2>
           {/if}
-          <p>Total Capacity Lost: <b>6584.59 MW Yearly of Generation</b> since <b>January 2022</b></p>
+          <div class="stats shadow">
+            <div class="stat">
+              <div class="stat-title">Total Capacity Lost</div>
+              <div class="stat-value">6584.59 MW</div>
+              <div class="stat-desc">of Generation since <b>January 2022</b></div>
+            </div>
+          </div>
+
         </div>
-        
+
         {#if selectedFeature}
-        <div class="sidebar-content">
+        <div class="sidebar-content" bind:this={sidebarContent}>
+          <div class="card ">
           {#each Object.entries(selectedFeature.properties).filter(([key]) => allowedProperties.includes(key)) as [key, value]}
             {#if key !== 'title'}
-              <div class="property-row">
+              <div class="property-row card p-1 mb-0">
                 <strong>{key.replace(/_/g, ' ')}:</strong>
                 <span>{value}</span>
               </div>
             {/if}
           {/each}
+            </div>
         </div>
         {/if}
 
       </div>
       <div class="map-container" bind:this={mapContainer} />
-
     </div>
   
   <style>
+        @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
       .container {
     display: flex;
     height: 100vh;
@@ -217,9 +172,10 @@
     }
     .sidebar {
     width: 70em;
-    background: white;
-    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    /* background: white; */
+    /* box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1); */
     padding: 20px;
     overflow-y: auto;
+    
     }
   </style>

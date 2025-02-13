@@ -43,7 +43,7 @@ def search_news(site_name, cancelled=True):
 def create_geojson(df):
     features = []
     for _, row in df.iterrows():
-        links = search_news(row['Site Name'])
+        # links = search_news(row['Site Name'])
         feature = {
             "type": "Feature",
             "geometry": {
@@ -51,27 +51,41 @@ def create_geojson(df):
                 "coordinates": [float(row['longitude']), float(row['latitude'])]
             },
             "properties": row.drop(['latitude', 'longitude']).to_dict(),
-            "links": links
+            # "links": links
         }        
         features.append(feature)
-        break
-
     return {
         "type": "FeatureCollection",
         "features": features
     }
-    
+def get_capacity_value(value):
+    if pd.isna(value) or value == '':
+        return 0
+    try:
+        num_value = float(value)
+        return num_value
+    except (ValueError, TypeError):
+        return 0
+
 if __name__ == "__main__":    
     df = pd.read_csv('repdoct.csv', encoding='cp1252')
-    df = df[df['Development Status (short)'] == 'Application Refused']
+    df = df[df['Development Status (short)'].isin(['Application Refused', 'Abandoned', 'Application Withdrawn', 'Appeal Refused'])]
+    print(df)
     df['Planning Application Submitted'] = pd.to_datetime(df['Planning Application Submitted'], format='%d/%m/%Y')
-    df = df[df['Planning Application Submitted'] >= pd.Timestamp('2023-01-01')]
+    df = df[df['Planning Application Submitted'] >= pd.Timestamp('2020-01-01')]
+    print(df)
     df['Planning Application Submitted'] = df['Planning Application Submitted'].dt.strftime('%Y-%m-%d')
     # df = pd.DataFrame(data)
+    # df[df["Installed Capacity (MWelec)"]
+    df['Installed Capacity (MWelec)'] = df['Installed Capacity (MWelec)'].apply(get_capacity_value)
+    print(df["Installed Capacity (MWelec)"].sum())
     df = convert_coordinates(df, easting_col='X-coordinate', northing_col='Y-coordinate')
+    print(df)
+    df = df[['Site Name', 'Operator (or Applicant)', 'Technology Type', 'Planning Authority', 'Planning Application Submitted']]
+    df.to_csv("potential_sites.csv")
     geojson = create_geojson(df)
 
-    with open('points.geojson', 'w') as f:
+    with open('points_2.geojson', 'w') as f:
         json.dump(geojson, f, indent=2)
 
     # print("\nGeoJSON output:")
