@@ -26,6 +26,14 @@
     let speed = 0;
     let rpm = 0;
 
+    
+  let stats = [
+    { label: 'Total Capacity Lost', value: '6584 MW', trend: 'since January 2022' },
+    { label: 'Groups', value: '23', trend: '+2' },
+    { label: 'Projects', value: '12',  trend: '+3' },
+    { label: 'Appeals', value: '156',  trend: '+22%' }
+  ];
+
     const generateTitles = (step, count) =>
       Array.from({ length: count }, (_, i) => (i * step).toString());
 
@@ -43,7 +51,7 @@
     export let sizeProperty = 'Installed Capacity (MWelec)'; 
     export let minSize = 20;
     export let maxSize = 50;
-    const allowedProperties = ['Operator (or Applicant)', 'Site Name', 'Technology Type', 'Installed Capacity (MWelec)', 'Development Status', 'Planning Authority', 'Planning Application Submitted', 'Planning Permission Refused'];
+    const allowedProperties = ['Operator (or Applicant)', 'Site Name', 'Technology Type', 'Installed Capacity (MWelec)', 'Development Status', 'Planning Permission Refused'];
 
     let chartCanvas
     let ctx
@@ -115,7 +123,7 @@
             'interpolate',
             ['linear'],
             ['coalesce', ['get', 'Installed Capacity (MWelec)'], 0],
-            0, 3,  // minimum radius
+            0, 5,  // minimum radius
             200, 20  // maximum radius at 1000 MWelec
           ],
           'circle-color': [
@@ -180,58 +188,68 @@
   </script>
 
 
-  <div class="container">
-      <div class="w-1/2 p-5 overflow-y-auto shadow-lg" transition:slide>
+  <div class="container font-sans">
+
+      <div class="w-2/3 p-5 overflow-y-auto shadow-lg" transition:slide>
         <div class="sidebar-header justify-center items-center">
           <div class="mb-4">
             {#if selectedFeature}
-            <h2 class="text-xl font-bold">{selectedFeature.properties.title || 'NIMBYdex'}</h2>          
+            <h2 class="text-xl font-bold">{selectedFeature.properties.title || 'NIMBYdex'}</h2>       
+            <p>UK Cancelled Renewable Monitor</p>
+   
             {:else}
             <h2 class="text-xl font-bold">NIMBYdex</h2>
             <p>UK Cancelled Renewable Monitor</p>
             {/if}
           </div>
 
-
-          <div class="flex justify-center items-center">
-          <div class="stats   shadow">
-            <div class="stat">
-              <div class="stat-title">Total Capacity Lost</div>
-              <div class="stat-value">6584.59 MW</div>
-              <div class="stat-desc">of Generation since <b>January 2022</b></div>
-            </div>
+          <div style="height: 300px"  class:hidden={!selectedFeature}>
+            <canvas bind:this={nimbyDarCanvas} ></canvas>
           </div>
-          <div class="stats  shadow">
-            <div class="stat">
-              <div class="stat-title">Nimby Rating</div>
-              <div class="stat-value">4.5 NPA</div>
-              <div class="stat-desc">of Storage since <b>January 2022</b></div>
+          <div class="grid grid-cols-2 gap-4" class:hidden={selectedFeature}>
+            {#each stats as stat (stat.label)}
+            <div class="stat shadow">
+              <div class="stat-title">{stat.label}</div>
+              <span class="stat-value">{stat.value}</span>
+              <span class="stat-desc">{stat.trend}</span>
             </div>
+          {/each}
           </div>
         </div>
 
-        </div>
-        <Gauge
-          width={300}
-          stop={200}
-          labels={generateTitles(20, 11)}
-          startAngle={45}
-          stopAngle={315}
-          stroke={10}
-          easing={cubicOut}
-          value={speed}
-          color={"#d43008"}
-        >
-        </Gauge>
 
         <div style="height: 100px" class:hidden={selectedFeature}>
         <canvas bind:this={chartCanvas}  id="myChart"></canvas>
         </div>
-
+        <div class ='flex justify-center items-center' class:hidden={!selectedFeature}>
+          <Gauge
+            width={200}
+            stop={200}
+            labels={generateTitles(20, 11)}
+            startAngle={45}
+            stopAngle={315}
+            stroke={10}
+            easing={cubicOut}
+            value={speed}
+            color={"#d43008"}
+          >
+          <div class="gauge-content">
+            <br/>
+            <br/>
+            <br/>
+            <span><b>NIMBY Score: {Math.round(speed)}</b></span>
+          </div>
+          </Gauge>
+        </div>
         {#if selectedFeature}
         <div class="sidebar-content" bind:this={sidebarContent}>
-          <div class="card ">
-            <table className="w-full">
+            <table class="w-full table">
+              <thead> 
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
               <tbody>
 
           {#each Object.entries(selectedFeature.properties).filter(([key]) => allowedProperties.includes(key)) as [key, value]}
@@ -244,27 +262,17 @@
                     {value}
                   </td>
                 </tr>
-
-
             {/if}
           {/each}
         </tbody>
       </table>    
-            </div>
         </div>
         {/if}
-        <div style="height: 400px" class:hidden={!selectedFeature}>
-          <canvas bind:this={nimbyDarCanvas} ></canvas>
-        </div>
-        <div style="height: 400px" class:hidden={!selectedFeature}>
-          <canvas bind:this={nimbyDialCanvas} ></canvas>
-        </div>
 
       </div>
-      <div class="map-container" bind:this={mapContainer} >
+      <div class="map-container" bind:this={mapContainer} />
       
-      </div>
-      <div class='absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-secondary p-4 rounded-lg shadow-lg'>
+      <div class='absolute bottom-2 left-2/3 transform -translate-x-2/3 bg-base-100 p-4 rounded-lg shadow-lg'>
         <label>Start Date:
             <input type="date" bind:value={startDate} on:input={updateMapData} />
         </label>
