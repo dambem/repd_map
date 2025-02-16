@@ -36,7 +36,6 @@
 		"maplibre-gl": "^5.1.0",
 		"melt": "^0.11.0",
 		"motion": "^12.4.2",
-		"nouislider": "^15.8.1",
-		"svelte-gauge": "^2.0.0"
+		"nouislider": "^15.8.1"
 	}
 }

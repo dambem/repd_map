@@ -5,7 +5,6 @@
     import chartjs from 'chart.js/auto';
     import { nonpassive } from 'svelte/legacy';
     import gsap from 'gsap';
-    import Gauge from "svelte-gauge";
     import { cubicIn, cubicOut } from "svelte/easing";
 
     export let points = []; // GeoJSON features
@@ -221,26 +220,7 @@
         <div style="height: 100px" class:hidden={selectedFeature}>
         <canvas bind:this={chartCanvas}  id="myChart"></canvas>
         </div>
-        <div class ='flex justify-center items-center' class:hidden={!selectedFeature}>
-          <Gauge
-            width={200}
-            stop={200}
-            labels={generateTitles(20, 11)}
-            startAngle={45}
-            stopAngle={315}
-            stroke={10}
-            easing={cubicOut}
-            value={speed}
-            color={"#d43008"}
-          >
-          <div class="gauge-content">
-            <br/>
-            <br/>
-            <br/>
-            <span><b>NIMBY Score: {Math.round(speed)}</b></span>
-          </div>
-          </Gauge>
-        </div>
+
         {#if selectedFeature}
         <div class="sidebar-content" bind:this={sidebarContent}>
             <table class="w-full table">
