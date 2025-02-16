@@ -7,7 +7,34 @@ from bs4 import BeautifulSoup
 import requests
 import time
 transformer = Transformer.from_crs("EPSG:27700", "EPSG:4326")
+import requests
+import os
+from dotenv import load_dotenv
 
+def google_search(query, api_key, cse_id, num_results=5):
+    url = "https://www.googleapis.com/customsearch/v1"
+    params = {
+        "key": api_key,
+        "cx": cse_id,
+        "q": query,
+        "num": min(num_results, 5),  # Limit to 100 results per request
+    }
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        data = response.json()
+        return data.get("items", [])
+    except requests.exceptions.RequestException as e:
+        print(f"Error during search: {e}")
+        return None
+    except KeyError:
+        print("Error: Invalid API response format.")
+        return None
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        return None
+
+    
 def convert_coordinates(df, easting_col='easting', northing_col='northing'):
     lat, lon = transformer.transform(df[easting_col].values, df[northing_col].values)
     df['latitude'] = lat
@@ -70,24 +97,31 @@ def get_capacity_value(value):
 if __name__ == "__main__":    
     df = pd.read_csv('repdoct.csv', encoding='cp1252')
     df = df[df['Development Status (short)'].isin(['Application Refused', 'Abandoned', 'Application Withdrawn', 'Appeal Refused'])]
-    print(df)
     df['Planning Application Submitted'] = pd.to_datetime(df['Planning Application Submitted'], format='%d/%m/%Y')
-    df = df[df['Planning Application Submitted'] >= pd.Timestamp('2020-01-01')]
-    print(df)
+    df = df[df['Planning Application Submitted'] >= pd.Timestamp('2021-01-01')]
     df['Planning Application Submitted'] = df['Planning Application Submitted'].dt.strftime('%Y-%m-%d')
-    # df = pd.DataFrame(data)
-    # df[df["Installed Capacity (MWelec)"]
     df['Installed Capacity (MWelec)'] = df['Installed Capacity (MWelec)'].apply(get_capacity_value)
-    print(df["Installed Capacity (MWelec)"].sum())
     df = convert_coordinates(df, easting_col='X-coordinate', northing_col='Y-coordinate')
-    print(df)
-    df = df[['Site Name', 'Operator (or Applicant)', 'Technology Type', 'Planning Authority', 'Planning Application Submitted']]
-    df.to_csv("potential_sites.csv")
+    # df = df[['Site Name', 'Operator (or Applicant)', 'Technology Type', 'Planning Authority', 'Planning Application Submitted']]
+    # df.to_csv("potential_sites.csv")
     geojson = create_geojson(df)
 
     with open('points_2.geojson', 'w') as f:
         json.dump(geojson, f, indent=2)
+    load_dotenv() # Load environment variables from .env file
+    api_key = os.getenv("GOOGLE_SEARCH_API_KEY")
+    cse_id = os.getenv("GOOGLE_CSE_ID")
 
-    # print("\nGeoJSON output:")
-    # print(json.dumps(geojson, indent=2))
+    for _, row in df.iterrows():
+        print(row)
+        query = input("Enter your search query: ")
+        results = google_search(query, api_key, cse_id, num_results=5)
+        with open('test_query.json', "w", encoding="utf-8") as f:
+            json.dump(results, f, ensure_ascii=False, indent=4)
+
+        break
+    
+    
+    
+    print(results)
 

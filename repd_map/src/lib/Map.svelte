@@ -63,7 +63,7 @@
         data: {
           labels: ['Organised', 'Governmental', 'Council', 'Suspicious', 'Valid'],
           datasets: [{
-            label: 'NIMBYDar Analysis',
+            label: 'NimbyDEX',
             data: [65, 90, 70, 30, 0],
           }]
         },
@@ -181,16 +181,18 @@
 
 
   <div class="container">
-
-      <div class="sidebar" transition:slide>
+      <div class="w-1/2 p-5 overflow-y-auto shadow-lg" transition:slide>
         <div class="sidebar-header justify-center items-center">
-          <div>
+          <div class="mb-4">
             {#if selectedFeature}
-            <h2 class="text-3xl font-bold">{selectedFeature.properties.title || 'NIMBY Analysis'}</h2>          
+            <h2 class="text-xl font-bold">{selectedFeature.properties.title || 'NIMBYdex'}</h2>          
             {:else}
-            <h2 class="text-3xl font-bold"><b>NIMBYdar</b> - Select A Project</h2>
+            <h2 class="text-xl font-bold">NIMBYdex</h2>
+            <p>UK Cancelled Renewable Monitor</p>
             {/if}
           </div>
+
+
           <div class="flex justify-center items-center">
           <div class="stats   shadow">
             <div class="stat">
@@ -206,16 +208,8 @@
               <div class="stat-desc">of Storage since <b>January 2022</b></div>
             </div>
           </div>
+        </div>
 
-        </div>
-        <div style="margin-top: 10px;">
-            <label>Start Date:
-                <input type="date" bind:value={startDate} on:input={updateMapData} />
-            </label>
-            <label>End Date:
-                <input type="date" bind:value={endDate} on:input={updateMapData} />
-            </label>
-        </div>
         </div>
         <Gauge
           width={300}
@@ -267,13 +261,24 @@
         </div>
 
       </div>
-      <div class="map-container" bind:this={mapContainer} />
+      <div class="map-container" bind:this={mapContainer} >
+      
+      </div>
+      <div class='absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-secondary p-4 rounded-lg shadow-lg'>
+        <label>Start Date:
+            <input type="date" bind:value={startDate} on:input={updateMapData} />
+        </label>
+        <label>End Date:
+            <input type="date" bind:value={endDate} on:input={updateMapData} />
+        </label>
+    </div>
     </div>
   
   <style>
   @tailwind base;
   @tailwind components;
   @tailwind utilities;
+  @plugin "@tailwindcss/typography";
   .hidden {
     display: none;
   }

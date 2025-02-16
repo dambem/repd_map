@@ -11,9 +11,7 @@
     <title>Broken Britain - Cancelled Renewables</title>
   </svelte:head>
   
-  <div class="container">
-    <Map points={data.points} />
-  </div>
+  <Map points={data.points} />
   
 
   <style>
