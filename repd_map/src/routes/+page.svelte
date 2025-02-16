@@ -15,8 +15,17 @@
     <Map points={data.points} />
   </div>
   
-  <style global lang="postcss">
+
+  <style>
+      /* .container {
+      background:
+        url(noise.svg);
+        opacity: .90;  */
+        /* mix-blend-mode: soft-light; */
+      /* } */
+  </style>
+  <!-- <style global lang="postcss">
     @tailwind base;
     @tailwind components;
     @tailwind utilities;
-  </style>
+  </style> -->
