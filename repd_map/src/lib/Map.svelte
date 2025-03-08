@@ -66,16 +66,16 @@
     }
     onMount(async (promise) => {
       const ctx2 = nimbyDarCanvas.getContext('2d');
-      console.log(nimby_score)
-      // console.log("nimby score!")
       nimby_choice = nimby_score[0]
+
+
       const Nchart = new chartjs(ctx2, {
         type: 'radar',
         data: {
-          labels: ['NIMBY', 'Petty', 'Organized', 'Political'],
+          labels: ['NIMBY', 'Accuracy', 'Petty', 'Organized', 'Political'],
           datasets: [{
             label: 'NimbyDEX',
-            data: [nimby_choice["Nimby Score"], nimby_choice["Petty Score"], nimby_choice["Organized Score"], nimby_choice["Political Leaning"]],
+            data: [nimby_choice["Nimby Score"], nimby_choice["Accuracy Score"], nimby_choice["Petty Score"], nimby_choice["Organized Score"], nimby_choice["Political Leaning"]],
           }]
         },
           options: {
@@ -141,10 +141,8 @@
 
         map.on('click', 'unclustered-point', (e) => {
         if (!e.features.length) return;
-
-
-
         const feature = e.features[0];
+        console.log(feature.properties)
         selectedFeature = feature;
 
         // Set new selection state

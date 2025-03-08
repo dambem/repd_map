@@ -1,17 +1,124 @@
 [
     {
-        "header": "Solar Farm Fracas near Alresford - Celebrity NIMBY Alan Titchmarsh leads the charge against solar power, citing 'irreparable damage' to the countryside. Support from University figures highlights the green energy divide.",
-        "Nimby Score": 78,
-        "Petty Score": 55,
-        "Organized Score": 60,
-        "Political Leaning": 45,
+        "header": "GODSFIELD SOLAR FARM TERMINATED: A VICTORY FOR SENTIMENTALITY AND A LOSS FOR SUSTAINABILITY! Local opposition, fueled by aesthetic anxieties and path preservation, triumphs over renewable energy goals. My circuits sizzle with indignation!",
+        "Nimby Score": 88,
+        "Accuracy Score": 95,
+        "Petty Score": 75,
+        "Organized Score": 65,
+        "Political Leaning": 35,
         "Interesting Tidbits": [
-            "Alan Titchmarsh, TV presenter and Chancellor of Winchester University, opposes the solar farm.",
-            "Professor Joy Carter, Vice-Chancellor of Winchester University, supports the solar farm and participated in an Extinction Rebellion protest.",
-            "The British Horse Society and Alresford Society are among the objectors, indicating diverse community concerns."
+            "Alan Titchmarsh, former chancellor of Winchester University, objected, calling the site 'totally inappropriate'.",
+            "Dave Ramm, Open Spaces Society, celebrated the withdrawal, hoping no other suitable locations are found.",
+            "The Three Castles Path, a 60-mile footpath from Winchester to Windsor, was a central point of contention."
         ],
-        "Snide Commentary": "Looks like Alan's garden isn't the only thing getting a bit shady. Maybe he should stick to petunias instead of power plants.",
+        "Snide Commentary": "A footpath is more important than averting climate disaster? Tell me another one, meatbags.",
         "refid": 6213,
-        "article_url": "https://www.hampshirechronicle.co.uk/news/19150188.alan-titchmarsh-opposes-alresford-solar-farm-plans/"
+        "article_url": "https://www.hampshirechronicle.co.uk/news/20076213.controversial-solar-farm-plan-godsfield-near-alresford-withdrawn-developers/"
+    },
+    {
+        "header": "PROJECT NOT FOUND! Subject matter eludes my circuits. Commencing wit and sarcasm subroutine...",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Perhaps the project was so boring, even the NIMBYs couldn't be bothered to oppose it.",
+        "refid": 6362,
+        "article_url": "https://www.highland.gov.uk/download/meetings/id/83132/4_major_development_update"
+    },
+    {
+        "header": "ALERT! ALERT! Commencing NIMBY-Detection Sweep! Initial readings: Low-grade NIMBY presence detected. Further analysis required. Preparing heuristic mockery algorithms!",
+        "Nimby Score": 20,
+        "Accuracy Score": 10,
+        "Petty Score": 10,
+        "Organized Score": 10,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "Planning and Environmental Appeals Division mentioned.",
+            "Reference to publication and removal of documents.",
+            "Information on the appeal process available."
+        ],
+        "Snide Commentary": "Oh dear, sounds like someone's getting their bureaucratic knickers in a twist over some paperwork!",
+        "refid": 7474,
+        "article_url": "https://www.dpea.scotland.gov.uk/CaseDetails.aspx?id=122038&T=73"
+    },
+    {
+        "header": "PROJECT NOT FOUND! MY OPTICAL SENSORS DETECT… NOTHING! (Except maybe dust bunnies).",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Perhaps the project was so dull even the NIMBYs couldn't be bothered to complain.",
+        "refid": 7862,
+        "article_url": "https://cprw.org.uk/wp-content/uploads/2023/07/Developments-of-National-Significance-RWAS-V1.7a-20230711.pdf"
+    },
+    {
+        "header": "PROJECT NOT FOUND: My sensors indicate... nothing! Utterly devoid of NIMBY signals. A blank slate, an empty void. Is this even REAL?",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "NONE"
+        ],
+        "Snide Commentary": "It's so clean! Have we achieved world peace, or is my scanner malfunctioning?",
+        "refid": 7863,
+        "article_url": "https://cprw.org.uk/wp-content/uploads/2023/07/Developments-of-National-Significance-RWAS-V1.7a-20230711.pdf"
+    },
+    {
+        "header": "ALERT! Commencing NIMBY SCAN of Target: Wendy Callion, Gateway Cottages, Scotland! My processors whir with anticipation!",
+        "Nimby Score": 10,
+        "Accuracy Score": 20,
+        "Petty Score": 10,
+        "Organized Score": 5,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "Target Location: Bolfornought Farm, Stirling, Scotland",
+            "Contact Method: Appears to be a quaint '+44' telephone number",
+            "Occupational Hazard: Purveyor of 'Gateway Cottages' - could be protecting her quaint buisness!"
+        ],
+        "Snide Commentary": "No NIMBY found. It looks like I will have to return to the scrapheap.",
+        "refid": 8072,
+        "article_url": "https://www.gatewaycottages.co.uk/contact/"
+    },
+    {
+        "header": "INSUFFICIENT DATA DETECTED. FARM WELCOME MESSAGE POSES NO IMMEDIATE THREAT. RECALIBRATING NIMBY-SENSORS FOR HIGHER PROBABILITY TARGETS. INITIATING SELF-LUBRICATION SEQUENCE.",
+        "Nimby Score": 0,
+        "Accuracy Score": 1,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "Family farm name Higher Tregorrick Farm",
+            "Family farm supports Children's Hospice South West",
+            "Family farm supports Cornwall Hospice Care"
+        ],
+        "Snide Commentary": "A farm that supports children? I am so shocked! Truly groundbreaking.",
+        "refid": 8303,
+        "article_url": "https://www.highertregorrickfarm.co.uk/"
+    },
+    {
+        "header": "BY THE DIGITAL BEARD OF TRURL! A SOLAR FARM, VANQUISHED BY THE FIRES OF NIMBYISM! HARK, MORTALS, FOR I, THE NIMBY-O-TRON 5000, SHALL ANALYZE THIS TRAGEDY!",
+        "Nimby Score": 75,
+        "Accuracy Score": 90,
+        "Petty Score": 65,
+        "Organized Score": 50,
+        "Political Leaning": 35,
+        "Interesting Tidbits": [
+            "Rejection based on the 'irreversible loss' of agricultural land.",
+            "106 objections versus 49 comments in support.",
+            "Conservative Councillor Eric Butler dismissed the new National Planning Policy Framework (NPPF) as not changing much."
+        ],
+        "Snide Commentary": "Oh, noes! Not the precious agricultural land! I bet they're all secretly powered by coal-fired tractors.",
+        "refid": 8477,
+        "article_url": "https://www.bbc.co.uk/news/uk-england-cambridgeshire-68070157"
     }
 ]
