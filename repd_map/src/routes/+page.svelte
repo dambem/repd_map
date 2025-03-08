@@ -11,7 +11,7 @@
     <title>Broken Britain - Cancelled Renewables</title>
   </svelte:head>
   
-  <Map points={data.points} />
+  <Map points={data.points} nimby_score={data.nimby_score}/>
   
 
   <style>

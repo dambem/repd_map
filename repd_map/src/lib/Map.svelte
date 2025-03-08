@@ -8,17 +8,18 @@
     import { cubicIn, cubicOut } from "svelte/easing";
 
     export let points = []; // GeoJSON features
+    export let nimby_score = [];
     let mapContainer;
     let map;
     let selectedFeature = false;
     let sidebarContent;
-
+    let nimby_choice;
     let chartData;
     let chartValues = [20, 10, 5, 2, 20, 30, 45];
   	let chartLabels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
 
-    let startDate = '2023-01-01';
-    let endDate = '2024-01-01';
+    let startDate = '2020-01-01';
+    let endDate = '2025-01-01';
 
     let nimbyDarCanvas;
     let nimbyDialCanvas;
@@ -65,17 +66,21 @@
     }
     onMount(async (promise) => {
       const ctx2 = nimbyDarCanvas.getContext('2d');
+      console.log(nimby_score)
+      // console.log("nimby score!")
+      nimby_choice = nimby_score[0]
       const Nchart = new chartjs(ctx2, {
         type: 'radar',
         data: {
-          labels: ['Organised', 'Governmental', 'Council', 'Suspicious', 'Valid'],
+          labels: ['NIMBY', 'Petty', 'Organized', 'Political'],
           datasets: [{
             label: 'NimbyDEX',
-            data: [65, 90, 70, 30, 0],
+            data: [nimby_choice["Nimby Score"], nimby_choice["Petty Score"], nimby_choice["Organized Score"], nimby_choice["Political Leaning"]],
           }]
         },
           options: {
             responsive: true,
+            legend: false,
            maintainAspectRatio: false,
 
             scales: {
@@ -193,11 +198,12 @@
         <div class="sidebar-header justify-center items-center">
           <div class="mb-4">
             {#if selectedFeature}
-            <h2 class="text-xl font-bold">{selectedFeature.properties.title || 'NIMBYdex'}</h2>       
-            <p>UK Cancelled Renewable Monitor</p>
+            <h2 class="text-md font-bold">{selectedFeature.properties['Site Name'] || 'NIMBYdex'}</h2>       
+            <p class="text-sm">{nimby_choice['header']}</p>
+            <p class="text-xs font-bold">Record Last Updated {selectedFeature.properties['Record Last Updated (dd/mm/yyyy)']}</p>
    
             {:else}
-            <h2 class="text-xl font-bold">NIMBYdex</h2>
+            <h1 class="text-xl font-bold">NIMBYdex</h1>
             <p>UK Cancelled Renewable Monitor</p>
             {/if}
           </div>
@@ -214,6 +220,15 @@
             </div>
           {/each}
           </div>
+          <article class:hidden={selectedFeature} class="prose mt-5">
+          <h2 class="text-xl">Disclosure!</h2>
+          <p>The NimbyDex is an experiment into analyzing the NIMBY menace plaguing  UK progress. 
+            Gemini has been used in order to help identify potential news articles about sites. 
+            The actual site information is factual and is using the governmental REPD dataset for cancelled renewable projects, 
+            <b>the commentary may not always be - but attempts to find the most accurate site.</b> </p>
+          <p>The opinions themselves are made up, and the points don't matter</p>
+          <a href='https://www.bemben.co.uk'>Made by Damian Bemben</a>
+        </article>
         </div>
 
 
@@ -223,6 +238,17 @@
 
         {#if selectedFeature}
         <div class="sidebar-content" bind:this={sidebarContent}>
+          <hr/>
+          <div class="mt-2 mb-2">
+          {#each nimby_choice['Interesting Tidbits'] as tidbit}
+            <p class="text-sm mt-2">- {tidbit}</p>
+          {/each}
+          </div>
+          <div class="collapse mb-2 bg-base-200">
+            <input type="checkbox" />
+            <div class="collapse-title text-medium font-medium">Site Details</div>
+            <div class="collapse-content">
+          
             <table class="w-full table">
               <thead> 
                 <tr>
@@ -245,18 +271,30 @@
             {/if}
           {/each}
         </tbody>
-      </table>    
+      </table>  
+    </div>
+          </div>
+          <div class="chat chat-start">
+          <div class="chat-bubble">
+            {nimby_choice['Snide Commentary']}
+          </div>
+
+          </div>
+
+        </div>
+        <div class="flex mt-5 justify-center items-center">
+          <a href="{nimby_choice['article_url']}" class="link">Possible Article About This</a>
         </div>
         {/if}
 
       </div>
       <div class="map-container" bind:this={mapContainer} />
       
-      <div class='absolute bottom-2 left-2/3 transform -translate-x-2/3 bg-base-100 p-4 rounded-lg shadow-lg'>
-        <label>Start Date:
+      <div class='absolute bottom-2 left-2/3 transform -translate-x-2/3 bg-base-100 p-2 rounded-lg shadow-lg'>
+        <label class="mr-4"><b>From:</b>
             <input type="date" bind:value={startDate} on:input={updateMapData} />
         </label>
-        <label>End Date:
+        <label><b>Til:</b>
             <input type="date" bind:value={endDate} on:input={updateMapData} />
         </label>
     </div>
@@ -284,7 +322,7 @@
 
     }
     .sidebar {
-    width: 70em;
+    width: 90em;
     /* background: white; */
     /* box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1); */
     padding: 20px;
