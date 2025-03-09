@@ -1,330 +1,518 @@
 <script>
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
     import maplibregl from 'maplibre-gl';
     import 'maplibre-gl/dist/maplibre-gl.css';
-    import chartjs from 'chart.js/auto';
-    import { nonpassive } from 'svelte/legacy';
-    import gsap from 'gsap';
+    import Chart from 'chart.js/auto';
     import { cubicIn, cubicOut } from "svelte/easing";
+    import { slide } from 'svelte/transition';
+    import gsap from 'gsap';
 
+    // Props
     export let points = []; // GeoJSON features
     export let nimby_score = [];
-    let mapContainer;
-    let map;
-    let selectedFeature = false;
-    let sidebarContent;
-    let nimby_choice;
-    let chartData;
-    let chartValues = [20, 10, 5, 2, 20, 30, 45];
-  	let chartLabels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+    export let sizeProperty = 'Installed Capacity (MWelec)';
+    export let refProperty = 'Ref ID';
 
-    let startDate = '2020-01-01';
-    let endDate = '2025-01-01';
-
-    let nimbyDarCanvas;
-    let nimbyDialCanvas;
-    let speed = 0;
-    let rpm = 0;
-
-    
-  let stats = [
-    { label: 'Total Capacity Lost', value: '6584 MW', trend: 'since January 2022' },
-    { label: 'Groups', value: '23', trend: '+2' },
-    { label: 'Projects', value: '12',  trend: '+3' },
-    { label: 'Appeals', value: '156',  trend: '+22%' }
-  ];
-
-    const generateTitles = (step, count) =>
-      Array.from({ length: count }, (_, i) => (i * step).toString());
-
-    setInterval(() => {
-      const timeFraction = (Date.now() % 6000) / 5000;
-      speed = cubicIn(timeFraction) * 100;
-      rpm = cubicOut(timeFraction) * 8000;
-    }, 500);
-    const typeColors = {
-      restaurant: '#FF5733',
-      shopping: '#33FF57',
-      entertainment: '#3357FF',
-      default: '#808080'  // fallback color
-    };
-    export let sizeProperty = 'Installed Capacity (MWelec)'; 
     export let minSize = 20;
     export let maxSize = 50;
+
+    // DOM elements
+    let mapContainer;
+    let nimbyRadarCanvas;
+    let sidebarContent;
+    
+    // State variables
+    let map;
+    let selectedFeature = null;
+    let nimby_choice = null;
+    let speed = 0;
+    let rpm = 0;
+    let radarChart = null;
+    let showSubmitForm = false;
+    let articleUrl = '';
+    let articleNotes = '';
+    
+    // Date filter
+    let startDate = '2020-01-01';
+    let endDate = '2025-01-01';
+    
+
+    let stats = [
+        { label: 'Total Capacity Lost', value: '6584 MW', calculate: calculateTotalCapacity},
+        { label: 'Application Withdrawn', value: '23', calculate: calculateLengthW},
+        { label: 'Permission Refused', value: '12', calculate: calculateLength},
+        { label: 'Total Projects Cancelled', value: '156', calculate: calculateLengthA}
+    ];
+    
     const allowedProperties = ['Operator (or Applicant)', 'Site Name', 'Technology Type', 'Installed Capacity (MWelec)', 'Development Status', 'Planning Permission Refused'];
 
-    let chartCanvas
-    let ctx
+    // Animation timer
+    let animationTimer;
+
+    function calculateTotalCapacity(points) {
+        const total = points.reduce((sum, point) => {
+            const capacity = parseFloat(point.properties['Installed Capacity (MWelec)']) || 0;
+            return sum + capacity;
+        }, 0);
+        return `${Math.round(total)} MW`;
+    }
+    function calculateLength(points) {
+        // Count points with appeal information
+        const appealsCount = points.filter(point => 
+            point.properties['Development Status'] === 'Planning Permission Refused'
+        ).length;
+        return appealsCount.toString();
+    }
+    function calculateLengthW(points) {
+        // Count points with appeal information
+        const appealsCount = points.filter(point => 
+            point.properties['Development Status'] === 'Planning Application Withdrawn'
+        ).length;
+        return appealsCount.toString();
+    }
+    function calculateLengthA(points) {
+        // Count points with appeal information
+        const appealsCount = points.length;
+        return appealsCount.toString();
+    }
+    
+    function initAnimation() {
+        clearInterval(animationTimer);
+        animationTimer = setInterval(() => {
+            const timeFraction = (Date.now() % 6000) / 5000;
+            speed = cubicIn(timeFraction) * 100;
+            rpm = cubicOut(timeFraction) * 8000;
+        }, 500);
+    }
+    
     function updateMapData() {
-        if (!map) return; // Ensure map is initialized
-        // Example: Filtering data based on year range (replace with your actual data logic)
+        if (!map) return;
+        console.log(points)
         map.setFilter('unclustered-point', [
             'all',
             ['>=', ['get', 'Planning Application Submitted'], startDate],
             ['<=', ['get', 'Planning Application Submitted'], endDate]
         ]);
+        
+        stats.forEach(stat => {
+            const currentValue = stat.calculate(points);
+            stat.value = currentValue;
+
+        })
+        stats = stats.map(stat => ({...stat}))
+        console.log(stats)
     }
-    onMount(async (promise) => {
-      const ctx2 = nimbyDarCanvas.getContext('2d');
-      nimby_choice = nimby_score[0]
+    
 
-
-      const Nchart = new chartjs(ctx2, {
-        type: 'radar',
-        data: {
-          labels: ['NIMBY', 'Accuracy', 'Petty', 'Organized', 'Political'],
-          datasets: [{
-            label: 'NimbyDEX',
-            data: [nimby_choice["Nimby Score"], nimby_choice["Accuracy Score"], nimby_choice["Petty Score"], nimby_choice["Organized Score"], nimby_choice["Political Leaning"]],
-          }]
-        },
-          options: {
-            responsive: true,
-            legend: false,
-           maintainAspectRatio: false,
-
-            scales: {
-              r: {
-                angleLines: {
-                  display: true
-                },
-                suggestedMin: 0,
-                suggestedMax: 100
-              }
-            }
-          }
-        });
-
-      map = new maplibregl.Map({
-        container: mapContainer,
-        style: 'https://api.maptiler.com/maps/toner-v2/style.json?key=xGVG9z8FJiMrvfFTWFgs',
-        center: [-4, 55.20],
-        zoom: 4.8
-      });
-  
-      map.on('load', () => {
-        map.addSource('points', {
-          type: 'geojson',
-          data: {
-            type: 'FeatureCollection',
-            features: points
-          },
-          cluster: false,
-          clusterMaxZoom: 14,
-          clusterRadius: 50
-        });
-  
-        // Add unclustered point circles
-        map.addLayer({
-        id: 'unclustered-point',
-        type: 'circle',
-        source: 'points',
-        paint: {
-          'circle-radius': 10,
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#ffffff',
-          'circle-radius': [
-            'interpolate',
-            ['linear'],
-            ['coalesce', ['get', 'Installed Capacity (MWelec)'], 0],
-            0, 5,  // minimum radius
-            200, 20  // maximum radius at 1000 MWelec
-          ],
-          'circle-color': [
-            'case',
-            ['boolean', ['feature-state', 'selected'], false],
-            '#fbb03b',  // Selected color
-            '#a8323a'   // Default color
-          ]
+    
+    function initNimbyRadarChart() {
+        if (!nimbyRadarCanvas || !nimby_choice) return;
+        
+        if (radarChart) {
+            radarChart.destroy();
         }
-      });
+        
+        const ctx = nimbyRadarCanvas.getContext('2d');
+        radarChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['NIMBY', 'Accuracy', 'Petty', 'Organized', 'Political'],
+                datasets: [{
+                    label: 'NimbyDEX',
+                    data: [
+                        nimby_choice["Nimby Score"], 
+                        nimby_choice["Accuracy Score"], 
+                        nimby_choice["Petty Score"], 
+                        nimby_choice["Organized Score"], 
+                        nimby_choice["Political Leaning"]
+                    ],
+                    backgroundColor: 'rgba(168, 200, 58, 0.2)',
+                    borderColor: '#fbb03b',
+                    pointBackgroundColor: '#fbb03b'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { display: true },
+                        suggestedMin: 0,
+                        suggestedMax: 100
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                    
+                }
+            }
+        });
+    }
+    
+    function initMap() {
+        if (map) return;
+        
+        map = new maplibregl.Map({
+            container: mapContainer,
+            style: 'https://api.maptiler.com/maps/aquarelle/style.json?key=xGVG9z8FJiMrvfFTWFgs',
+            center: [-4, 55.20],
+            zoom: 4.8
+        });
+        
+        map.on('load', () => {
+            // Add source
+            map.addSource('points', {
+                type: 'geojson',
+                data: {
+                    type: 'FeatureCollection',
+                    features: points
+                },
+                cluster: false,
+                clusterMaxZoom: 14,
+                clusterRadius: 50
+            });
+            
+            // Create a Set of refids from nimby_score for quick lookup
+            const nimbyRefIds = new Set(nimby_score.map(item => item.refid || ''));
 
-        map.on('click', 'unclustered-point', (e) => {
-        if (!e.features.length) return;
-        const feature = e.features[0];
-        console.log(feature.properties)
-        selectedFeature = feature;
-
-        // Set new selection state
-        map.setFeatureState(
-          { source: 'points', id: selectedFeature.id },
-          { selected: true }
-        );
-        animateProperties();
-
-          });
-
-        updateMapData();//initial data filter
-
-      
-      });
-
-
-
-    });
-
+            map.addLayer({
+                id: 'unclustered-point',
+                type: 'circle',
+                source: 'points',
+                paint: {
+                    'circle-radius': [
+                        'interpolate',
+                        ['linear'],
+                        ['coalesce', ['get', sizeProperty], 0],
+                        0, 5,
+                        200, 20
+                    ],
+                    'circle-stroke-width': 2,
+                    'circle-stroke-color': '#ffffff',
+                    'circle-color': [
+                        'case',
+                        ['boolean', ['feature-state', 'selected'], false],
+                        '#fbb03b',  // Selected color
+                        [
+                            'case',
+                            ['in', ['get', refProperty], ['literal', [...nimbyRefIds]]],
+                            '#a8323a',  // Has nimby details - darker red
+                            '#d3d3d3'   // No nimby details - gray
+                        ]
+                    ],
+                    'circle-opacity': [
+                        'case',
+                        ['in', ['get', refProperty], ['literal', [...nimbyRefIds]]],
+                        1,  // Full opacity for points with nimby details
+                        0.7 // Slight transparency for points without nimby details
+                    ]
+                }
+            });
+            
+            // Add interactivity
+            map.on('mouseenter', 'unclustered-point', () => {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+            
+            map.on('mouseleave', 'unclustered-point', () => {
+                map.getCanvas().style.cursor = '';
+            });
+            
+            // Handle click events
+            map.on('click', 'unclustered-point', (e) => {
+                if (!e.features.length) return;
+                
+                // Clear previous selection
+                if (selectedFeature) {
+                    console.log(selectedFeature)
+                    map.setFeatureState(
+                        { source: 'points', id: selectedFeature.properties["Ref ID"]},
+                        { selected: false }
+                    );
+                }
+                
+                const feature = e.features[0];
+                selectedFeature = feature;
+                
+                // Find corresponding nimby score by refid
+                const featureId = feature.properties["Ref ID"];
+                console.log(featureId)
+                nimby_choice = nimby_score.find(score => score.refid === featureId);
+                
+                // Set new selection state
+                map.setFeatureState(
+                    { source: 'points', id: selectedFeature.properties["Ref ID"]},
+                    { selected: true }
+                );
+                
+                // Initialize nimby radar chart if nimby_choice exists
+                if (nimby_choice) {
+                    setTimeout(() => {
+                        initNimbyRadarChart();
+                        animateProperties();
+                    }, 10);
+                } else {
+                    // Show UI for submitting a new article
+                    nimby_choice = {
+                        header: "No community information available yet",
+                        "Interesting Tidbits": ["No information has been added for this project yet."],
+                        "Snide Commentary": "Help us build our database by submitting information about this project!"
+                    };
+                }
+            });
+            
+            // Initialize map data filter
+            updateMapData();
+        });
+    }
+    
     function animateProperties() {
-    if (!sidebarContent) return;
+        if (!sidebarContent) return;
+        
+        // Get all property rows
+        const rows = sidebarContent.querySelectorAll('.property-row');
+        
+        // Reset any existing animations
+        gsap.set(rows, { opacity: 0, y: 20 });
+        
+        // Create stagger animation for the rows
+        gsap.to(rows, {
+            duration: 0.5,
+            opacity: 1,
+            y: 0,
+            stagger: 0.1,
+            ease: 'power2.out'
+        });
+    }
     
-    // Get all property rows
-    const rows = sidebarContent.querySelectorAll('.property-row');
+    function resetSelection() {
+        if (selectedFeature && map) {
+            map.setFeatureState(
+                { source: 'points', id: selectedFeature.id },
+                { selected: false }
+            );
+            selectedFeature = null;
+            nimby_choice = null;
+            showSubmitForm = false;
+            articleUrl = '';
+            articleNotes = '';
+        }
+    }
     
-    // Reset any existing animations
-    gsap.set(rows, { opacity: 0, y: 20 });
+    function handleSubmitArticle() {
+        // This function would handle the submission - in a real app, you'd send this to your backend
+        console.log('Article submitted:', {
+            refid: selectedFeature?.properties?.id || selectedFeature?.id,
+            siteName: selectedFeature?.properties['Site Name'],
+            articleUrl,
+            articleNotes
+        });
+        
+        // Show success message and reset form
+        alert('Thank you for your submission! We will review it shortly.');
+        showSubmitForm = false;
+        articleUrl = '';
+        articleNotes = '';
+    }
     
-    // Create stagger animation for the rows
-    gsap.to(rows, {
-      duration: 0.5,
-      opacity: 1,
-      y: 0,
-      stagger: 0.1,
-      ease: 'power2.out'
+    // Lifecycle hooks
+    onMount(() => {
+
+        initMap();
+        initAnimation();
     });
-  }
-  $: if (selectedFeature) {
-    // Wait for next tick to ensure DOM is updated
-    setTimeout(animateProperties, 0);
-  }
+    
+    onDestroy(() => {
+        // Clean up resources
+        if (map) map.remove();
+        if (radarChart) radarChart.destroy();
+        clearInterval(animationTimer);
+    });
+    
+    // Reactive statements
+    $: if (selectedFeature) {
+        setTimeout(animateProperties, 0);
+    }
+    
+    $: if (startDate || endDate) {
+        updateMapData();
+    }
+</script>
+
+<div class="container font-sans">
+    <div class="w-2/3 p-5 overflow-y-auto" transition:slide>
+        <div class="sidebar-header justify-center items-center ">
 
 
-  </script>
+            <div class="ml-4 mb-4">
+                {#if selectedFeature}
+                    <h2 class="text-md font-bold">{selectedFeature.properties['Site Name'] || 'NIMBYdex'}</h2>
+                    <button class="text-xs text-blue-500 mt-1" on:click={resetSelection}>← Back to overview</button>
 
+                    {#if nimby_choice}
+                    <div class="chat chat-start">
 
-  <div class="container font-sans">
+                        <div class="chat-bubble bg-base-300">
+                        <p class="text-sm">{nimby_choice['header']}</p>
+                        </div>
+                        <div class="chat-footer opacity-50">Sent By NimbyDar - He may be wrong!</div>
 
-      <div class="w-2/3 p-5 overflow-y-auto shadow-lg" transition:slide>
-        <div class="sidebar-header justify-center items-center">
-          <div class="mb-4">
-            {#if selectedFeature}
-            <h2 class="text-md font-bold">{selectedFeature.properties['Site Name'] || 'NIMBYdex'}</h2>       
-            <p class="text-sm">{nimby_choice['header']}</p>
-            <p class="text-xs font-bold">Record Last Updated {selectedFeature.properties['Record Last Updated (dd/mm/yyyy)']}</p>
-   
-            {:else}
-            <h1 class="text-xl font-bold">NIMBYdex</h1>
-            <p>UK Cancelled Renewable Monitor</p>
-            {/if}
-          </div>
+                    </div>
+                    {/if}
+                    <div class="collapse collapse-arrow border-base-300 mt-3 mb-2 border">
+                        <input type="checkbox" />
+                        <div class="collapse-title text-sm mb-0 pb-0">Site Details</div>
+                        <div class="collapse-content">
+                            <table class="w-full table rounded-box border border-base-content/5 bg-base-100">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {#each Object.entries(selectedFeature.properties).filter(([key]) => allowedProperties.includes(key)) as [key, value]}
+                                        {#if key !== 'title'}
+                                            <tr class="property-row"  style="opacity: 1;">
+                                                <td>{key.replace(/_/g, ' ')}</td>
+                                                <td>{value}</td>
+                                            </tr>
+                                        {/if}
+                                    {/each}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <p class="text-xs font-bold">Record Last Updated {selectedFeature.properties['Record Last Updated (dd/mm/yyyy)']}</p>
+                {:else}
+                <div class="flex">
 
-          <div style="height: 300px"  class:hidden={!selectedFeature}>
-            <canvas bind:this={nimbyDarCanvas} ></canvas>
-          </div>
-          <div class="grid grid-cols-2 gap-4" class:hidden={selectedFeature}>
-            {#each stats as stat (stat.label)}
-            <div class="stat shadow">
-              <div class="stat-title">{stat.label}</div>
-              <span class="stat-value">{stat.value}</span>
-              <span class="stat-desc">{stat.trend}</span>
+                    <div class="avatar">
+                        <div class="w-12 rounded-md">
+                            <img src="./lamplight.gif"/>
+                        </div>
+                    </div>
+                    <div class='ml-3'>
+                    <h1 class="text-xl font-bold">NIMBYdex</h1>
+                    <p>UK Cancelled Renewable Projects Radar</p>
+                    </div>
+                </div>
+
+                {/if}
             </div>
-          {/each}
-          </div>
-          <article class:hidden={selectedFeature} class="prose mt-5">
-          <h2 class="text-xl">Disclosure!</h2>
-          <p>The NimbyDex is an experiment into analyzing the NIMBY menace plaguing  UK progress. 
-            Gemini has been used in order to help identify potential news articles about sites. 
-            The actual site information is factual and is using the governmental REPD dataset for cancelled renewable projects, 
-            <b>the commentary may not always be - but attempts to find the most accurate site.</b> </p>
-          <p>The opinions themselves are made up, and the points don't matter</p>
-          <a href='https://www.bemben.co.uk'>Made by Damian Bemben</a>
-        </article>
+
+            <div style="height: 300px" class:hidden={!selectedFeature}>
+                <canvas bind:this={nimbyRadarCanvas}></canvas>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4" class:hidden={selectedFeature}>
+                {#each stats as stat}
+                    <div class="stat shadow">
+                        <div class="stat-title">{stat.label}</div>
+                        <span class="stat-value">{stat.value}</span>
+                        <span class="stat-desc">{stat.trend}</span>
+                    </div>
+                {/each}
+            </div>
+            
+            <article class:hidden={selectedFeature} class="prose mt-5">
+                <h2 class="text-xl">Disclosure!</h2>
+                <p>
+                    The NimbyDex is an experiment into analyzing the NIMBY menace plaguing UK progress.
+                    Gemini has been used in order to help identify potential news articles about sites.
+                </p>
+
+                <p>
+                    The actual site information is factual and is using the governmental REPD dataset for cancelled renewable projects.
+                    <b>The opinions themselves are made up, and the points don't matter.</b>
+                </p>
+                    <a href='https://www.bemben.co.uk'>Made by Damian Bemben</a>
+            </article>
         </div>
 
 
-        <div style="height: 100px" class:hidden={selectedFeature}>
-        <canvas bind:this={chartCanvas}  id="myChart"></canvas>
-        </div>
 
-        {#if selectedFeature}
-        <div class="sidebar-content" bind:this={sidebarContent}>
-          <hr/>
-          <div class="mt-2 mb-2">
-          {#each nimby_choice['Interesting Tidbits'] as tidbit}
-            <p class="text-sm mt-2">- {tidbit}</p>
-          {/each}
-          </div>
-          <div class="collapse mb-2 bg-base-200">
-            <input type="checkbox" />
-            <div class="collapse-title text-medium font-medium">Site Details</div>
-            <div class="collapse-content">
-          
-            <table class="w-full table">
-              <thead> 
-                <tr>
-                  <th>Name</th>
-                  <th>Value</th>
-                </tr>
-              </thead>
-              <tbody>
+        {#if selectedFeature && nimby_choice}
+            <div class="sidebar-content" bind:this={sidebarContent}>
+                <hr/>
+                <div class="mt-2 mb-2">
+                    {#each nimby_choice['Interesting Tidbits'] || [] as tidbit}
+                        <p class="text-sm mt-2 property-row">- {tidbit}</p>
+                    {/each}
+                </div>
+                
 
-          {#each Object.entries(selectedFeature.properties).filter(([key]) => allowedProperties.includes(key)) as [key, value]}
-            {#if key !== 'title'}
-                <tr>
-                  <td>
-                    {key.replace(/_/g, ' ')}
-                  </td>
-                  <td>
-                    {value}
-                  </td>
-                </tr>
-            {/if}
-          {/each}
-        </tbody>
-      </table>  
-    </div>
-          </div>
-          <div class="chat chat-start">
-          <div class="chat-bubble">
-            {nimby_choice['Snide Commentary']}
-          </div>
+                <div class="chat chat-start">
+                    <div class="chat-bubble">
+                        {nimby_choice['Snide Commentary']}
+                    </div>
+                    <div class="chat-footer opacity-50">Sent By NimbyDar - He may be wrong! </div>
 
-          </div>
-
-        </div>
-        <div class="flex mt-5 justify-center items-center">
-          <a href="{nimby_choice['article_url']}" class="link">Possible Article About This</a>
-        </div>
+                </div>
+            </div>
+            
+            <div class="flex mt-5 justify-center items-center">
+                {#if nimby_choice && nimby_choice['article_url']}
+                    <a href="{nimby_choice['article_url']}" target="_blank" rel="noopener noreferrer" class="link">
+                        Potential Link/Article About This Project
+                    </a>
+                {:else}
+                    <button class="btn btn-primary" on:click={() => showSubmitForm = true}>
+                        Submit Information
+                    </button>
+                {/if}
+            </div>
         {/if}
-
-      </div>
-      <div class="map-container" bind:this={mapContainer} />
-      
-      <div class='absolute bottom-2 left-2/3 transform -translate-x-2/3 bg-base-100 p-2 rounded-lg shadow-lg'>
+    </div>
+    
+    <div class="map-container" bind:this={mapContainer}></div>
+    
+    <div class='absolute bottom-2 left-2/3 transform -translate-x-2/3 bg-base-100 p-2 rounded-lg shadow-lg'>
         <label class="mr-4"><b>From:</b>
             <input type="date" bind:value={startDate} on:input={updateMapData} />
         </label>
-        <label><b>Til:</b>
+        <label><b>To:</b>
             <input type="date" bind:value={endDate} on:input={updateMapData} />
         </label>
     </div>
-    </div>
-  
-  <style>
-  @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
-  @plugin "@tailwindcss/typography";
-  .hidden {
-    display: none;
-  }
-      .container {
-    display: flex;
-    height: 100vh;
-    width: 100%;
-    overflow-y: hidden;
-  }
-    .map-container {
-      width: 100%;
-      height: 100%;
-      padding: 0;
-      flex-grow: 1;
+</div>
 
-    }
-    .sidebar {
-    width: 90em;
-    /* background: white; */
-    /* box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1); */
-    padding: 20px;
-    overflow-y: auto;
+<style>
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
+    @plugin "@tailwindcss/typography";
     
+    .hidden {
+        display: none;
     }
-  </style>
+    
+    .container {
+        display: flex;
+        height: 100vh;
+        width: 100%;
+        overflow-y: hidden;
+    }
+    
+    .map-container {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        flex-grow: 1;
+    }
+    
+    .sidebar {
+        width: 90em;
+        padding: 20px;
+        overflow-y: auto;
+    }
+    
+    .chat-bubble {
+        max-width: 90%;
+    }
+    
+    .property-row {
+        opacity: 0;
+    }
+</style>

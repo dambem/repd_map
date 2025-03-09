@@ -10,6 +10,10 @@ transformer = Transformer.from_crs("EPSG:27700", "EPSG:4326")
 import requests
 import os
 from dotenv import load_dotenv
+load_dotenv()
+API_KEY = os.getenv("GOOGLE_SEARCH_API_KEY")
+CSE_ID = os.getenv("GOOGLE_CSE_ID")
+
 
 def google_search(query, api_key, cse_id, num_results=5):
     url = "https://www.googleapis.com/customsearch/v1"
@@ -23,6 +27,7 @@ def google_search(query, api_key, cse_id, num_results=5):
         response = requests.get(url, params=params)
         response.raise_for_status()
         data = response.json()
+        print(data)
         return data.get("items", [])
     except requests.exceptions.RequestException as e:
         print(f"Error during search: {e}")
@@ -66,6 +71,24 @@ def search_news(site_name, cancelled=True):
     time.sleep(0.1)
     return links[:5] # Return top 5 links
 
+def get_repd_dataframe(date='2021-01-01'):
+    df = pd.read_csv('data/repdoct.csv', encoding='cp1252')
+    df = df[df['Development Status (short)'].isin(['Application Refused', 'Abandoned', 'Application Withdrawn', 'Appeal Refused'])]
+    df['Planning Application Submitted'] = pd.to_datetime(df['Planning Application Submitted'], format='%d/%m/%Y')
+    df = df[df['Planning Application Submitted'] >= pd.Timestamp(date)]
+    df['Installed Capacity (MWelec)'] = df['Installed Capacity (MWelec)'].apply(get_capacity_value)
+    df = convert_coordinates(df, easting_col='X-coordinate', northing_col='Y-coordinate')
+    # df = df[['Site Name', 'Operator (or Applicant)', 'Technology Type', 'Planning Authority', 'Planning Application Submitted']]
+    df['Planning Application Submitted'] = df['Planning Application Submitted'].dt.strftime('%Y-%m-%d')
+    df = df.fillna(0)
+    return df
+
+
+def repd_geojson_file():
+    df = get_repd_dataframe()
+    geojson = create_geojson(df)
+    with open('points.geojson', 'w') as f:
+        json.dump(geojson, f, indent=2)
 
 def create_geojson(df):
     features = []
@@ -94,34 +117,40 @@ def get_capacity_value(value):
     except (ValueError, TypeError):
         return 0
 
-if __name__ == "__main__":    
-    df = pd.read_csv('repdoct.csv', encoding='cp1252')
-    df = df[df['Development Status (short)'].isin(['Application Refused', 'Abandoned', 'Application Withdrawn', 'Appeal Refused'])]
-    df['Planning Application Submitted'] = pd.to_datetime(df['Planning Application Submitted'], format='%d/%m/%Y')
-    df = df[df['Planning Application Submitted'] >= pd.Timestamp('2021-01-01')]
-    df['Planning Application Submitted'] = df['Planning Application Submitted'].dt.strftime('%Y-%m-%d')
-    df['Installed Capacity (MWelec)'] = df['Installed Capacity (MWelec)'].apply(get_capacity_value)
-    df = convert_coordinates(df, easting_col='X-coordinate', northing_col='Y-coordinate')
-    # df = df[['Site Name', 'Operator (or Applicant)', 'Technology Type', 'Planning Authority', 'Planning Application Submitted']]
-    # df.to_csv("potential_sites.csv")
-    geojson = create_geojson(df)
+def search_query(query):
+    try:
+        results = google_search(query, API_KEY, CSE_ID, num_results=1)
+        return(results)
+    except Exception as e:
+        return False
+# if __name__ == "__main__":    
+#     df = pd.read_csv('repdoct.csv', encoding='cp1252')
+#     df = df[df['Development Status (short)'].isin(['Application Refused', 'Abandoned', 'Application Withdrawn', 'Appeal Refused'])]
+#     df['Planning Application Submitted'] = pd.to_datetime(df['Planning Application Submitted'], format='%d/%m/%Y')
+#     df = df[df['Planning Application Submitted'] >= pd.Timestamp('2021-01-01')]
+#     df['Planning Application Submitted'] = df['Planning Application Submitted'].dt.strftime('%Y-%m-%d')
+#     df['Installed Capacity (MWelec)'] = df['Installed Capacity (MWelec)'].apply(get_capacity_value)
+#     df = convert_coordinates(df, easting_col='X-coordinate', northing_col='Y-coordinate')
+#     # df = df[['Site Name', 'Operator (or Applicant)', 'Technology Type', 'Planning Authority', 'Planning Application Submitted']]
+#     # df.to_csv("potential_sites.csv")
+#     geojson = create_geojson(df)
 
-    with open('points_2.geojson', 'w') as f:
-        json.dump(geojson, f, indent=2)
-    load_dotenv() # Load environment variables from .env file
-    api_key = os.getenv("GOOGLE_SEARCH_API_KEY")
-    cse_id = os.getenv("GOOGLE_CSE_ID")
+#     with open('points_2.geojson', 'w') as f:
+#         json.dump(geojson, f, indent=2)
+#     load_dotenv() # Load environment variables from .env file
+#     api_key = os.getenv("GOOGLE_SEARCH_API_KEY")
+#     cse_id = os.getenv("GOOGLE_CSE_ID")
 
-    for _, row in df.iterrows():
-        print(row)
-        query = input("Enter your search query: ")
-        results = google_search(query, api_key, cse_id, num_results=5)
-        with open('test_query.json', "w", encoding="utf-8") as f:
-            json.dump(results, f, ensure_ascii=False, indent=4)
+#     for _, row in df.iterrows():
+#         print(row)
+#         query = input("Enter your search query: ")
+#         results = google_search(query, api_key, cse_id, num_results=5)
+#         with open('test_query.json', "w", encoding="utf-8") as f:
+#             json.dump(results, f, ensure_ascii=False, indent=4)
 
-        break
+#         break
     
     
     
-    print(results)
+#     print(results)
 
