@@ -2,6 +2,8 @@ from funcs import repd_converter as repd
 from funcs import scrape_and_analyse as scrape
 import json
 import time
+import os 
+import sys
 
 if __name__ == "__main__":    
     print("Creating REPD Geojson")
@@ -11,8 +13,18 @@ if __name__ == "__main__":
     nimby_radar = {}
     nimby_scores = []
     score = 0
+    start_row = 40
     
-    for _, row in df.iterrows():
+    if os.path.exists("nimby_score.json"):
+        with open("nimby_score.json", "r", encoding="utf-8") as f:
+            try:
+                for n in json.load(f):
+                    nimby_scores.append(n)
+            except json.JSONDecodeError:
+                pass
+    print(f'nimby scores {nimby_scores}')
+    # sys.exit(1)
+    for _, row in df.iloc[start_row:].iterrows():
         string = f"{row['Site Name']}, {row['Planning Authority']} "
 
         query_res = repd.search_query(string)
@@ -39,6 +51,7 @@ if __name__ == "__main__":
                 except Exception as e:
                     print("failed to parse")
                     next
+
                 with open("nimby_score.json", "w", encoding="utf-8") as f: 
                     json.dump(nimby_scores, f, ensure_ascii=False, indent=4)
                 time.sleep(1)

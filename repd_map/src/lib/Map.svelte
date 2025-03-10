@@ -173,8 +173,14 @@
             });
             
             // Create a Set of refids from nimby_score for quick lookup
-            const nimbyRefIds = new Set(nimby_score.map(item => item.refid || ''));
+            const accuracy1 = nimby_score.filter(item => item['Accuracy Score'] >= 70)
+            const accuracy2 = nimby_score.filter(item => item['Accuracy Score'] < 70)
 
+            const nimbyRefIds = new Set(accuracy1.map(item => item.refid || ''));
+            const nimbyRefIds2 = new Set(accuracy2.map(item => item.refid || ''));
+
+            // const nimbyRefIds2 = new Set(nimby_score.map(item => [item.refid, ]));
+            // console.log(nimbyRefIds2)
             map.addLayer({
                 id: 'unclustered-point',
                 type: 'circle',
@@ -196,8 +202,14 @@
                         [
                             'case',
                             ['in', ['get', refProperty], ['literal', [...nimbyRefIds]]],
+
                             '#a8323a',  // Has nimby details - darker red
-                            '#d3d3d3'   // No nimby details - gray
+                            [
+                            'case',    
+                                ['in', ['get', refProperty], ['literal', [...nimbyRefIds2]]],
+                                '#ffa000',
+                                '#d3d3d3'   // No nimby details - gray
+                            ]
                         ]
                     ],
                     'circle-opacity': [
@@ -350,15 +362,6 @@
                     <button class="text-xs text-blue-500 mt-1" on:click={resetSelection}>← Back to overview</button>
 
                     {#if nimby_choice}
-                    <div class="chat chat-start">
-
-                        <div class="chat-bubble bg-base-300">
-                        <p class="text-sm">{nimby_choice['header']}</p>
-                        </div>
-                        <div class="chat-footer opacity-50">Sent By NimbyDar - He may be wrong!</div>
-
-                    </div>
-                    {/if}
                     <div class="collapse collapse-arrow border-base-300 mt-3 mb-2 border">
                         <input type="checkbox" />
                         <div class="collapse-title text-sm mb-0 pb-0">Site Details</div>
@@ -384,6 +387,23 @@
                         </div>
                     </div>
                     
+                    <div class="chat chat-start">
+                        <div class="chat-image avatar">
+                            <div class="w-10 rounded-full ring-primary ring ring-offset-2">
+                              <img
+                                alt="A small butterfly, illustrated"
+                                src="./nimbydar.webp" />
+                            </div>
+                          </div>
+                        
+                        <div class="chat-bubble bg-primary">
+                        <p class="text-sm">{nimby_choice['header']}</p>
+                        </div>
+                        <div class="chat-footer opacity-50">Sent By NimbyDar - He may be wrong!</div>
+
+                    </div>
+                    {/if}
+
                     <p class="text-xs font-bold">Record Last Updated {selectedFeature.properties['Record Last Updated (dd/mm/yyyy)']}</p>
                 {:else}
                 <div class="flex">
@@ -408,7 +428,7 @@
             
             <div class="grid grid-cols-2 gap-4" class:hidden={selectedFeature}>
                 {#each stats as stat}
-                    <div class="stat shadow">
+                    <div class="stat shadow bg-base-100">
                         <div class="stat-title">{stat.label}</div>
                         <span class="stat-value">{stat.value}</span>
                         <span class="stat-desc">{stat.trend}</span>
@@ -444,7 +464,14 @@
                 
 
                 <div class="chat chat-start">
-                    <div class="chat-bubble">
+                    <div class="chat-image avatar">
+                        <div class="w-10 rounded-full ring-primary ring ring-offset-2">
+                          <img
+                            alt="A small butterfly, illustrated"
+                            src="./nimbydar.webp" />
+                        </div>
+                      </div>
+                    <div class="chat-bubble bg-primary">
                         {nimby_choice['Snide Commentary']}
                     </div>
                     <div class="chat-footer opacity-50">Sent By NimbyDar - He may be wrong! </div>
