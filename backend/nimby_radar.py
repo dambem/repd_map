@@ -10,10 +10,11 @@ if __name__ == "__main__":
     repd.repd_geojson_file()
     
     df = repd.get_repd_dataframe()
+    df = df.sort_values(by=['Installed Capacity (MWelec)'], ascending=False)
     nimby_radar = {}
     nimby_scores = []
     score = 0
-    start_row = 40
+    start_row = 70
     
     if os.path.exists("nimby_score.json"):
         with open("nimby_score.json", "r", encoding="utf-8") as f:
@@ -23,7 +24,6 @@ if __name__ == "__main__":
             except json.JSONDecodeError:
                 pass
     print(f'nimby scores {nimby_scores}')
-    # sys.exit(1)
     for _, row in df.iloc[start_row:].iterrows():
         string = f"{row['Site Name']}, {row['Planning Authority']} "
 
@@ -55,7 +55,7 @@ if __name__ == "__main__":
                 with open("nimby_score.json", "w", encoding="utf-8") as f: 
                     json.dump(nimby_scores, f, ensure_ascii=False, indent=4)
                 time.sleep(1)
-        if score >= 20:
+        if score >= 30:
             break
         else:
             score += 1
