@@ -11,7 +11,7 @@ api_key= os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
 generation_config = {
-  "temperature": 1,
+  "temperature": 1.5,
   "top_p": 0.95,
   "top_k": 40,
   "max_output_tokens": 8192,
@@ -86,7 +86,6 @@ def gemini_process(content, prompt="data/nimby_prompt.txt"):
             "parts": [nimby_radar_prompt]
         }])
     response = chat_session.send_message(content)
-    print(response)
     return response
 
 def parse_json_string(json_string):

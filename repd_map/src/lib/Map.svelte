@@ -35,7 +35,7 @@
     // Date filter
     let startDate = '2020-01-01';
     let endDate = '2025-01-01';
-    
+    let technologyType = null;
 
     let stats = [
         { label: 'Total Capacity Lost', value: '6584 MW', calculate: calculateTotalCapacity},
@@ -87,7 +87,6 @@
     
     function updateMapData() {
         if (!map) return;
-        console.log(points)
         map.setFilter('unclustered-point', [
             'all',
             ['>=', ['get', 'Planning Application Submitted'], startDate],
@@ -495,13 +494,29 @@
     
     <div class="map-container" bind:this={mapContainer}></div>
     
-    <div class='absolute bottom-2 left-2/3 transform -translate-x-2/3 bg-base-100 p-2 rounded-lg shadow-lg'>
-        <label class="mr-4"><b>From:</b>
-            <input type="date" bind:value={startDate} on:input={updateMapData} />
-        </label>
-        <label><b>To:</b>
-            <input type="date" bind:value={endDate} on:input={updateMapData} />
-        </label>
+
+
+    <div class='absolute top-2 right-2 transform bg-base-100 p-2 rounded-lg shadow-lg'>
+        <div class="mb-2">
+            <label class="mr-4"><b>From:</b>
+                <input type="date" bind:value={startDate} on:input={updateMapData} />
+            </label>
+            <label><b>To:</b>
+                <input type="date" bind:value={endDate} on:input={updateMapData} />
+            </label>
+        </div>
+        <div>
+            <label><b>Technology:</b>
+                <select class="technology-filter" bind:value={technologyType} on:change={updateMapData}>
+                    <option value="all">All</option>
+                    <option value="solar">Solar</option>
+                    <option value="wind">Wind</option>
+                    <option value="hydro">Hydro</option>
+                    <option value="biomass">Biomass</option>
+                    <option value="geothermal">Geothermal</option>
+                </select>
+            </label>
+        </div>
     </div>
 </div>
 

@@ -6,15 +6,15 @@ import os
 import sys
 
 if __name__ == "__main__":    
-    print("Creating REPD Geojson")
     repd.repd_geojson_file()
     
     df = repd.get_repd_dataframe()
     df = df.sort_values(by=['Installed Capacity (MWelec)'], ascending=False)
+    
     nimby_radar = {}
     nimby_scores = []
     score = 0
-    start_row = 70
+    start_row = 0
     
     if os.path.exists("nimby_score.json"):
         with open("nimby_score.json", "r", encoding="utf-8") as f:
@@ -23,12 +23,14 @@ if __name__ == "__main__":
                     nimby_scores.append(n)
             except json.JSONDecodeError:
                 pass
-    print(f'nimby scores {nimby_scores}')
+    
+    start_row=len(nimby_scores)+1
+    # print(len(nimby_scores))
+    # sys.exit(0)
+    
     for _, row in df.iloc[start_row:].iterrows():
         string = f"{row['Site Name']}, {row['Planning Authority']} "
-
         query_res = repd.search_query(string)
-
         if query_res:
             url = query_res[0]["link"] 
             mime = 'n/a'
@@ -41,7 +43,6 @@ if __name__ == "__main__":
                 ai = scrape.gemini_process(content)
                 new_text = ai.text.replace("json", "")
                 new_text = new_text.replace("```", "")
-
                 try:
                     object = json.loads(new_text)
                     ref_id = row['Ref ID']
@@ -49,9 +50,7 @@ if __name__ == "__main__":
                     object['article_url'] = url
                     nimby_scores.append(object)    
                 except Exception as e:
-                    print("failed to parse")
                     next
-
                 with open("nimby_score.json", "w", encoding="utf-8") as f: 
                     json.dump(nimby_scores, f, ensure_ascii=False, indent=4)
                 time.sleep(1)
