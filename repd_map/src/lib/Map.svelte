@@ -35,7 +35,7 @@
     // Date filter
     let startDate = '2020-01-01';
     let endDate = '2025-01-01';
-    let technologyType = null;
+    let technologyType = 'all';
 
     let stats = [
         { label: 'Total Capacity Lost', value: '6584 MW', calculate: calculateTotalCapacity},
@@ -87,12 +87,17 @@
     
     function updateMapData() {
         if (!map) return;
-        map.setFilter('unclustered-point', [
+        var filter  =  [
             'all',
             ['>=', ['get', 'Planning Application Submitted'], startDate],
             ['<=', ['get', 'Planning Application Submitted'], endDate]
-        ]);
-        
+        ];
+        console.log(technologyType)
+        if (technologyType == 'All') {
+            filter.push(['==', ['get', 'Technology Type'], technologyType]);
+        }
+        map.setFilter('unclustered-point', filter);
+
         stats.forEach(stat => {
             const currentValue = stat.calculate(points);
             stat.value = currentValue;
@@ -172,12 +177,17 @@
             });
             
             // Create a Set of refids from nimby_score for quick lookup
+            const accuracy2 = nimby_score.filter(item => item['Accuracy Score'] >= 30)
+            const accuracy3 = nimby_score.filter(item => item['Accuracy Score'] < 70 && item['Accuracy Score'] >= 50 )
             const accuracy1 = nimby_score.filter(item => item['Accuracy Score'] >= 70)
-            const accuracy2 = nimby_score.filter(item => item['Accuracy Score'] < 70)
+
+            const accuracy_bad = nimby_score.filter(item => item['Accuracy Score'] < 30)
 
             const nimbyRefIds = new Set(accuracy1.map(item => item.refid || ''));
-            const nimbyRefIds2 = new Set(accuracy2.map(item => item.refid || ''));
-
+            const nimbyRefIds2 = new Set(accuracy_bad.map(item => item.refid || ''));
+            const nimbyRefIds3 = new Set(accuracy2.map(item => item.refid || ''));
+            const nimbyRefIds4 = new Set(accuracy3.map(item => item.refid || ''));
+            console.log(nimbyRefIds3)
             // const nimbyRefIds2 = new Set(nimby_score.map(item => [item.refid, ]));
             // console.log(nimbyRefIds2)
             map.addLayer({
@@ -201,13 +211,17 @@
                         [
                             'case',
                             ['in', ['get', refProperty], ['literal', [...nimbyRefIds]]],
-
-                            '#a8323a',  // Has nimby details - darker red
+                            '#47001b',  // Has nimby details - darker red
                             [
-                            'case',    
-                                ['in', ['get', refProperty], ['literal', [...nimbyRefIds2]]],
-                                '#ffa000',
-                                '#d3d3d3'   // No nimby details - gray
+                                'case',
+                                ['in', ['get', refProperty], ['literal', [...nimbyRefIds3]]],
+                                '#ab446b',  // Has nimby details - darker red
+                                [
+                                    'case',    
+                                        ['in', ['get', refProperty], ['literal', [...nimbyRefIds2]]],
+                                        '#a698b8',
+                                        '#d3d3d3'   // No nimby details - gray
+                                ]
                             ]
                         ]
                     ],
@@ -345,7 +359,7 @@
         setTimeout(animateProperties, 0);
     }
     
-    $: if (startDate || endDate) {
+    $: if (startDate || endDate || technologyType) {
         updateMapData();
     }
 </script>

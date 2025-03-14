@@ -14,7 +14,7 @@ if __name__ == "__main__":
     nimby_radar = {}
     nimby_scores = []
     score = 0
-    start_row = 0
+    start_row = 50
     
     if os.path.exists("nimby_score.json"):
         with open("nimby_score.json", "r", encoding="utf-8") as f:
@@ -24,7 +24,7 @@ if __name__ == "__main__":
             except json.JSONDecodeError:
                 pass
     
-    start_row=len(nimby_scores)+1
+    # start_row=len(nimby_scores)+1
     # print(len(nimby_scores))
     # sys.exit(0)
     

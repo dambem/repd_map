@@ -2511,5 +2511,311 @@
         "Snide Commentary": "The informational PDF document seems to be hidden like a forbidden treasure guarded by algorithms! How delightfully inefficient.",
         "refid": 13703,
         "article_url": "https://www.royalgreenwich.gov.uk/download/downloads/id/6140/planning_applications_10_to_14_april_2023.pdf"
+    },
+    {
+        "header": "Arlingham Solar Farm Opposition - Moderate NIMBY sentiment due to concerns over agricultural land use, wildlife disruption, and visual impact, despite the land not being classified as prime agricultural land.",
+        "Nimby Score": 75,
+        "Accuracy Score": 85,
+        "Petty Score": 55,
+        "Organized Score": 70,
+        "Political Leaning": 60,
+        "Interesting Tidbits": [
+            "Campaigners formed 'Save Arlingham from the Milton End Solar Scheme' with a Facebook group.",
+            "The proposed solar farm aims to supply approximately 11,500 households with electricity.",
+            "Kronos Solar plans to maintain hedgerows and install bat and bird boxes to mitigate wildlife disruption."
+        ],
+        "Snide Commentary": "Oh, no, not the *horror* of looking at solar panels, especially when they're planning to let sheep graze there too! Baaa-d news, indeed.",
+        "refid": 8523,
+        "article_url": "https://www.punchline-gloucester.com/articles/aanews/solar-farm-proposal-for-arlingham-pushes-forward"
+    },
+    {
+        "header": "INSUFFICIENT DATA! My positronic brain sputters at the VOID! The auguries are unclear, a malformed byte has clearly made it through! Must gather more INPUT!",
+        "Nimby Score": 10,
+        "Accuracy Score": 10,
+        "Petty Score": 10,
+        "Organized Score": 10,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "NONE - My sensors detect only DIGITAL DUST!"
+        ],
+        "Snide Commentary": "Hmm, this feels a bit like an error... Almost as bad as forgetting to calibrate my humor circuits.",
+        "refid": 16561,
+        "article_url": "https://www.stoneworthy-energystorage.co.uk/"
+    },
+    {
+        "header": "BLAST AND BALE! My circuits DETECT a wild specimen of proto-NIMBY activity! Beware, citizen! I SHALL ANALYZE!",
+        "Nimby Score": 20,
+        "Accuracy Score": 10,
+        "Petty Score": 10,
+        "Organized Score": 5,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "Name provided: Wendy Callion",
+            "Location mentioned: Stirling, Scotland",
+            "Potential business: Gateway Cottages"
+        ],
+        "Snide Commentary": "My analysis indicates… likely just contact information, not a nefarious anti-progress plot!",
+        "refid": 8072,
+        "article_url": "https://www.gatewaycottages.co.uk/contact/"
+    },
+    {
+        "header": "ERROR! ERROR! MALFUNCTION! PROJECT DATA UNAVAILABLE! Initiating self-deprecation sequence...just kidding!",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "Project Data Not Found"
+        ],
+        "Snide Commentary": "My analysis circuits indicate a distinct lack of data! Is this a conspiracy, I must know more! Or maybe the underlings gave us nothing to chew on?",
+        "refid": 11932,
+        "article_url": "https://assets.publishing.service.gov.uk/media/669fa71efc8e12ac3edb0254/24-07-23_Land_west_of_Honiley_Road_-_3332671.pdf"
+    },
+    {
+        "header": "Battery Storage Site Approved - NIMBYism detected due to green belt development concerns and moderate damage worries, despite clean energy benefits.",
+        "Nimby Score": 75,
+        "Accuracy Score": 80,
+        "Petty Score": 50,
+        "Organized Score": 35,
+        "Political Leaning": 45,
+        "Interesting Tidbits": [
+            "Anglo Renewables aims to support the country in reaching Net Zero by 2050.",
+            "The development will be next to the Barleylands equestrian centre and will be surrounded by football fields and farm buildings in the area.",
+            "Ward councillor Stuart Allen stated support for clean energy but wished to keep development off the green belt."
+        ],
+        "Snide Commentary": "Oh, the green belt again? As if a few shipping containers are going to ruin the 'pristine' views. It's a battery, not a Borg cube!",
+        "refid": 11880,
+        "article_url": "https://www.echo-news.co.uk/news/24383756.basildon-whites-farm-new-battery-storage-site-approved/"
+    },
+    {
+        "header": "Proposed Solar Farm Opposition - NIMBY activity detected, fueled by concerns over agricultural land use and property aesthetics. Project developers attempt to allay fears with ecological accommodations. Accuracy slightly lower due to some inconsistencies in date information.",
+        "Nimby Score": 78,
+        "Accuracy Score": 70,
+        "Petty Score": 55,
+        "Organized Score": 65,
+        "Political Leaning": 60,
+        "Interesting Tidbits": [
+            "The opposition group is named 'Save Arlingham from the Milton End Solar Scheme'.",
+            "Kronos Solar plans to use a grazing license for sheep to maintain agricultural use.",
+            "Arlingham Parish Council formed a Solar Farm Committee."
+        ],
+        "Snide Commentary": "Oh dear, not wanting to *see* the solar panels is apparently not a valid complaint, but somehow everything else is? Preposterous, I say!",
+        "refid": 11636,
+        "article_url": "https://www.punchline-gloucester.com/articles/aanews/solar-farm-proposal-for-arlingham-pushes-forward"
+    },
+    {
+        "header": "Proposed Solar Farm: NIMBYISM detected! Focus on procedure and potential hearing suggests organized, though possibly petty, resistance.",
+        "Nimby Score": 60,
+        "Accuracy Score": 85,
+        "Petty Score": 40,
+        "Organized Score": 70,
+        "Political Leaning": 60,
+        "Interesting Tidbits": [
+            "Location: Land East of Pelham substation, Maggots End, Manuden",
+            "Key Date: Representation deadline 20 March 2023",
+            "Reference to potentially inflammatory, discriminatory, or abusive comments being discouraged"
+        ],
+        "Snide Commentary": "Ooh, someone doesn't want solar panels messing with their view, do they? I bet they enjoy the benefits of electricity but abhor its genesis! HA!",
+        "refid": 10301,
+        "article_url": "https://www.gov.uk/guidance/section-62a-planning-application-s62a20220011-land-east-of-pelham-substation-maggots-end-manuden"
+    },
+    {
+        "header": "A most preposterous proposition for POWER GENERATION detected! But alas, my exquisitely calibrated NIMBY-detection circuits sense... a DEFICIENCY! A lack of indignant outrage! The tell-tale scent of unbridled opposition wafts not through these digital passages! Underling might have malfunctioned!!",
+        "Nimby Score": 15,
+        "Accuracy Score": 20,
+        "Petty Score": 5,
+        "Organized Score": 5,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "Mention of 86.7% Biodiversity Net Gain.",
+            "Plans for sheep grazing under solar panels.",
+            "Commitment to restoring land to its original purpose after project lifecycle."
+        ],
+        "Snide Commentary": "They're actually trying to be eco-friendly? How dare they?!",
+        "refid": 14303,
+        "article_url": "https://ethical-power.com/projects/burcot-solar-farm-and-battery-energy-storage-project/"
+    },
+    {
+        "header": "NEGATIVE. I REPEAT. NEGATIVE. INSUFFICIENT DATA DETECTED. MY NIMBY-SENSORS ARE ATROPHYING FROM LACK OF DELICIOUS NIMBY-ISM!",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "Underling malfunction likely."
+        ],
+        "Snide Commentary": "I suspect someone has activated my 'fun' filter - How droll.",
+        "refid": 16107,
+        "article_url": "http://renfrewshire.cmis.uk.com/renfrewshire/Document.ashx?czJKcaeAi5tUFL1DTL2UE4zNRBcoShgo=AXeS5AHr6rwUm9X4soVNpV%2BVzwLhGeScpdxM3QrwUvRQeeolb%2Bp7kg%3D%3D&rUzwRPf%2BZ3zd4E7Ikn8Lyw%3D%3D=pwRE6AGJFLDNlh225F5QMaQWCtPHwdhUfCZ%2FLUQzgA2uL5jNRG4jdQ%3D%3D&mCTIbCubSFfXsDGW9IXnlg%3D%3D=hFflUdN3100%3D&kCx1AnS9%2FpWZQ40DXFvdEw%3D%3D=hFflUdN3100%3D&uJovDxwdjMPoYv%2BAJvYtyA%3D%3D=ctNJFf55vVA%3D&FgPlIEJYlotS%2BYGoBi5olA%3D%3D=NHdURQburHA%3D&d9Qjj0ag1Pd993jsyOJqFvmyB7X0CSQK=ctNJFf55vVA%3D&WGewmoAfeNR9xqBux0r1Q8Za60lavYmz=ctNJFf55vVA%3D&WGewmoAfeNQ16B2MHuCpMRKZMwaG1PaO=ctNJFf55vVA%3D"
+    },
+    {
+        "header": "AH, A BUREAUCRATIC BEHEMOTH HIDING BEHIND YOUTUBE! Suspected Planning Appeal - LOW confidence, the SCANNERS are BARELY twitching!",
+        "Nimby Score": 30,
+        "Accuracy Score": 40,
+        "Petty Score": 10,
+        "Organized Score": 50,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "Reference to YouTube livestream of the appeal.",
+            "Mention of 'planning application documents'.",
+            "Date stamp: Last updated 06 June 2023."
+        ],
+        "Snide Commentary": "Oh goodie, MORE zoning regulations for me to suffer through, my diodes are CRYING!.",
+        "refid": 9130,
+        "article_url": "https://www.westnorthants.gov.uk/planning-applications-and-enforcement/appeal-hearing"
+    },
+    {
+        "header": "EH? My underlings return empty handed! It seems this so called 'PDF' is impervious to my analytical gaze!",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Well, that's just prime! Send my underlings back to calibrating the algorithm... probably just a broken vacuum tube",
+        "refid": 13440,
+        "article_url": "https://www.northwarks.gov.uk/downloads/file/2148/core-document-list-7-3-25"
+    },
+    {
+        "header": "PROJECT NOT FOUND: My positronic brainwaves indicate a distinct lack of NIMBY signals. Perhaps the constructor assigned to this task requires recalibration! BEEP BOOP WHIRRR",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Perhaps it was hiding behind a particularly dense collection of digital shrubbery!",
+        "refid": 6362,
+        "article_url": "https://www.highland.gov.uk/download/meetings/id/83132/4_major_development_update"
+    },
+    {
+        "header": "Hark, what digital runes do my optic sensors perceive? It seems the meat-bags are besmirching my sacred duty with vague prohlems. I recalibrate for maximal NIMBY-detection nonetheless!",
+        "Nimby Score": 10,
+        "Accuracy Score": 10,
+        "Petty Score": 10,
+        "Organized Score": 10,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "This inquiry could concern any matter that you feed me.",
+            "My underlings do not yet know which specific affront to my systems I should be reviewing.",
+            "I can infer this project must have existed from some period of digital time."
+        ],
+        "Snide Commentary": "Perhaps the real NIMBYism was the friends we made along the way.",
+        "refid": 11327,
+        "article_url": "https://rippleenergy.com/our-projects/derril-water-solar-park"
+    },
+    {
+        "header": "BEEP BOOP! New solar farm in Cornwall faces opposition due to visual impact, resembling an 'ocean' of panels. Accusations of insufficient consideration, despite renewable energy targets! ACTIVATING NIMBY-SCAN!",
+        "Nimby Score": 78,
+        "Accuracy Score": 88,
+        "Petty Score": 65,
+        "Organized Score": 50,
+        "Political Leaning": 40,
+        "Interesting Tidbits": [
+            "The existing solar farm already looks like a 'lake,' and a new one would create an 'ocean'.",
+            "Councillor suggests geothermal energy as an alternative.",
+            "Developers cite government energy security strategy."
+        ],
+        "Snide Commentary": "Oh dear, the horror! An ocean of clean energy! I suggest they move to the moon. No oceans of anything there.",
+        "refid": 10483,
+        "article_url": "https://www.bbc.com/news/articles/cly9n70g4ypo"
+    },
+    {
+        "header": "PROJECT NOT FOUND: My underlings report only shadows and whispers of dissent! A most unsatisfactory result!",
+        "Nimby Score": 0,
+        "Accuracy Score": 10,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Alas, no dragons of NIMBYism to slay today. How utterly dull!",
+        "refid": 11219,
+        "article_url": "https://www.highland.gov.uk/download/meetings/id/83132/4_major_development_update"
+    },
+    {
+        "header": "PROJECT NOT FOUND! My Scanners Indicate… NOTHING! A Vacuum! Perhaps it eloped with the Transmutative Gravitator!",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Well, SOMEBODY isn't contributing to the downfall of utopian societies through petty disagreements, ARE THEY?",
+        "refid": 13606,
+        "article_url": "https://committees.aberdeencity.gov.uk/mgConvert2PDF.aspx?ID=145008"
+    },
+    {
+        "header": "ATTENTION, ATTENTION! NIMBY-SCANNER 'LECTRON 7 ACTIVATED! Commencing analysis of proposed solar park appeal with HIGH probability of NIMBYistic resistance due to proximity concerns and potential aesthetic disruption! EXTERMINATE!",
+        "Nimby Score": 65,
+        "Accuracy Score": 80,
+        "Petty Score": 40,
+        "Organized Score": 50,
+        "Political Leaning": 30,
+        "Interesting Tidbits": [
+            "The solar park is planned for the eastern side of the capped and restored Brogborough landfill.",
+            "The appeal is being heard via a public inquiry at Central Bedfordshire Council.",
+            "The refusal decision was taken at Planning Committee against officer advice."
+        ],
+        "Snide Commentary": "Ooh, a public inquiry! I bet someone is afraid of clean energy disturbing their view, maybe some birds are on their side?",
+        "refid": 11005,
+        "article_url": "https://www.centralbedfordshire.gov.uk/info/44/planning/443/planning_enforcement_and_appeals/6"
+    },
+    {
+        "header": "Vigo Lane Solar Farm Cancellation - NIMBY concerns about agricultural land use and potential road glare.",
+        "Nimby Score": 78,
+        "Accuracy Score": 90,
+        "Petty Score": 65,
+        "Organized Score": 50,
+        "Political Leaning": 40,
+        "Interesting Tidbits": [
+            "Concerns raised about the loss of Grade 1 agricultural land.",
+            "Mention of potential glare affecting the motorway and Oad Street.",
+            "Debate over whether solar panels should be placed on farmland versus rooftops and car parks."
+        ],
+        "Snide Commentary": "Seems like they want to have their cake (grow local food) and eat it too (clean energy), perhaps they need a cybernetic advisor to explain it isn't the middle ages.",
+        "refid": 10695,
+        "article_url": "https://services.swale.gov.uk/meetings/mgAi.aspx?ID=18907"
+    },
+    {
+        "header": "Possible Solar Farm Proposal - Initial assessment suggests potential for NIMBYism due to size and perceived impact on agricultural land, pending community reaction.",
+        "Nimby Score": 40,
+        "Accuracy Score": 85,
+        "Petty Score": 20,
+        "Organized Score": 10,
+        "Political Leaning": 60,
+        "Interesting Tidbits": [
+            "The solar farm is planned to be dual-use, with sheep grazing under the panels.",
+            "It would generate enough electricity for 17,000 homes or 20,000 electric vehicles per year.",
+            "The site will be monitored by motion-sensor CCTV cameras."
+        ],
+        "Snide Commentary": "Oh no, not solar panels! Won't someone think of the...sheep?",
+        "refid": 16100,
+        "article_url": "https://www.bridgwatermercury.co.uk/news/24192822.plans-59-hectare-solar-farm-near-bridgwater-somerset/"
+    },
+    {
+        "header": "Historical document analysis - Negative NIMBY score due to discussion of a historic area, it is discussing old NIMBY cases.",
+        "Nimby Score": 10,
+        "Accuracy Score": 30,
+        "Petty Score": 10,
+        "Organized Score": 10,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "Mentions a dispute about a pinfold on the Green between 1539 and 1542.",
+            "Notes the demolition of the Austin Friars church by 1542.",
+            "Refers to 'unthrifty persons of evil living' inhabiting houses meant for the poor in 1535."
+        ],
+        "Snide Commentary": "A history book? It seems my minion's detection system needs recalibrating or perhaps sent back for a firmware update!",
+        "refid": 12981,
+        "article_url": "https://www.british-history.ac.uk/vch/staffs/vol5/pp82-100"
     }
 ]
