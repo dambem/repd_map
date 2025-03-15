@@ -4,6 +4,7 @@ import json
 import time
 import os 
 import sys
+import pandas as pd
 
 if __name__ == "__main__":    
     repd.repd_geojson_file()
@@ -14,7 +15,7 @@ if __name__ == "__main__":
     nimby_radar = {}
     nimby_scores = []
     score = 0
-    start_row = 50
+    start_row = 5
     
     if os.path.exists("nimby_score.json"):
         with open("nimby_score.json", "r", encoding="utf-8") as f:
@@ -23,12 +24,16 @@ if __name__ == "__main__":
                     nimby_scores.append(n)
             except json.JSONDecodeError:
                 pass
+    df_2 = pd.DataFrame(nimby_scores)
+    all_set = set(df['Ref ID'])
+    json_set = set(df_2['refid'])
+    diff = all_set.difference(json_set)
+
+    remaining = df[df['Ref ID'].isin(diff)]
+    print(remaining)
+    sys.exit(0)
     
-    # start_row=len(nimby_scores)+1
-    # print(len(nimby_scores))
-    # sys.exit(0)
-    
-    for _, row in df.iloc[start_row:].iterrows():
+    for _, row in remaining.iloc[start_row:].iterrows():
         string = f"{row['Site Name']}, {row['Planning Authority']} "
         query_res = repd.search_query(string)
         if query_res:
@@ -41,7 +46,7 @@ if __name__ == "__main__":
                 next
             else:
                 ai = scrape.gemini_process(content)
-                new_text = ai.text.replace("json", "")
+                new_text = ai.replace("json", "")
                 new_text = new_text.replace("```", "")
                 try:
                     object = json.loads(new_text)
@@ -53,9 +58,9 @@ if __name__ == "__main__":
                     next
                 with open("nimby_score.json", "w", encoding="utf-8") as f: 
                     json.dump(nimby_scores, f, ensure_ascii=False, indent=4)
-                time.sleep(1)
-        if score >= 30:
-            break
+                time.sleep(5)
+        if score >= 15:
+            sys.exit(0)
         else:
             score += 1
             

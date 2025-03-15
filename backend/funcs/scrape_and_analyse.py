@@ -71,13 +71,21 @@ def load_prompt(filepath):
         print(f"Error: Prompt file not found at {filepath}")
         return None  # Or raise the exception, depending on desired behavior
 
+
+def load_json(filepath):
+    """Loads the prompt from a text file."""
+    with open(filepath, "r", encoding="utf-8") as f:
+        try:
+            return json.load(f)
+        except json.JSONDecodeError:
+            pass
 def gemini_process(content, prompt="data/nimby_prompt.txt"):
     prompt_filepath = "data/nimby_prompt.txt"  # Adjust the path if needed
     nimby_radar_prompt = load_prompt(prompt_filepath)
-
+    
     model = genai.GenerativeModel(
-    model_name="gemini-2.0-flash",
-    generation_config=generation_config,
+        model_name="gemini-2.0-flash",
+        generation_config=generation_config,
     )
     
     chat_session = model.start_chat(
@@ -85,7 +93,10 @@ def gemini_process(content, prompt="data/nimby_prompt.txt"):
             "role": "user",  # or "model" if it was a prior model response
             "parts": [nimby_radar_prompt]
         }])
-    response = chat_session.send_message(content)
+    if len(content) > 0:
+        response = chat_session.send_message(content).text
+    else:
+        response = load_prompt("data/backup_object.json")
     return response
 
 def parse_json_string(json_string):
