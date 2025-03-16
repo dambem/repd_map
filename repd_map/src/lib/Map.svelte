@@ -38,13 +38,13 @@
     let technologyType = 'all';
 
     let stats = [
-        { label: 'Total Capacity Lost', value: '6584 MW', calculate: calculateTotalCapacity},
-        { label: 'Application Withdrawn', value: '23', calculate: calculateLengthW},
-        { label: 'Permission Refused', value: '12', calculate: calculateLength},
-        { label: 'Total Projects Cancelled', value: '156', calculate: calculateLengthA}
+        { label: 'Total Capacity Lost', value: '6584', calculate: calculateTotalCapacity, trend:'MW'},
+        { label: 'Application Withdrawn', value: '23', calculate: calculateLengthW, trend:'Since January 2020'},
+        { label: 'Permission Refused', value: '12', calculate: calculateLength, trend:'Since January 2020'},
+        { label: 'Total Projects Cancelled', value: '156', calculate: calculateLengthA, trend:'Since January 2020'}
     ];
     
-    const allowedProperties = ['Operator (or Applicant)', 'Site Name', 'Technology Type', 'Installed Capacity (MWelec)', 'Development Status', 'Planning Permission Refused'];
+    const allowedProperties = ['Operator (or Applicant)', 'Site Name', 'Technology Type', 'Installed Capacity (MWelec)', 'Development Status', 'Planning Permission Refused', 'Planning Application Withdrawn', 'Planning Application Submitted'];
 
     // Animation timer
     let animationTimer;
@@ -54,7 +54,7 @@
             const capacity = parseFloat(point.properties['Installed Capacity (MWelec)']) || 0;
             return sum + capacity;
         }, 0);
-        return `${Math.round(total)} MW`;
+        return `${Math.round(total)}`;
     }
     function calculateLength(points) {
         // Count points with appeal information
@@ -104,7 +104,7 @@
 
         })
         stats = stats.map(stat => ({...stat}))
-        console.log(stats)
+        // console.log(stats)
     }
     
 
@@ -211,7 +211,7 @@
                         [
                             'case',
                             ['in', ['get', refProperty], ['literal', [...nimbyRefIds]]],
-                            '#47001b',  // Has nimby details - darker red
+                            '#97001b',  // Has nimby details - darker red
                             [
                                 'case',
                                 ['in', ['get', refProperty], ['literal', [...nimbyRefIds3]]],
@@ -364,21 +364,28 @@
     }
 </script>
 
-<div class="container font-sans">
-    <div class="w-2/3 p-5 overflow-y-auto" transition:slide>
+<div class="font-sans flex flex-wrap">
+    <div class="w-1/3 sidebar container p-5 overflow-y-auto" transition:slide>
         <div class="sidebar-header justify-center items-center ">
-
-
             <div class="ml-4 mb-4">
                 {#if selectedFeature}
                     <h2 class="text-md font-bold">{selectedFeature.properties['Site Name'] || 'NIMBYdex'}</h2>
+                    <p class='text-xs'>Submitted: {selectedFeature.properties['Planning Application Submitted']}</p>
+                    {#if selectedFeature.properties['Planning Permission Refused'] != 0}
+                        <p class='text-xs'>Refused: {selectedFeature.properties['Planning Permission Refused']}</p>
+                    {/if}
+
+                    {#if selectedFeature.properties['Planning Permission Withdraw'] != 0}
+                        <p class='text-xs'>Withdrawn: {selectedFeature.properties['Planning Permission Withdrawn']}</p>
+                    {/if}
+
                     <button class="text-xs text-blue-500 mt-1" on:click={resetSelection}>← Back to overview</button>
 
                     {#if nimby_choice}
                     <div class="collapse collapse-arrow border-base-300 mt-3 mb-2 border">
                         <input type="checkbox" />
-                        <div class="collapse-title text-sm mb-0 pb-0">Site Details</div>
-                        <div class="collapse-content">
+                        <div class="collapse-title text-sm mb-0 pb-0 bg-white">{selectedFeature.properties['Development Status']}</div>
+                        <div class="collapse-content bg-white">
                             <table class="w-full table rounded-box border border-base-content/5 bg-base-100">
                                 <thead>
                                     <tr>
@@ -409,7 +416,7 @@
                             </div>
                           </div>
                         
-                        <div class="chat-bubble bg-primary">
+                        <div class="chat-bubble bg-primary shadow-xl">
                         <p class="text-sm">{nimby_choice['header']}</p>
                         </div>
                         <div class="chat-footer opacity-50">Sent By NimbyDar - He may be wrong!</div>
@@ -423,7 +430,7 @@
 
                     <div class="avatar">
                         <div class="w-12 rounded-md">
-                            <img src="./lamplight.gif"/>
+                            <img class='h-48' src="./lamplight.gif"/>
                         </div>
                     </div>
                     <div class='ml-3'>
@@ -435,13 +442,13 @@
                 {/if}
             </div>
 
-            <div style="height: 300px" class:hidden={!selectedFeature}>
+            <div style="height: 300px" class='bg-white p-4 rounded-xl shadow-xl'    class:hidden={!selectedFeature}>
                 <canvas bind:this={nimbyRadarCanvas}></canvas>
             </div>
             
             <div class="grid grid-cols-2 gap-4" class:hidden={selectedFeature}>
                 {#each stats as stat}
-                    <div class="stat shadow bg-base-100">
+                    <div class="stat place-items-center shadow bg-base-100 rounded-xl">
                         <div class="stat-title">{stat.label}</div>
                         <span class="stat-value">{stat.value}</span>
                         <span class="stat-desc">{stat.trend}</span>
@@ -449,10 +456,10 @@
                 {/each}
             </div>
             
-            <article class:hidden={selectedFeature} class="prose mt-5">
-                <h2 class="text-xl">Disclosure!</h2>
+            <article class:hidden={selectedFeature} class="prose mt-5 bg-white p-4 rounded-xl shadow-xl">
+                <h2 class="text-sm">What's the Nimbydex?</h2>
                 <p>
-                    The NimbyDex is an experiment into analyzing the NIMBY menace plaguing UK progress.
+                    The NimbyDex is an experiment into analyzing issues plaguing UK renewables progress.
                     Gemini has been used in order to help identify potential news articles about sites.
                 </p>
 
@@ -460,7 +467,13 @@
                     The actual site information is factual and is using the governmental REPD dataset for cancelled renewable projects.
                     <b>The opinions themselves are made up, and the points don't matter.</b>
                 </p>
-                    <a href='https://www.bemben.co.uk'>Made by Damian Bemben</a>
+                <p>
+                    <b> On the map - Bright red denotes high certainty NIMBY-ness</b>
+                </p>
+                <div class="flex mt-5 justify-center items-center">
+
+                    <a class='link' href='https://www.bemben.co.uk'>Made by Damian Bemben</a>
+                </div>
             </article>
         </div>
 
@@ -469,11 +482,17 @@
         {#if selectedFeature && nimby_choice}
             <div class="sidebar-content" bind:this={sidebarContent}>
                 <hr/>
-                <div class="mt-2 mb-2">
+                <ul  class="list bg-base-100 rounded-box shadow-md mt-2 mb-2">
+                    <li class="p-4 pb-2 text-xs opacity-60 tracking-wide">3 'Fun' Facts about this Failure</li>
+
                     {#each nimby_choice['Interesting Tidbits'] || [] as tidbit}
-                        <p class="text-sm mt-2 property-row">- {tidbit}</p>
+                        <li class="list-row p-4">
+                            <div class='list-col-grow text-sm'>
+                                {tidbit}
+                            </div>
+                        </li>
                     {/each}
-                </div>
+                </ul>
                 
 
                 <div class="chat chat-start">
@@ -484,7 +503,7 @@
                             src="./nimbydar.webp" />
                         </div>
                       </div>
-                    <div class="chat-bubble bg-primary">
+                    <div class="chat-bubble bg-primary  shadow-xl">
                         {nimby_choice['Snide Commentary']}
                     </div>
                     <div class="chat-footer opacity-50">Sent By NimbyDar - He may be wrong! </div>
@@ -506,7 +525,7 @@
         {/if}
     </div>
     
-    <div class="map-container" bind:this={mapContainer}></div>
+    <div class="w-2/3  map-container" bind:this={mapContainer}></div>
     
 
 
@@ -545,21 +564,10 @@
     }
     
     .container {
-        display: flex;
         height: 100vh;
-        width: 100%;
-        overflow-y: hidden;
-    }
-    
-    .map-container {
-        width: 100%;
-        height: 100%;
-        padding: 0;
-        flex-grow: 1;
     }
     
     .sidebar {
-        width: 90em;
         padding: 20px;
         overflow-y: auto;
     }
