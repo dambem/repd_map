@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     remaining = df[df['Ref ID'].isin(diff)]
     print(remaining)
-    sys.exit(0)
+    # sys.exit(0)
     
     for _, row in remaining.iloc[start_row:].iterrows():
         string = f"{row['Site Name']}, {row['Planning Authority']} "
@@ -41,24 +41,27 @@ if __name__ == "__main__":
             mime = 'n/a'
             if query_res[0].get('mime'):
                 mime = query_res[0]['mime']
+            
+            
             content = scrape.scrape_content(url, mime=mime)
+            print(content)
+            time.sleep(5)
             if content == None:
+                content = "Nothing located - please fill with default 0 values and write a snippy remark"
+            ai = scrape.gemini_process(content)
+            new_text = ai.replace("json", "")
+            new_text = new_text.replace("```", "")
+            try:
+                object = json.loads(new_text)
+                ref_id = row['Ref ID']
+                object['refid'] = ref_id
+                object['article_url'] = url
+                nimby_scores.append(object)    
+            except Exception as e:
                 next
-            else:
-                ai = scrape.gemini_process(content)
-                new_text = ai.replace("json", "")
-                new_text = new_text.replace("```", "")
-                try:
-                    object = json.loads(new_text)
-                    ref_id = row['Ref ID']
-                    object['refid'] = ref_id
-                    object['article_url'] = url
-                    nimby_scores.append(object)    
-                except Exception as e:
-                    next
-                with open("nimby_score.json", "w", encoding="utf-8") as f: 
-                    json.dump(nimby_scores, f, ensure_ascii=False, indent=4)
-                time.sleep(5)
+            with open("nimby_score.json", "w", encoding="utf-8") as f: 
+                json.dump(nimby_scores, f, ensure_ascii=False, indent=4)
+            time.sleep(5)
         if score >= 15:
             sys.exit(0)
         else:
