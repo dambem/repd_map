@@ -158,7 +158,7 @@
         
         map = new maplibregl.Map({
             container: mapContainer,
-            style: 'https://api.maptiler.com/maps/aquarelle/style.json?key=xGVG9z8FJiMrvfFTWFgs',
+            style: 'https://api.maptiler.com/maps/aquarelle/style.json?key=Quo7Fj6wWokTK0Taqy0g',
             center: [-4, 55.20],
             zoom: 4.8
         });
