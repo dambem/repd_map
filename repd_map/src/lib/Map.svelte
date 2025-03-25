@@ -158,7 +158,7 @@
         
         map = new maplibregl.Map({
             container: mapContainer,
-            style: 'https://api.maptiler.com/maps/aquarelle/style.json?key=Quo7Fj6wWokTK0Taqy0g',
+            style: 'https://api.maptiler.com/maps/aquarelle/style.json?key=cyYG5tvmi6dhPXwxXQXr',
             center: [-4, 55.20],
             zoom: 4.8
         });
@@ -426,16 +426,16 @@
 
                     <p class="text-xs font-bold">Record Last Updated {selectedFeature.properties['Record Last Updated (dd/mm/yyyy)']}</p>
                 {:else}
-                <div class="flex">
+                <div class="flex bg-white rounded-xl p-5 shadow-md">
 
                     <div class="avatar">
                         <div class="w-12 rounded-md">
                             <img class='h-48' src="./lamplight.gif"/>
                         </div>
                     </div>
-                    <div class='ml-3'>
-                    <h1 class="text-xl font-bold">NIMBYdex</h1>
-                    <p>UK Cancelled Renewable Projects Radar</p>
+                    <div class='ml-3 '>
+                        <h1 class="text-xl font-bold">NIMBYdex</h1>
+                        <p>UK Cancelled Renewable Projects Radar</p>
                     </div>
                 </div>
 
