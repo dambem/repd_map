@@ -427,13 +427,12 @@
                     <p class="text-xs font-bold">Record Last Updated {selectedFeature.properties['Record Last Updated (dd/mm/yyyy)']}</p>
                 {:else}
                 <div class="flex bg-white rounded-xl p-5 shadow-md">
-
                     <div class="avatar">
                         <div class="w-12 rounded-md">
                             <img class='h-48' src="./lamplight.gif"/>
                         </div>
                     </div>
-                    <div class='ml-3 '>
+                    <div class='ml-1'>
                         <h1 class="text-xl font-bold">NIMBYdex</h1>
                         <p>UK Cancelled Renewable Projects Radar</p>
                     </div>

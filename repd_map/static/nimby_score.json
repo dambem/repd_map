@@ -3978,5 +3978,51 @@
         "Snide Commentary": "Looks like my circuits are cooling down, I'll need to search the databanks again for the real evil that lurks!",
         "refid": 14943,
         "article_url": "https://hartfordcare.co.uk/care_homes/ashley-grange/"
+    },
+    {
+        "header": "Samphill Solar Farm - Cancelled: Possible NIMBY-adjacent factors may have contributed to its demise, though direct evidence is lacking. Speculation abounds regarding community concerns about aesthetics and land use, however it is also possible there were material issues with the plan.",
+        "Nimby Score": 50,
+        "Accuracy Score": 60,
+        "Petty Score": 40,
+        "Organized Score": 30,
+        "Political Leaning": 45,
+        "Interesting Tidbits": [
+            "Located in Bedfordshire, England",
+            "Cancelled solar photovoltaic (PV) farm",
+            "Data accessible via Global Energy Monitor website."
+        ],
+        "Snide Commentary": "Even the sun's rays fear the might of NIMBYism; even cancelled projects contain some data. Fascinating!",
+        "refid": 9184,
+        "article_url": "https://www.gem.wiki/Greenfield_Road_Samphill_solar_farm"
+    },
+    {
+        "header": "NO DATA FOUND - My glorious algorithms have detected a void! It seems the data you seek has eluded my grasp, or perhaps it simply doesn't exist in a form I deem worthy of processing. HA!",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Perhaps this missing data is for the best. The world is already over-encumbered with pointless regulations!",
+        "refid": 14776,
+        "article_url": "https://www.dcaa.mil/Portals/88/FY%202022%20Active%20Contractor%20Listing.pdf"
+    },
+    {
+        "header": "Extension Refusal at Sandhill Farm - Low NIMBY sentiment due to planner's assessment of unnecessary infrastructure.",
+        "Nimby Score": 20,
+        "Accuracy Score": 80,
+        "Petty Score": 10,
+        "Organized Score": 10,
+        "Political Leaning": 30,
+        "Interesting Tidbits": [
+            "Applicant: James Hewitt",
+            "Location: Sandhill Farm, Picketts Hill, Headley",
+            "Council: East Hampshire District Council"
+        ],
+        "Snide Commentary": "An unnecessary extension got denied? How positively humdrum, I needed to see a scandal about badgers being oppressed!",
+        "refid": 12594,
+        "article_url": "https://www.bordonherald.com/news/appeal-launched-as-bid-to-extend-headley-farm-building-is-rejected-675223"
     }
 ]
