@@ -1,8 +1,7 @@
 .noise {
     /* ... */
     background:
-      linear-gradient(0.46turn, rgba(255, 255, 255, 0.545), rgb(255, 255, 216, 0.9),  rgba(0, 94, 255, 0.737)),
+      linear-gradient(0.46turn, rgb(255, 255, 216, 1), rgb(255, 255, 216, 0.4),  rgb(229, 255, 216, 0.1)),
       url(../static/bg.svg);
       filter: contrast(100%) brightness(100%);
-
   }
