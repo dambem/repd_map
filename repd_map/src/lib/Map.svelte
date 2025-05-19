@@ -406,7 +406,7 @@ function toggleColorMode() {
 
         gsap.from(mapContainer, {
             opacity: 0,
-            duration: 5, // Animation duration in seconds
+            duration: 2, // Animation duration in seconds
             ease: 'power2.out', // Easing function
             delay: 0.5 // Optional: if you want to delay the animation
         });
