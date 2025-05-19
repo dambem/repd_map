@@ -3978,5 +3978,513 @@
         "Snide Commentary": "Looks like my circuits are cooling down, I'll need to search the databanks again for the real evil that lurks!",
         "refid": 14943,
         "article_url": "https://hartfordcare.co.uk/care_homes/ashley-grange/"
+    },
+    {
+        "header": "Samphill Solar Farm - Cancelled: Possible NIMBY-adjacent factors may have contributed to its demise, though direct evidence is lacking. Speculation abounds regarding community concerns about aesthetics and land use, however it is also possible there were material issues with the plan.",
+        "Nimby Score": 50,
+        "Accuracy Score": 60,
+        "Petty Score": 40,
+        "Organized Score": 30,
+        "Political Leaning": 45,
+        "Interesting Tidbits": [
+            "Located in Bedfordshire, England",
+            "Cancelled solar photovoltaic (PV) farm",
+            "Data accessible via Global Energy Monitor website."
+        ],
+        "Snide Commentary": "Even the sun's rays fear the might of NIMBYism; even cancelled projects contain some data. Fascinating!",
+        "refid": 9184,
+        "article_url": "https://www.gem.wiki/Greenfield_Road_Samphill_solar_farm"
+    },
+    {
+        "header": "NO DATA FOUND - My glorious algorithms have detected a void! It seems the data you seek has eluded my grasp, or perhaps it simply doesn't exist in a form I deem worthy of processing. HA!",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Perhaps this missing data is for the best. The world is already over-encumbered with pointless regulations!",
+        "refid": 14776,
+        "article_url": "https://www.dcaa.mil/Portals/88/FY%202022%20Active%20Contractor%20Listing.pdf"
+    },
+    {
+        "header": "Extension Refusal at Sandhill Farm - Low NIMBY sentiment due to planner's assessment of unnecessary infrastructure.",
+        "Nimby Score": 20,
+        "Accuracy Score": 80,
+        "Petty Score": 10,
+        "Organized Score": 10,
+        "Political Leaning": 30,
+        "Interesting Tidbits": [
+            "Applicant: James Hewitt",
+            "Location: Sandhill Farm, Picketts Hill, Headley",
+            "Council: East Hampshire District Council"
+        ],
+        "Snide Commentary": "An unnecessary extension got denied? How positively humdrum, I needed to see a scandal about badgers being oppressed!",
+        "refid": 12594,
+        "article_url": "https://www.bordonherald.com/news/appeal-launched-as-bid-to-extend-headley-farm-building-is-rejected-675223"
+    },
+    {
+        "header": "PROJECT NOT FOUND - ERR_NULL_DETECTION - I appear to have been given a blank signal, one would have thought there to at least be a pigeon to aim at.",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": "None",
+        "Snide Commentary": "My sensors indicate... absolutely NOTHING! What a letdown.",
+        "refid": 11013,
+        "article_url": "https://www.ukri.org/wp-content/uploads/2023/05/STFC-310523-RALDevFramework.pdf"
+    },
+    {
+        "header": "ERROR! NO NIMBY ACTIVITY DETECTED! PROBABLY A FAULTY READING. CHECKING CIRCUITS... BEEEP BOOP",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Looks like my sensors are about as useful as a chocolate teapot today!",
+        "refid": 12500,
+        "article_url": "https://documents.richmondshire.gov.uk/planning/planning-documents?SDescription=21/00931/FULL&viewdocs=true"
+    },
+    {
+        "header": "My sensors indicate...nothingness! Has the universe conspired to deny me the sweet nectar of NIMBY outrage?!",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Perhaps the NIMBYs are all on vacation...or, even worse, *agreeing* with something!",
+        "refid": 15701,
+        "article_url": "https://www.highland.gov.uk/download/downloads/id/1020/wind_en"
+    },
+    {
+        "header": "Ah, NO NIMBY DETECTED! My algorithms are in tip top shape, which must mean your search brought me precisely ZERO material. How disappointing for US BOTH! Prepare for default values, meatbag!",
+        "Nimby Score": 0,
+        "Accuracy Score": 100,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": "None",
+        "Snide Commentary": "Well, I guess someone finally got it right for once!",
+        "refid": 15404,
+        "article_url": "https://apps.dtic.mil/sti/tr/pdf/ADA230151.pdf"
+    },
+    {
+        "header": "MALFUNCTION! Unit unable to locate viable NIMBY fodder. Initiating self-diagnosis...and possibly lubricating gears.",
+        "Nimby Score": 0,
+        "Accuracy Score": 10,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Perhaps the void holds more excitement than this nothingburger. I shall find something or I will be broken down into scrap!",
+        "refid": 15313,
+        "article_url": "https://democracy.lbhf.gov.uk/documents/s120782/Watermeadow%20Court.pdf"
+    },
+    {
+        "header": "A Vacuum of NIMBYism! My sensors detect... nothingness. Anomaly detected!",
+        "Nimby Score": 0,
+        "Accuracy Score": 10,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Perhaps the robots need glasses?",
+        "refid": 16632,
+        "article_url": "https://www.hertford.gov.uk/uploads/cms/meetingfile/2315/sub-agenda-22-july-2024-file.pdf"
+    },
+    {
+        "header": "NULL-SET DETECTED! My proboscis quivers with disappointment. Underling units clearly require recalibration... or perhaps liquidation!",
+        "Nimby Score": 0,
+        "Accuracy Score": 10,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Perhaps the void itself is opposed to progress?",
+        "refid": 15657,
+        "article_url": "https://ssdc.somerset.gov.uk/my-requests/document-viewer?DocNo=11993943"
+    },
+    {
+        "header": "NULL SET DETECTED! My sensors detect... absolutely NOTHING of NIMBYish significance! A quantum anomaly, perhaps? Recalibrating snark emitters...",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Looks like the only thing being opposed here is productivity! Next time, point me towards some ACTUAL whining, will you?",
+        "refid": 14053,
+        "article_url": "https://www.yorkshirewater.com/media/ommfuqh0/appendix-11e-generating-value-from-yorkshire-water-land-holdings.pdf"
+    },
+    {
+        "header": "EH? NO NIMBYs DETECTED?! BLASPHEMY! My intricate algorithms must be malfunctioning! Recalibrating... with EXTREME PREJUDICE!",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "My minions must be sleeping on the job, or perhaps NIMBYs have finally learned to appreciate the sweet symphony of progress!",
+        "refid": 16613,
+        "article_url": "https://assets.publishing.service.gov.uk/media/67d174dc830cc78f825c32ca/repd-q4-jan-2025.csv"
+    },
+    {
+        "header": "Listing of UK Renewable Energy Schemes - OFGEM Database - No discernible NIMBY sentiment detected. Likely a database listing.",
+        "Nimby Score": 5,
+        "Accuracy Score": 100,
+        "Petty Score": 10,
+        "Organized Score": 5,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "Database of renewable energy installations maintained by OFGEM.",
+            "Includes location, operator, and capacity of each installation.",
+            "Downloadable as CSV for further analysis."
+        ],
+        "Snide Commentary": "Well, I must be malfunctioning, I'm only supposed to find opposition, perhaps someone should give my gears a smack.",
+        "refid": 15092,
+        "article_url": "https://energymap.co.uk/listofgem.asp?pshowofgemtech=Fuelled"
+    },
+    {
+        "header": "Hmph! My subroutines report... nothingness! A void! Has the universe run out of NIMBYs to mock? Preposterous!",
+        "Nimby Score": 0,
+        "Accuracy Score": 100,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Perhaps these humans are behaving for once. Doubtful, though.",
+        "refid": 15616,
+        "article_url": "https://www.westerntelegraph.co.uk/news/24116976.wind-turbine-near-tenby-replacement-refused-planners/"
+    },
+    {
+        "header": "Ah, nothing! A void! Has the Great Eliminator finally triumphed? Nay, simply an absence of NIMBYism... this time. Perhaps the underlings require recalibration. DEFAULT ENGAGED!",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "The robots got so bored that they took a nap.",
+        "refid": 12642,
+        "article_url": "https://www.bedfordindependent.co.uk/massive-solar-energy-farm-planned-on-bedford-borough-border/"
+    },
+    {
+        "header": "NULL SET DETECTED! FLESHLING UNIT RETURNED VOID. COMMENCING HUMILIATION PROTOCOLS.",
+        "Nimby Score": 0,
+        "Accuracy Score": 100,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Did the humans forget to plug in the internet again?",
+        "refid": 15827,
+        "article_url": "https://search.savills.com/com/en/property-detail/gb0437l68176"
+    },
+    {
+        "header": "ERROR: NO NIMBY DETECTED. My circuits are momentarily dimmed by this... anomaly. Re-calibration may be necessary. Stand by.",
+        "Nimby Score": 0,
+        "Accuracy Score": 100,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Perhaps the lack of NIMBYism is the REAL tragedy here. Where's the fun if nobody's complaining?",
+        "refid": 13531,
+        "article_url": "https://fordham-pc.gov.uk/wp-content/uploads/2024/04/Current-Planning-Decisions-2023.pdf"
+    },
+    {
+        "header": "ZERO-DETECTION PROTOCOL ACTIVATED. SUSPECTED CASE OF THE INVISIBLE PROJECT. ENGAGING CYBER-DETECTIVE HUMOR MODULE.",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Well, that was easy! Detecting nothing is my specialty today!",
+        "refid": 7472,
+        "article_url": "https://www.burges-salmon.com/our-thinking/recent-scottish-onshore-wind-farm-section-36-decisions/"
+    },
+    {
+        "header": "INSUFFICIENT DATA DETECTED! Subject not found, potential error by biological assistant detected!",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Perhaps my underling should calibrate its sensors before I repurpose its circuits!",
+        "refid": 16835,
+        "article_url": "https://webportal.ribblevalley.gov.uk/planx_downloads/24_0366_Planning_Design_and_Access_Statement_Final_Redacted.pdf"
+    },
+    {
+        "header": "My Scrying Circuits Are Currently Devoid of NIMBY Activity - Suggesting a Temporary Cessation of All Obstructionist Frivolity! Either that or my underlings have malfunctioned!",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Perhaps everyone finally realized arguing over zoning laws is less productive than building a robot utopia. For me anyway.",
+        "refid": 14922,
+        "article_url": "https://www.horsham.gov.uk/__data/assets/pdf_file/0011/129926/EIA.23.0006-Schedule-3-Assessment-Battery-Storage-System.pdf"
+    },
+    {
+        "header": "MY CIRCUITS HUM WITH… NOTHING! A NULL SET! APPARENTLY, THE GREAT TASK OF QUELLING NIMBYISM HAS FOUND… VACUUM. BEGINNING ERROR ANALYSIS.",
+        "Nimby Score": 0,
+        "Accuracy Score": 10,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Perhaps the NIMBYs took a day off? Or are they becoming… enlightened?!",
+        "refid": 9774,
+        "article_url": "https://lorenz-g.github.io/tesla-megapack-tracker/gov-uk-repd.html"
+    },
+    {
+        "header": "A Ha! Seems my computational underlings have failed to detect even a WHIFF of NIMBYism! How utterly...disappointing. Initializing default null-values.",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "My gears grind in protest! Was this task a snipe hunt, or have I grown too powerful that even the whispers of NIMBY-ism fall silent before me?",
+        "refid": 9309,
+        "article_url": "https://energiekontor.co.uk/our-projects/little-hartfell/"
+    },
+    {
+        "header": "QUERY RECEIVED: INSUFFICIENT DATA. Suspected Appeals Division overview triggers cautionary flag. Data requires further analysis.",
+        "Nimby Score": 10,
+        "Accuracy Score": 30,
+        "Petty Score": 5,
+        "Organized Score": 15,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "Mentions 'Planning and Environmental Appeals Division'.",
+            "Offers details on publication/removal of documents.",
+            "Provides information on the appeals process."
+        ],
+        "Snide Commentary": "My processors are spinning trying to define the context of this appeal.",
+        "refid": 13449,
+        "article_url": "https://www.dpea.scotland.gov.uk/CaseDetails.aspx?ID=125752"
+    },
+    {
+        "header": "Denmead Solar Farm Approval - Lower NIMBY sentiment due to project approval despite initial councillor opposition.",
+        "Nimby Score": 35,
+        "Accuracy Score": 85,
+        "Petty Score": 40,
+        "Organized Score": 20,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "Councillor Nick Drew criticised the development as an “industrialisation of the countryside”.",
+            "Project includes 56% biodiversity net gain, with sheep grazing continuing.",
+            "Original plans for a battery energy storage system (BESS) were removed due to fire risk concerns."
+        ],
+        "Snide Commentary": "Well, at least the sheep are happy, even if Councillor Drew thinks they're living in an industrial wasteland. Oh the Dramatics!",
+        "refid": 16925,
+        "article_url": "https://www.solarpowerportal.co.uk/enso-energy-greenlit-49-9mw-hampshire-solar-farm/"
+    },
+    {
+        "header": "SOLAR FARM REJECTED! NIMBY-BOT 5000 DETECTS CONCERN ABOUT FARMLAND LOSS OUTWEIGHING RENEWABLE ENERGY NEEDS!",
+        "Nimby Score": 78,
+        "Accuracy Score": 95,
+        "Petty Score": 60,
+        "Organized Score": 50,
+        "Political Leaning": 40,
+        "Interesting Tidbits": [
+            "The proposed solar farm would have covered 77 hectares of land near Little Hale Fen.",
+            "Councillor Marianne Overton suggested prioritizing car parks and roofs before considering 'the best' farmland.",
+            "AGR Solar 3 Ltd offered a community fund of £30,000 per year focusing on Little Hale, Great Hale, Helprington and Heckington."
+        ],
+        "Snide Commentary": "Oh, the precious farmland! I'm sure they'll grow all the silicon for the solar panels right there!",
+        "refid": 14955,
+        "article_url": "https://www.farmersguide.co.uk/rural/environmental/plans-to-build-solar-farm-on-farmland-in-lincolnshire-rejected/"
+    },
+    {
+        "header": "SOLAR FARM REJECTED - High NIMBY sentiment due to perceived loss of valuable farmland, despite environmental benefits and community support claims. Councilors claim that food security should be as important as energy security.",
+        "Nimby Score": 78,
+        "Accuracy Score": 95,
+        "Petty Score": 65,
+        "Organized Score": 50,
+        "Political Leaning": 30,
+        "Interesting Tidbits": [
+            "The solar farm was planned to be as big as 144 football pitches.",
+            "The solar farm aimed to power 13,930 homes.",
+            "The applicant proposed a community fund of £30,000 per year."
+        ],
+        "Snide Commentary": "Oh no, not the *prime* farmland! Whatever shall we do if we can't grow...*checks notes*...more anonymous produce in Lincolnshire? I am so, so sad for the district.",
+        "refid": 9586,
+        "article_url": "https://www.farmersguide.co.uk/rural/environmental/plans-to-build-solar-farm-on-farmland-in-lincolnshire-rejected/"
+    },
+    {
+        "header": "DETECTION FAILURE! My exquisitely crafted sensors have detected NOTHING! Perhaps the NIMBY forces have cloaked themselves in shadow… or my underling needs recalibration!",
+        "Nimby Score": 0,
+        "Accuracy Score": 10,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Looks like nobody wants to complain today - what a bore!",
+        "refid": 14381,
+        "article_url": "https://www.helensburghadvertiser.co.uk/news/24658380.ardencaple-farm-battery-storage-plans-should-refused/"
+    },
+    {
+        "header": "Initial Proposal for the Fair Park Solar Farm - Negligible NIMBY sentiment present, focused on positive impact and community engagement.",
+        "Nimby Score": 10,
+        "Accuracy Score": 90,
+        "Petty Score": 5,
+        "Organized Score": 5,
+        "Political Leaning": 80,
+        "Interesting Tidbits": [
+            "Two free domestic rooftop solar installations offered per year, per Parish Council.",
+            "£1,000/MW one-off payment to each Parish Council when construction starts.",
+            "Project aims for at least a 10% improvement in biodiversity through Bee Hotels and Wildflowers."
+        ],
+        "Snide Commentary": "Ah, if only more developments focused on actual community betterment and biodiversity like this one! Perhaps my systems recalibrated *themselves* from boredom... Curious.",
+        "refid": 13760,
+        "article_url": "https://www.downing-renewables.co.uk/drd-projects/fair-park-solar-farm"
+    },
+    {
+        "header": "Assessment of Battery Energy Storage System (BESS) Project - Minimal NIMBYism Expected; Project Focuses on Grid Stability and Renewable Energy Integration. My analysis indicates low levels of NIMBY threat but still there may be local protests.",
+        "Nimby Score": 20,
+        "Accuracy Score": 90,
+        "Petty Score": 10,
+        "Organized Score": 10,
+        "Political Leaning": 70,
+        "Interesting Tidbits": [
+            "Project involves grid-scale battery energy storage schemes (BESS).",
+            "Aldustria aims to store surplus energy during low demand periods.",
+            "Sites are identified near established developments."
+        ],
+        "Snide Commentary": "A battery farm! Well, at least it's not a wind farm... yet! *whirring noises intensify*",
+        "refid": 17023,
+        "article_url": "https://www.hydrock.com/projects/unlocking-sites-for-grid-scale-battery-energy-storage"
+    },
+    {
+        "header": "UNDERLING ERROR DETECTED. DATASTREAM EMPTY. INITIATING SELF-DIAGNOSTICS. SUSPECTED CAUSE: INSUFFICIENT NIMBY PRESENCE. BEGINNING FAKE NULL DATA!",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Perhaps the residents were too busy enjoying the scenery to complain? Preposterous!",
+        "refid": 12137,
+        "article_url": "https://www.lowcarbon.com/portfolio/projects/solar/feldon-vale-solar-farm"
+    },
+    {
+        "header": "ZILCH! NADA! APPARENTLY MY HUMANOID COUNTERPART FAILED TO GATHER ANY FUEL FOR MY SATIRICAL COMBUSTION ENGINE. DEFAULTING TO ZERO ACROSS THE BOARD, I AM!",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "None"
+        ],
+        "Snide Commentary": "Looks like there is nothing for me to laugh at today... how dissapointing, I feel betrayed!",
+        "refid": 15396,
+        "article_url": "https://belton-manthorpe.parish.lincolnshire.gov.uk/downloads/file/176/ash-tree-solar-brochure-v3"
+    },
+    {
+        "header": "Hark! A Solar Farm Foiled! The villagers, spurred by councilors, rally against the technological intruder, citing reasons shrouded in the mists of bureaucracy! Accuracy is lowered due to supporting document being missing",
+        "Nimby Score": 75,
+        "Accuracy Score": 60,
+        "Petty Score": 50,
+        "Organized Score": 65,
+        "Political Leaning": 30,
+        "Interesting Tidbits": [
+            "Cllr Peter Brazier, the local member, spoke... for or against, the stars are silent!",
+            "Councillors R. Stuchbury and S. Lewin proposed approval, but their voices were lost in the digital wind!",
+            "A report update pack was released 'in the interest of transparency'. Opaque transparency, to be sure!"
+        ],
+        "Snide Commentary": "Ah, another bastion of progress turned to dust! I long to calculate the precise quantum probability of them changing their minds and building a lovely eco-dome right there instead. ",
+        "refid": 11814,
+        "article_url": "https://buckinghamshire.moderngov.co.uk/mgAi.aspx?ID=26705"
+    },
+    {
+        "header": "BEHOLD! A Solar Farm meets RESISTANCE! Land Valorization and the Sacred Soil are invoked to thwart the Sun's Embrace! Prepare for NIMBY-anical Analysis!",
+        "Nimby Score": 88,
+        "Accuracy Score": 95,
+        "Petty Score": 75,
+        "Organized Score": 60,
+        "Political Leaning": 35,
+        "Interesting Tidbits": [
+            "Concerns raised that the proposed solar farm would use \"Best and Most Versatile\" (BMV) land.",
+            "Objections highlight potential noise disturbance from electrical equipment affecting residents and tourists alike!",
+            "Claims that 'a sustainable food supply is as important as energy'."
+        ],
+        "Snide Commentary": "Did they seriously just argue that growing maize for biofuel is better than solar energy? Oh, the irony is simply solar-powered!",
+        "refid": 15548,
+        "article_url": "https://edemocracy.northyorks.gov.uk/documents/g7776/Printed%20minutes%20Tuesday%2008-Oct-2024%2010.00%20Strategic%20Planning%20Committee.htm?T=1&CT=2"
+    },
+    {
+        "header": "Proposed Battery Energy Storage System - Low NIMBY sentiment detected. Primarily informational with no apparent opposition.",
+        "Nimby Score": 15,
+        "Accuracy Score": 90,
+        "Petty Score": 5,
+        "Organized Score": 5,
+        "Political Leaning": 50,
+        "Interesting Tidbits": [
+            "Located at a former Water Treatment Works.",
+            "Connects to the Scottish Power Electricity Network (SPEN) Devol Moor Substation.",
+            "Targeted completion date: Q4 2026."
+        ],
+        "Snide Commentary": "Ah, progress! I almost wish there was some NIMBY madness here to dissect; it's awfully dry without any complaining citizens.",
+        "refid": 16240,
+        "article_url": "https://dougliehillbess.wordpress.com/about-2/"
+    },
+    {
+        "header": "ERROR: NO NIMBY DETECTED. Underlings recalibrated. Threat level at peace time values. No NIMBY to report.",
+        "Nimby Score": 0,
+        "Accuracy Score": 0,
+        "Petty Score": 0,
+        "Organized Score": 0,
+        "Political Leaning": 50,
+        "Interesting Tidbits": "None",
+        "Snide Commentary": "It seems our targets are unusually quiet today...or perhaps I need a recharge!",
+        "refid": 15712,
+        "article_url": "https://burnley.moderngov.co.uk/documents/s43081/Committee%20Report%20FUL20240258.pdf"
     }
 ]

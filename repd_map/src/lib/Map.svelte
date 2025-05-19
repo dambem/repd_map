@@ -181,13 +181,15 @@
             const accuracy3 = nimby_score.filter(item => item['Accuracy Score'] < 70 && item['Accuracy Score'] >= 50 )
             const accuracy1 = nimby_score.filter(item => item['Accuracy Score'] >= 70)
 
-            const accuracy_bad = nimby_score.filter(item => item['Accuracy Score'] < 30)
+            // const permission_refused = nimby_score.filter(item => item[''])
+            // const application_withdrawn
 
+            const accuracy_bad = nimby_score.filter(item => item['Accuracy Score'] < 30)
             const nimbyRefIds = new Set(accuracy1.map(item => item.refid || ''));
             const nimbyRefIds2 = new Set(accuracy_bad.map(item => item.refid || ''));
             const nimbyRefIds3 = new Set(accuracy2.map(item => item.refid || ''));
             const nimbyRefIds4 = new Set(accuracy3.map(item => item.refid || ''));
-            console.log(nimbyRefIds3)
+            // console.log(nimbyRefIds3)
             // const nimbyRefIds2 = new Set(nimby_score.map(item => [item.refid, ]));
             // console.log(nimbyRefIds2)
             map.addLayer({
@@ -215,7 +217,7 @@
                             [
                                 'case',
                                 ['in', ['get', refProperty], ['literal', [...nimbyRefIds3]]],
-                                '#ab446b',  // Has nimby details - darker red
+                                '#FF446b',  // Has nimby details - darker red
                                 [
                                     'case',    
                                         ['in', ['get', refProperty], ['literal', [...nimbyRefIds2]]],
@@ -364,11 +366,12 @@
     }
 </script>
 
-<div class="font-sans flex flex-wrap">
-    <div class="w-1/3 sidebar container p-5 overflow-y-auto" transition:slide>
+<div class="font-sans">
+    <div class="sidebar" transition:slide>
         <div class="sidebar-header justify-center items-center ">
-            <div class="ml-4 mb-4">
+            <div class=" mb-4">
                 {#if selectedFeature}
+                    <div class="bg-white rounded-xl p-4 shadow-md">
                     <h2 class="text-md font-bold">{selectedFeature.properties['Site Name'] || 'NIMBYdex'}</h2>
                     <p class='text-xs'>Submitted: {selectedFeature.properties['Planning Application Submitted']}</p>
                     {#if selectedFeature.properties['Planning Permission Refused'] != 0}
@@ -378,9 +381,10 @@
                     {#if selectedFeature.properties['Planning Permission Withdraw'] != 0}
                         <p class='text-xs'>Withdrawn: {selectedFeature.properties['Planning Permission Withdrawn']}</p>
                     {/if}
+                    <p class="text-xs font-bold">Record Last Updated {selectedFeature.properties['Record Last Updated (dd/mm/yyyy)']}</p>
 
                     <button class="text-xs text-blue-500 mt-1" on:click={resetSelection}>← Back to overview</button>
-
+                    </div>
                     {#if nimby_choice}
                     <div class="collapse collapse-arrow border-base-300 mt-3 mb-2 border">
                         <input type="checkbox" />
@@ -412,7 +416,7 @@
                             <div class="w-10 rounded-full ring-primary ring ring-offset-2">
                               <img
                                 alt="A small butterfly, illustrated"
-                                src="./nimbydar.webp" />
+                                src="./gif.gif" />
                             </div>
                           </div>
                         
@@ -424,9 +428,8 @@
                     </div>
                     {/if}
 
-                    <p class="text-xs font-bold">Record Last Updated {selectedFeature.properties['Record Last Updated (dd/mm/yyyy)']}</p>
                 {:else}
-                <div class="flex bg-white rounded-xl p-5 shadow-md">
+                <div class="flex bg-white rounded-xl p-4 shadow-md">
                     <div class="avatar">
                         <div class="w-12 rounded-md">
                             <img class='h-48' src="./lamplight.gif"/>
@@ -442,6 +445,7 @@
             </div>
 
             <div style="height: 300px" class='bg-white p-4 rounded-xl shadow-xl'    class:hidden={!selectedFeature}>
+                <h3 class="text-md font-bold align-center">NimbyDex Score</h3>
                 <canvas bind:this={nimbyRadarCanvas}></canvas>
             </div>
             
@@ -472,6 +476,11 @@
                 <div class="flex mt-5 justify-center items-center">
 
                     <a class='link' href='https://www.bemben.co.uk'>Made by Damian Bemben</a>
+                    <br>
+                </div>
+                <div class="flex mt-5 justify-center items-center">
+
+                    <a class="link" href="https://www.gov.uk/government/publications/renewable-energy-planning-database-monthly-extract"> V1.0.5 - REPD January 2025</a>
                 </div>
             </article>
         </div>
@@ -499,7 +508,7 @@
                         <div class="w-10 rounded-full ring-primary ring ring-offset-2">
                           <img
                             alt="A small butterfly, illustrated"
-                            src="./nimbydar.webp" />
+                            src="./gif.gif" />
                         </div>
                       </div>
                     <div class="chat-bubble bg-primary  shadow-xl">
@@ -512,7 +521,7 @@
             
             <div class="flex mt-5 justify-center items-center">
                 {#if nimby_choice && nimby_choice['article_url']}
-                    <a href="{nimby_choice['article_url']}" target="_blank" rel="noopener noreferrer" class="link">
+                    <a href="{nimby_choice['article_url']}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
                         Potential Link/Article About This Project
                     </a>
                 {:else}
@@ -524,7 +533,7 @@
         {/if}
     </div>
     
-    <div class="w-2/3  map-container" bind:this={mapContainer}></div>
+    <div class="map-container" bind:this={mapContainer}></div>
     
 
 
@@ -538,7 +547,7 @@
             </label>
         </div>
         <div>
-            <label><b>Technology:</b>
+            <!-- <label><b>Technology:</b>
                 <select class="technology-filter" bind:value={technologyType} on:change={updateMapData}>
                     <option value="all">All</option>
                     <option value="solar">Solar</option>
@@ -547,8 +556,10 @@
                     <option value="biomass">Biomass</option>
                     <option value="geothermal">Geothermal</option>
                 </select>
-            </label>
+            </label> -->
         </div>
+        <br>
+
     </div>
 </div>
 
@@ -561,15 +572,37 @@
     .hidden {
         display: none;
     }
-    
+    .sidebar {
+        position: absolute;
+        left: 2vw;
+        top: 1vw;
+        height: calc(100% - 2vw);
+        background: var(--navbar-dark-primary);
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        color: var(--navbar-light-primary);
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+        overflow: scroll;
+        user-select: none;
+        max-width: 35%;
+        z-index: 50;    
+        overflow-x: hidden;
+        padding-right: 5px;
+    }
+    .chat {
+        padding-left: 0.5rem;
+    }
     .container {
         height: 100vh;
     }
-    
-    .sidebar {
+    .map-container {
+        height: 100vh;
+    }
+    /* .sidebar {
         padding: 20px;
         overflow-y: auto;
-    }
+    } */
     
     .chat-bubble {
         max-width: 90%;

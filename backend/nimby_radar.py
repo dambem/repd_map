@@ -6,7 +6,7 @@ import os
 import sys
 import pandas as pd
 
-if __name__ == "__main__":    
+def nimby_parse():
     repd.repd_geojson_file()
     
     df = repd.get_repd_dataframe()
@@ -28,10 +28,7 @@ if __name__ == "__main__":
     all_set = set(df['Ref ID'])
     json_set = set(df_2['refid'])
     diff = all_set.difference(json_set)
-
     remaining = df[df['Ref ID'].isin(diff)]
-    print(remaining)
-    # sys.exit(0)
     
     for _, row in remaining.iloc[start_row:].iterrows():
         string = f"{row['Site Name']}, {row['Planning Authority']} "
@@ -44,7 +41,6 @@ if __name__ == "__main__":
             
             
             content = scrape.scrape_content(url, mime=mime)
-            print(content)
             time.sleep(5)
             if content == None:
                 content = "Nothing located - please fill with default 0 values and write a snippy remark"
@@ -67,3 +63,12 @@ if __name__ == "__main__":
         else:
             score += 1
             
+    
+
+
+if __name__ == "__main__":    
+    # scrape.convert_points_geojson()
+    df = repd.get_repd_dataframe()
+    df = df.sort_values(by=['Installed Capacity (MWelec)'], ascending=False)
+    print(df)
+    df.to_csv("test.csv")

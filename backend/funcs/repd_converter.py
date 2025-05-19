@@ -71,15 +71,51 @@ def search_news(site_name, cancelled=True):
     time.sleep(0.1)
     return links[:5] # Return top 5 links
 
-def get_repd_dataframe(date='2021-01-01'):
-    df = pd.read_csv('data/repdoct.csv', encoding='cp1252')
+def get_repd_dataframe(date='2018-01-01'):
+    df = pd.read_csv('data/repd-q4-jan-2025.csv', encoding='cp1252')
+    
     df = df[df['Development Status (short)'].isin(['Application Refused', 'Abandoned', 'Application Withdrawn', 'Appeal Refused'])]
     df['Planning Application Submitted'] = pd.to_datetime(df['Planning Application Submitted'], format='%d/%m/%Y')
-    df = df[df['Planning Application Submitted'] >= pd.Timestamp(date)]
     df['Installed Capacity (MWelec)'] = df['Installed Capacity (MWelec)'].apply(get_capacity_value)
     df = convert_coordinates(df, easting_col='X-coordinate', northing_col='Y-coordinate')
-    # df = df[['Site Name', 'Operator (or Applicant)', 'Technology Type', 'Planning Authority', 'Planning Application Submitted']]
-    df['Planning Application Submitted'] = df['Planning Application Submitted'].dt.strftime('%Y-%m-%d')
+    df['Planning Application Submitted'] = pd.to_datetime(df['Planning Application Submitted'], format=('%Y-%m-%d'))
+    df['Planning Permission Refused'] = pd.to_datetime(df['Planning Permission Refused'], format=('%d/%m/%Y'))
+    df['Planning Application Withdrawn'] = pd.to_datetime(df['Planning Application Withdrawn'], format=('%d/%m/%Y'))
+    df['Record Last Updated (dd/mm/yyyy)'] = pd.to_datetime(df['Record Last Updated (dd/mm/yyyy)'], format=('%d/%m/%Y'))
+    df['Appeal Refused'] = pd.to_datetime(df['Appeal Refused'], format=('%d/%m/%Y'))
+
+    df = df[df['Planning Application Submitted'] >= pd.Timestamp(date)]
+    df['Planning Application Submitted String'] = df['Planning Application Submitted'].dt.strftime('%Y-%m-%d')
+
+    print(len(df))
+    df_a_refused = df[df["Development Status (short)"] == "Appeal Refused"]  
+    df_a_refused['Processing_Time'] = (df_a_refused['Appeal Refused'] - df_a_refused['Planning Application Submitted']).dt.days
+    # print(df_a_refused["Processing_Time"])
+    df_a_refused = df_a_refused[["Processing_Time", "Planning Application Submitted String"]]
+    df_a_refused = df_a_refused.to_json(orient='records')
+
+    with open('df_a_refused.json', 'w') as f:
+        json.dump(df_a_refused, f)
+
+    df_withdrawn = df[df["Development Status (short)"] == "Application Withdrawn"]  
+    df_withdrawn['Processing_Time'] = (df_withdrawn['Planning Application Withdrawn'] - df_withdrawn['Planning Application Submitted']).dt.days
+    # print(df_withdrawn["Processing_Time"])
+    df_withdrawn = df_withdrawn[["Processing_Time", "Planning Application Submitted String"]]
+    df_withdrawn = df_withdrawn.to_json(orient='records')
+
+    with open('df_withdrawn.json', 'w') as f:
+        json.dump(df_withdrawn, f)
+        
+    df_refused = df[df["Development Status (short)"] == "Application Refused"]  
+    df_refused['Processing_Time'] = (df_refused['Planning Permission Refused'] - df_refused['Planning Application Submitted']).dt.days
+    # print(df_refused["Processing_Time"])
+    df_refused = df_refused[["Processing_Time", "Planning Application Submitted String"]]
+    df_refused = df_refused.to_json(orient='records')
+    with open('df_refused.json', 'w') as f:
+        json.dump(df_refused, f)
+        
+
+
     df = df.fillna(0)
     return df
 

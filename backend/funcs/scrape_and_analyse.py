@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import google.generativeai as genai
 from dotenv import load_dotenv
 import os
-
+import io
 load_dotenv()
 api_key= os.getenv("GEMINI_API_KEY")
 
@@ -17,12 +17,19 @@ generation_config = {
   "max_output_tokens": 8192,
   "response_mime_type": "text/plain",
 }
+from markitdown import MarkItDown
 
 
 def scrape_content(url, mime="none", max_chars=10000):
     try:
         if url.lower().endswith('.pdf') or mime=='application/pdf':
-            return "PDF scraping is currently unsupported. Please return json object requested just with empty scores and a not found. Maybe add a slight quip."
+            response = requests.get(url, timeout=10)
+            md = MarkItDown(enable_plugins=False) # Set to True to enable plugins
+            pdf = io.BytesIO(response.content)
+            result = md.convert(pdf)
+            result = result[0:max_chars]
+            print(result)
+            return result
 
         response = requests.get(url, timeout=10)
         response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
@@ -107,6 +114,18 @@ def parse_json_string(json_string):
         return json_object
     except json.JSONDecodeError as e:
         return f"Error parsing JSON: {str(e)}"
+
+# def parse_date():
+    
+
+def convert_points_geojson():
+    geo_json = ""
+    with open("points.geojson", 'r', encoding="utf-8") as f:
+        try:
+            geo_json =  json.load(f)
+        except FileNotFoundError as e:
+            return f"Error parsing Geojson"
+    print(geo_json)
 
 # content = scrape_content('https://www.hampshirechronicle.co.uk/news/20076213.controversial-solar-farm-plan-godsfield-near-alresford-withdrawn-developers/')
 # ai = gemini_process(content)
