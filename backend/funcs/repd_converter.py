@@ -71,7 +71,7 @@ def search_news(site_name, cancelled=True):
     time.sleep(0.1)
     return links[:5] # Return top 5 links
 
-def get_repd_dataframe(date='2018-01-01'):
+def get_repd_dataframe(date='2015-01-01'):
     df = pd.read_csv('data/repd-q4-jan-2025.csv', encoding='cp1252')
     
     df = df[df['Development Status (short)'].isin(['Application Refused', 'Abandoned', 'Application Withdrawn', 'Appeal Refused'])]
@@ -91,30 +91,58 @@ def get_repd_dataframe(date='2018-01-01'):
     df_a_refused = df[df["Development Status (short)"] == "Appeal Refused"]  
     df_a_refused['Processing_Time'] = (df_a_refused['Appeal Refused'] - df_a_refused['Planning Application Submitted']).dt.days
     # print(df_a_refused["Processing_Time"])
-    df_a_refused = df_a_refused[["Processing_Time", "Planning Application Submitted String"]]
-    df_a_refused = df_a_refused.to_json(orient='records')
+    df_a_refused = df_a_refused[["Processing_Time", "Planning Application Submitted"]]
 
-    with open('df_a_refused.json', 'w') as f:
-        json.dump(df_a_refused, f)
 
     df_withdrawn = df[df["Development Status (short)"] == "Application Withdrawn"]  
     df_withdrawn['Processing_Time'] = (df_withdrawn['Planning Application Withdrawn'] - df_withdrawn['Planning Application Submitted']).dt.days
     # print(df_withdrawn["Processing_Time"])
-    df_withdrawn = df_withdrawn[["Processing_Time", "Planning Application Submitted String"]]
-    df_withdrawn = df_withdrawn.to_json(orient='records')
+    df_withdrawn = df_withdrawn[["Processing_Time", "Planning Application Submitted"]]
 
-    with open('df_withdrawn.json', 'w') as f:
-        json.dump(df_withdrawn, f)
         
     df_refused = df[df["Development Status (short)"] == "Application Refused"]  
     df_refused['Processing_Time'] = (df_refused['Planning Permission Refused'] - df_refused['Planning Application Submitted']).dt.days
     # print(df_refused["Processing_Time"])
-    df_refused = df_refused[["Processing_Time", "Planning Application Submitted String"]]
-    df_refused = df_refused.to_json(orient='records')
-    with open('df_refused.json', 'w') as f:
-        json.dump(df_refused, f)
-        
+    df_refused = df_refused[["Processing_Time", "Planning Application Submitted"]]
 
+
+    all_applications = [df_a_refused,  df_withdrawn, df_refused]
+    combined_df = pd.concat(all_applications, ignore_index=True)
+    combined_df = combined_df.dropna(subset=['Processing_Time', 'Planning Application Submitted'])
+    combined_df['Processing_Time'] = combined_df['Processing_Time'].astype(float)
+    combined_df['Year'] = combined_df['Planning Application Submitted'].dt.year
+
+    time_ranges = [
+        {"min": 0, "max": 30, "label": "0-90 days"},
+        {"min": 90, "max": 180, "label": "90-180 days"},
+        {"min": 180, "max": 365, "label": "180-365 days"},
+        {"min": 365, "max": 365*2, "label": "1 Year - 2 Years"},
+        {"min": 365*2, "max": float('inf'), "label": "Over 2 Years"}
+
+    ]
+    result = []
+    
+    for year, group in combined_df.groupby('Year'):
+        avg_time = round(group['Processing_Time'].mean(), 1)
+        
+        # Calculate distribution
+        distribution = []
+        for time_range in time_ranges:
+            count = len(group[(group['Processing_Time'] >= time_range['min']) & 
+                              (group['Processing_Time'] < time_range['max'])])
+            distribution.append({
+                "range": time_range["label"],
+                "count": int(count)
+            })
+        
+        result.append({
+            "year": int(year),
+            "avgDelay": float(avg_time),
+            "distribution": distribution
+        })
+    result.sort(key=lambda x: x['year'])
+    with open('final.json', 'w') as f:
+        json.dump(result, f, indent=2)
 
     df = df.fillna(0)
     return df

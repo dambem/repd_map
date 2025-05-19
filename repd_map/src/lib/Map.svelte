@@ -6,21 +6,30 @@
     import { cubicIn, cubicOut } from "svelte/easing";
     import { slide } from 'svelte/transition';
     import gsap from 'gsap';
-
+    import DelayTimesVisualization from '$lib/components/DelayTimesVisualization.svelte'
     // Props
     export let points = []; // GeoJSON features
     export let nimby_score = [];
+    export let refused = [];
     export let sizeProperty = 'Installed Capacity (MWelec)';
+    export let typeProperty = 'Technology Type';
+
     export let refProperty = 'Ref ID';
 
     export let minSize = 20;
     export let maxSize = 50;
+    let coloringMode = 'nimby'; // Start with NIMBY coloring, options are 'nimby' or 'type'
 
-    // DOM elements
+    // DOM elements 
     let mapContainer;
     let nimbyRadarCanvas;
     let sidebarContent;
-    
+    const typeItems = [
+    { label: 'Battery', color: '#004C99' },
+    { label: 'Solar', color: '#E6B800' },
+    { label: 'Wind', color: '#00857D' },
+    { label: 'Other', color: '#FFFFFF' }
+  ];
     // State variables
     let map;
     let selectedFeature = null;
@@ -36,7 +45,14 @@
     let startDate = '2020-01-01';
     let endDate = '2025-01-01';
     let technologyType = 'all';
-
+    const accuracy2 = nimby_score.filter(item => item['Accuracy Score'] >= 30)
+    const accuracy3 = nimby_score.filter(item => item['Accuracy Score'] < 70 && item['Accuracy Score'] >= 50 )
+    const accuracy1 = nimby_score.filter(item => item['Accuracy Score'] >= 70)
+    const accuracy_bad = nimby_score.filter(item => item['Accuracy Score'] < 30)
+    const nimbyRefIds = new Set(accuracy1.map(item => item.refid || ''));
+    const nimbyRefIds2 = new Set(accuracy_bad.map(item => item.refid || ''));
+    const nimbyRefIds3 = new Set(accuracy2.map(item => item.refid || ''));
+    const nimbyRefIds4 = new Set(accuracy3.map(item => item.refid || ''));
     let stats = [
         { label: 'Total Capacity Lost', value: '6584', calculate: calculateTotalCapacity, trend:'MW'},
         { label: 'Application Withdrawn', value: '23', calculate: calculateLengthW, trend:'Since January 2020'},
@@ -48,7 +64,51 @@
 
     // Animation timer
     let animationTimer;
+    function updateCircleColors() {
+    if (coloringMode === 'nimby') {
+        // NIMBY-based coloring
+        map.setPaintProperty('unclustered-point', 'circle-color', '#ffffff'); // Base color
 
+        map.setPaintProperty('unclustered-point', 'circle-color', [
+            'case',
+            ['in', ['get', refProperty], ['literal', [...nimbyRefIds]]],
+            '#97001b',  // Has nimby details - darker red
+            [
+                'case',
+                ['in', ['get', refProperty], ['literal', [...nimbyRefIds3]]],
+                '#FF446b',  // Has nimby details - darker red
+                [
+                    'case',    
+                    ['in', ['get', refProperty], ['literal', [...nimbyRefIds2]]],
+                    '#a698b8',
+                    '#d3d3d3'   // No nimby details - gray
+                ]
+            ]
+        ]);
+        // Reset stroke to a simple style
+        map.setPaintProperty('unclustered-point', 'circle-stroke-color', '#000000');
+        map.setPaintProperty('unclustered-point', 'circle-stroke-width', 0.5);
+    } else {
+        // Type-based coloring
+        map.setPaintProperty('unclustered-point', 'circle-color', '#ffffff'); // Base color
+        // Use the type colors for the stroke
+        map.setPaintProperty('unclustered-point', 'circle-color', [
+                        'match',
+                        ['get', typeProperty],  // Get the value of typeProperty
+                        'Battery', '#004C99',   // Blue for battery
+                        'Solar Photovoltaics', '#E6B800',     // Gold for solar
+                        'Wind Onshore', '#00CC66',      // Green for wind
+                        '#FFFFFF'              // Default color if none match
+        ]);
+        map.setPaintProperty('unclustered-point', 'circle-stroke-width', 2);
+    }
+
+
+}
+function toggleColorMode() {
+        coloringMode = coloringMode === 'nimby' ? 'type' : 'nimby';
+        updateCircleColors();
+    }
     function calculateTotalCapacity(points) {
         const total = points.reduce((sum, point) => {
             const capacity = parseFloat(point.properties['Installed Capacity (MWelec)']) || 0;
@@ -177,22 +237,11 @@
             });
             
             // Create a Set of refids from nimby_score for quick lookup
-            const accuracy2 = nimby_score.filter(item => item['Accuracy Score'] >= 30)
-            const accuracy3 = nimby_score.filter(item => item['Accuracy Score'] < 70 && item['Accuracy Score'] >= 50 )
-            const accuracy1 = nimby_score.filter(item => item['Accuracy Score'] >= 70)
 
-            // const permission_refused = nimby_score.filter(item => item[''])
-            // const application_withdrawn
-
-            const accuracy_bad = nimby_score.filter(item => item['Accuracy Score'] < 30)
-            const nimbyRefIds = new Set(accuracy1.map(item => item.refid || ''));
-            const nimbyRefIds2 = new Set(accuracy_bad.map(item => item.refid || ''));
-            const nimbyRefIds3 = new Set(accuracy2.map(item => item.refid || ''));
-            const nimbyRefIds4 = new Set(accuracy3.map(item => item.refid || ''));
             // console.log(nimbyRefIds3)
             // const nimbyRefIds2 = new Set(nimby_score.map(item => [item.refid, ]));
             // console.log(nimbyRefIds2)
-            map.addLayer({
+            map.addLayer({ 
                 id: 'unclustered-point',
                 type: 'circle',
                 source: 'points',
@@ -204,8 +253,9 @@
                         0, 5,
                         200, 20
                     ],
-                    'circle-stroke-width': 2,
-                    'circle-stroke-color': '#ffffff',
+                    'circle-stroke-width': 0,
+                    'circle-stroke-opacity':0.5,
+
                     'circle-color': [
                         'case',
                         ['boolean', ['feature-state', 'selected'], false],
@@ -227,15 +277,23 @@
                             ]
                         ]
                     ],
-                    'circle-opacity': [
-                        'case',
-                        ['in', ['get', refProperty], ['literal', [...nimbyRefIds]]],
-                        1,  // Full opacity for points with nimby details
-                        0.7 // Slight transparency for points without nimby details
-                    ]
+                    'circle-opacity': 0
                 }
             });
-            
+            setTimeout(() => {
+
+                map.setPaintProperty('unclustered-point', 'circle-opacity-transition', {
+                    duration: 800,  
+                    delay: 100  
+                });
+                map.setPaintProperty('unclustered-point', 'circle-stroke-width-transition', {
+                    duration: 800,  
+                    delay: 100  
+                });
+                map.setPaintProperty('unclustered-point', 'circle-stroke-width', 1);  // Final opacity
+
+                map.setPaintProperty('unclustered-point', 'circle-opacity', 0.8);  // Final opacity
+            }, 300);  // Wait 300ms after layer is added before starting animation
             // Add interactivity
             map.on('mouseenter', 'unclustered-point', () => {
                 map.getCanvas().style.cursor = 'pointer';
@@ -345,6 +403,13 @@
     // Lifecycle hooks
     onMount(() => {
 
+
+        gsap.from(mapContainer, {
+            opacity: 0,
+            duration: 5, // Animation duration in seconds
+            ease: 'power2.out', // Easing function
+            delay: 0.5 // Optional: if you want to delay the animation
+        });
         initMap();
         initAnimation();
     });
@@ -391,12 +456,7 @@
                         <div class="collapse-title text-sm mb-0 pb-0 bg-white">{selectedFeature.properties['Development Status']}</div>
                         <div class="collapse-content bg-white">
                             <table class="w-full table rounded-box border border-base-content/5 bg-base-100">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Value</th>
-                                    </tr>
-                                </thead>
+
                                 <tbody>
                                     {#each Object.entries(selectedFeature.properties).filter(([key]) => allowedProperties.includes(key)) as [key, value]}
                                         {#if key !== 'title'}
@@ -458,7 +518,9 @@
                     </div>
                 {/each}
             </div>
-            
+            <div class="bg-white rounded-xl p-4 shadow-md mt-6">
+                <DelayTimesVisualization delayData={refused}/>
+            </div>
             <article class:hidden={selectedFeature} class="prose mt-5 bg-white p-4 rounded-xl shadow-xl">
                 <h2 class="text-sm">What's the Nimbydex?</h2>
                 <p>
@@ -475,6 +537,10 @@
                 </p>
                 <div class="flex mt-5 justify-center items-center">
 
+                 <a class='link', href='https://form.jotform.com/251386339530055'>Let's Talk!</a>
+                </div>
+                <div class="flex mt-5 justify-center items-center">
+                    <br>
                     <a class='link' href='https://www.bemben.co.uk'>Made by Damian Bemben</a>
                     <br>
                 </div>
@@ -545,18 +611,24 @@
             <label><b>To:</b>
                 <input type="date" bind:value={endDate} on:input={updateMapData} />
             </label>
+            <br>
+            <div class="mt-4">
+                <button class="btn-primary" on:click={toggleColorMode}>
+                    {coloringMode === 'nimby' ? 'Switch to Type Coloring' : 'Switch to NIMBY Coloring'}
+                </button>
+            </div>
+
+            <div class="legend-items">
+                {#each typeItems as item}
+                  <div class="legend-item">
+                    <div class="color-swatch" style="background-color: {item.color}"></div>
+                    <div class="label p-0">{item.label}</div>
+                  </div>
+                {/each}
+              </div>
         </div>
         <div>
-            <!-- <label><b>Technology:</b>
-                <select class="technology-filter" bind:value={technologyType} on:change={updateMapData}>
-                    <option value="all">All</option>
-                    <option value="solar">Solar</option>
-                    <option value="wind">Wind</option>
-                    <option value="hydro">Hydro</option>
-                    <option value="biomass">Biomass</option>
-                    <option value="geothermal">Geothermal</option>
-                </select>
-            </label> -->
+
         </div>
         <br>
 
@@ -572,6 +644,11 @@
     .hidden {
         display: none;
     }
+    h1 {
+        background: -webkit-radial-gradient(#b62121, #eb8e47);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent; 
+    }
     .sidebar {
         position: absolute;
         left: 2vw;
@@ -585,7 +662,7 @@
         font-family: Verdana, Geneva, Tahoma, sans-serif;
         overflow: scroll;
         user-select: none;
-        max-width: 35%;
+        max-width: 33%;
         z-index: 50;    
         overflow-x: hidden;
         padding-right: 5px;
@@ -596,6 +673,18 @@
     .container {
         height: 100vh;
     }
+    .color-swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
     .map-container {
         height: 100vh;
     }
