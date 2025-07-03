@@ -3,25 +3,24 @@
     import { onMount } from 'svelte';
     import { scaleLinear, scaleBand } from 'd3-scale';
     import { max } from 'd3-array';
-    import { area } from 'd3-shape';
+    import { area, curveCardinal } from 'd3-shape';
     import { axisBottom, axisLeft } from 'd3-axis';
     import { select } from 'd3-selection';
     import { transition } from 'd3-transition';
     import { gsap } from 'gsap';
-    export let delayData = null
+    
+    export let delayData = null;
 
-    // Generate sample data for 20 years
+    // Generate sample data for testing
     const generateData = () => {
       const years = [];
       const currentYear = new Date().getFullYear();
       const startYear = currentYear - 5;
       
-      // Create data for each year with random average delay and distribution data
       for (let i = 0; i < 6; i++) {
         const year = startYear + i;
-        const avgDelay = Math.round((Math.random() * 10 + 5) * 10) / 10; // Between 5-15 minutes
+        const avgDelay = Math.round((Math.random() * 10 + 5) * 10) / 10;
         
-        // Create distribution data (delays in various ranges)
         const distribution = [
           { range: '0-5 min', count: Math.floor(Math.random() * 200 + 50) },
           { range: '5-10 min', count: Math.floor(Math.random() * 300 + 100) },
@@ -30,16 +29,11 @@
           { range: '20+ min', count: Math.floor(Math.random() * 100 + 20) }
         ];
         
-        years.push({
-          year,
-          avgDelay,
-          distribution
-        });
+        years.push({ year, avgDelay, distribution });
       }
-      
       return years;
     };
-  
+
     // Create all-time distribution by combining all years
     const calculateAllTimeDistribution = (data) => {
       const allTimeDistribution = [
@@ -58,8 +52,8 @@
       
       return allTimeDistribution;
     };
-  
-    // Dimensions - now using reactive variables
+
+    // Dimensions
     let containerWidth;
     let containerHeight;
     let width;
@@ -68,347 +62,604 @@
     let innerWidth;
     let innerHeight;
     
-    // References for resize observer
+    // References
+    let mainContainer;
     let barChartRef;
     let distributionChartRef;
     let resizeObserver;
-  
-    // Update dimensions based on container size
-    function updateDimensions() {
-      if (!barChartRef) return;
-      
-      // Get the actual container width
-      const containerRect = barChartRef.getBoundingClientRect();
-      containerWidth = containerRect.width;
-      containerHeight = Math.min(containerWidth * 0.4, 400); // Responsive height (aspect ratio)
-      
-      // Update dimensions
-      width = containerWidth;
-      height = containerHeight;
-      innerWidth = width - margin.left - margin.right;
-      innerHeight = height - margin.top - margin.bottom;
-      
-      // Force charts to update with new dimensions
-      if (data.length) {
-        renderBarChart();
-      }
-      
-      if (distributionData.length && (selectedYear || showAllTime)) {
-        renderDistributionChart();
-      }
-    }
-  
+    
     // State variables
     let data = [];
     let selectedYear = null;
     let showAllTime = false;
     let distributionData = [];
     let chartTitle = '';
-  
+    let currentView = 'overview'; // 'overview' or 'distribution'
+    
     // DOM nodes
     let barChartContainer;
     let distributionChartContainer;
-  
+    
+    // Animation timeline
+    let tl;
+
+    // Update dimensions
+    function updateDimensions() {
+      if (!mainContainer) return;
+      
+      const containerRect = mainContainer.getBoundingClientRect();
+      containerWidth = containerRect.width;
+      containerHeight = Math.min(containerWidth * 0.4, 400);
+      
+      width = containerWidth;
+      height = containerHeight;
+      innerWidth = width - margin.left - margin.right;
+      innerHeight = height - margin.top - margin.bottom;
+      
+      if (data.length && currentView === 'overview') {
+        renderBarChart();
+      }
+      
+      if (distributionData.length && currentView === 'distribution') {
+        renderDistributionChart();
+      }
+    }
+
     // Initialize
     onMount(() => {
-      console.log(delayData)
-      // data = generateData();
-      data = delayData;
-
-      // Set up ResizeObserver for responsive sizing
+      data = delayData || generateData();
+      
       resizeObserver = new ResizeObserver(entries => {
         updateDimensions();
       });
       
-      if (barChartRef) {
-        resizeObserver.observe(barChartRef);
+      if (mainContainer) {
+        resizeObserver.observe(mainContainer);
       }
-      handleAllTimeClick()
-      // Initial fade-in animation for the entire component
+      
+      // Initial setup
+      updateDimensions();
+      renderBarChart();
+      
       return () => {
-        // Clean up resize observer on component unmount
         if (resizeObserver) {
           resizeObserver.disconnect();
         }
       };
     });
-  
-    // Handle bar click with animation
+
+    // Enhanced bar click with zoom animation
     function handleBarClick(entry) {
-      // Animate the clicked bar
-      const clickedBar = select(barChartContainer).select(`.bar[x="${entry.year}"]`);
-      gsap.to(clickedBar.node(), {
+      if (currentView === 'distribution') return;
+      
+      // Create timeline for complex animation sequence
+      tl = gsap.timeline();
+      
+      // 1. Highlight clicked bar
+      const clickedBar = select(barChartContainer).select(`[data-year="${entry.year}"]`);
+      tl.to(clickedBar.node(), {
         fill: '#c0d9ff',
-        scale: 1.05,
-        transformOrigin: 'bottom',
+        scale: 1.1,
+        transformOrigin: 'bottom center',
         duration: 0.3,
-        yoyo: true,
-        repeat: 1
+        ease: "power2.out"
       });
       
-      showAllTime = false;
-      selectedYear = entry.year;
-      const yearData = data.find(d => d.year === entry.year);
-      if (yearData) {
-        distributionData = yearData.distribution;
-        chartTitle = `Delay Distribution for ${entry.year}`;
-        
-        // Add a slight delay before rendering the distribution chart for sequential animation
-        setTimeout(() => {
-          renderDistributionChart();
-        }, 300);
-      }
+      // 2. Fade out other bars
+      const otherBars = select(barChartContainer).selectAll('.bar').filter(d => d.year !== entry.year);
+      tl.to(otherBars.nodes(), {
+        opacity: 0.3,
+        scale: 0.9,
+        transformOrigin: 'bottom center',
+        duration: 0.3,
+        ease: "power2.out"
+      }, "-=0.2");
+      
+      // 3. Zoom and fade transition
+      tl.to(barChartRef, {
+        scale: 0.8,
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.inOut"
+      }, "+=0.1");
+      
+      // 4. Switch views and prepare distribution data
+      tl.call(() => {
+        currentView = 'distribution';
+        showAllTime = false;
+        selectedYear = entry.year;
+        const yearData = data.find(d => d.year === entry.year);
+        if (yearData) {
+          distributionData = yearData.distribution;
+          chartTitle = `Delay Distribution for ${entry.year}`;
+        }
+      });
+      
+      // 5. Animate distribution chart in
+      tl.fromTo(distributionChartRef, {
+        scale: 0.8,
+        opacity: 0,
+        rotationY: 15
+      }, {
+        scale: 1,
+        opacity: 1,
+        rotationY: 0,
+        duration: 0.6,
+        ease: "power2.out"
+      }, "-=0.2");
+      
+      // 6. Render the distribution chart
+      tl.call(() => {
+        renderDistributionChart();
+      }, null, "-=0.3");
     }
-  
-    // Handle all time button click with animation
+
+    // Enhanced back to overview with zoom out animation
+    function handleBackToOverview() {
+      if (currentView === 'overview') return;
+      
+      tl = gsap.timeline();
+      
+      // 1. Fade out distribution chart with 3D effect
+      tl.to(distributionChartRef, {
+        scale: 0.8,
+        opacity: 0,
+        rotationY: -15,
+        duration: 0.4,
+        ease: "power2.inOut"
+      });
+      
+      // 2. Switch back to overview
+      tl.call(() => {
+        currentView = 'overview';
+        selectedYear = null;
+        showAllTime = false;
+        chartTitle = '';
+      });
+      
+      // 3. Reset and show bar chart
+      tl.fromTo(barChartRef, {
+        scale: 0.8,
+        opacity: 0
+      }, {
+        scale: 1,
+        opacity: 1,
+        duration: 0.2,
+        ease: "power2.out"
+      }, "-=0.2");
+      
+      // 4. Re-render bar chart
+      tl.call(() => {
+        renderBarChart();
+      }, null, "-=0.3");
+    }
+
+    // Enhanced all-time click
     function handleAllTimeClick() {
-      // Animate the button
+      if (currentView === 'distribution') return;
+      
+      tl = gsap.timeline();
+      
+      // Animate button
       const button = document.querySelector('.all-time-btn');
-      gsap.to(button, {
+      tl.to(button, {
         scale: 0.95,
         duration: 0.2,
         yoyo: true,
         repeat: 1
       });
       
-      selectedYear = null;
-      showAllTime = true;
-      distributionData = calculateAllTimeDistribution(data);
-      chartTitle = 'All-Time Delay Distribution (20 Years)';
-      
-      // Animate the title change
-      const titleElement = document.querySelector('.chart-title');
-      gsap.from(titleElement, {
+      // Zoom transition similar to bar click
+      tl.to(barChartRef, {
+        scale: 1.2,
         opacity: 0,
-        y: -20,
-        duration: 0.5
+        duration: 0.5,
+        ease: "power2.inOut"
+      }, "-=0.1");
+      
+      tl.call(() => {
+        currentView = 'distribution';
+        selectedYear = null;
+        showAllTime = true;
+        distributionData = calculateAllTimeDistribution(data);
+        chartTitle = 'All-Time Delay Distribution';
       });
       
-      // Add a slight delay for sequential animation
-      setTimeout(() => {
+      tl.fromTo(distributionChartRef, {
+        scale: 0.8,
+        opacity: 0,
+        rotationY: 15
+      }, {
+        scale: 1,
+        opacity: 1,
+        rotationY: 0,
+        duration: 0.6,
+        ease: "power2.out"
+      }, "-=0.2");
+      
+      tl.call(() => {
         renderDistributionChart();
-      }, 300);
+      }, null, "-=0.3");
     }
-  
-    // Render bar chart
+
+    // Enhanced bar chart rendering
     function renderBarChart() {
       if (!barChartRef || !data.length) return;
-  
-      // Clear previous chart
+
       select(barChartRef).selectAll('*').remove();
-  
+
       const svg = select(barChartRef)
         .append('svg')
         .attr('width', width)
         .attr('height', height)
         .attr('viewBox', `0 0 ${width} ${height}`)
         .attr('preserveAspectRatio', 'xMidYMid meet');
-  
+
       const g = svg
         .append('g')
         .attr('transform', `translate(${margin.left}, ${margin.top})`);
-  
-      // Scales
+
       const xScale = scaleBand()
         .domain(data.map(d => d.year))
         .range([0, innerWidth])
         .padding(0.2);
-  
+
       const yScale = scaleLinear()
         .domain([0, max(data, d => d.avgDelay) * 1.1])
         .range([innerHeight, 0]);
-  
-      // Axes
-      g.append('g')
+
+      // Enhanced axes with better styling
+      const xAxis = g.append('g')
         .attr('transform', `translate(0, ${innerHeight})`)
-        .call(axisBottom(xScale))
-        .selectAll('text')
+        .call(axisBottom(xScale));
+      
+      xAxis.selectAll('text')
         .style('text-anchor', 'middle')
-        .style('font-size', `${Math.max(8, Math.min(12, width / 50))}px`); // Responsive font size
-  
-      g.append('g')
-        .call(axisLeft(yScale))
-        .selectAll('text')
-        .style('font-size', `${Math.max(8, Math.min(12, width / 50))}px`); // Responsive font size
-  
-      // Y-axis label
+        .style('font-size', `${Math.max(10, Math.min(14, width / 40))}px`)
+        .style('font-weight', '500');
+
+      const yAxis = g.append('g')
+        .call(axisLeft(yScale));
+      
+      yAxis.selectAll('text')
+        .style('font-size', `${Math.max(10, Math.min(14, width / 40))}px`)
+        .style('font-weight', '500');
+
+      // Enhanced Y-axis label
       g.append('text')
         .attr('transform', 'rotate(-90)')
         .attr('y', -margin.left + 15)
         .attr('x', -innerHeight / 2)
         .attr('text-anchor', 'middle')
-        .style('font-size', `${Math.max(10, Math.min(14, width / 40))}px`) // Responsive font size
-        .text('Average Delay (minutes)');
-  
-      // Bars - with GSAP animation
+        .style('font-size', `${Math.max(12, Math.min(16, width / 35))}px`)
+        .style('font-weight', '600')
+        .style('fill', '#374151')
+        .text('Avg Delay (days)');
+
+      // Enhanced bars with better interactions
       const bars = g.selectAll('.bar')
         .data(data)
         .enter()
         .append('rect')
         .attr('class', 'bar')
+        .attr('data-year', d => d.year)
         .attr('x', d => xScale(d.year))
         .attr('width', xScale.bandwidth())
-        .attr('height', 0) // Start with zero height
-        .attr('fill', '#FF446b')
-        .attr('stroke', '#97001b')
+        .attr('height', 0)
+        .attr('fill', '#eb8e47')
+        .attr('stroke', '#b62121')
+        .attr('stroke-width', 2)
+        .attr('rx', 4)
+        .attr('ry', 4)
         .style('cursor', 'pointer')
-        .on('click', (event, d) => handleBarClick(d));
-      
-      // Animate bars with GSAP
+        .style('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))')
+        .on('click', (event, d) => handleBarClick(d))
+        .on('mouseenter', function(event, d) {
+          gsap.to(this, {
+            fill: '#b62121',
+            y: yScale(d.avgDelay) - 1,
+            duration: 0.2,
+            ease: "power2.out"
+          });
+        })
+        .on('mouseleave', function(event, d) {
+          gsap.to(this, {
+            fill: '#eb8e47',
+            y: yScale(d.avgDelay),
+            duration: 0.2,
+            ease: "power2.out"
+          });
+        });
+
+      // Staggered animation for bars
       bars.each(function(d, i) {
-        gsap.to(this, {
+        gsap.fromTo(this, {
+          y: innerHeight,
+          height: 0,
+          opacity: 0
+        }, {
           y: yScale(d.avgDelay),
           height: innerHeight - yScale(d.avgDelay),
+          opacity: 1,
           duration: 0.8,
-          ease: "power2.out",
-          delay: i * 0.05 // Staggered animation
+          ease: "elastic.out(1, 0.5)",
+          delay: i * 0.1
         });
       });
-  
-      // Tooltip functionality
+
+      // Enhanced tooltips
       bars.append('title')
-        .text(d => `${d.year}: ${d.avgDelay} minutes`);
+        .text(d => `${d.year}: ${d.avgDelay} minutes average delay`);
     }
-  
-    // Render distribution chart
+
+    // Enhanced distribution chart with smooth curves
     function renderDistributionChart() {
       if (!distributionChartRef || !distributionData.length) return;
-  
-      // Clear previous chart
+
       select(distributionChartRef).selectAll('*').remove();
-  
+
       const svg = select(distributionChartRef)
         .append('svg')
         .attr('width', width)
         .attr('height', height)
         .attr('viewBox', `0 0 ${width} ${height}`)
         .attr('preserveAspectRatio', 'xMidYMid meet');
-  
+
       const g = svg
         .append('g')
         .attr('transform', `translate(${margin.left}, ${margin.top})`);
-  
-      // Scales
+
       const xScale = scaleBand()
         .domain(distributionData.map(d => d.range))
         .range([0, innerWidth])
-        .padding(0.2);
-  
+        .padding(0.1);
+
       const yScale = scaleLinear()
         .domain([0, max(distributionData, d => d.count) * 1.1])
         .range([innerHeight, 0]);
-  
-      // Axes
-      g.append('g')
+
+      // Enhanced axes
+      const xAxis = g.append('g')
         .attr('transform', `translate(0, ${innerHeight})`)
-        .call(axisBottom(xScale))
-        .selectAll('text')
+        .call(axisBottom(xScale));
+      
+      xAxis.selectAll('text')
         .style('text-anchor', 'middle')
-        .style('font-size', `${Math.max(8, Math.min(12, width / 50))}px`); // Responsive font size
-  
-      g.append('g')
-        .call(axisLeft(yScale))
-        .selectAll('text')
-        .style('font-size', `${Math.max(8, Math.min(12, width / 50))}px`); // Responsive font size
-  
-      // Y-axis label
+        .style('font-size', `${Math.max(9, Math.min(12, width / 50))}px`)
+        .style('font-weight', '500');
+
+      const yAxis = g.append('g')
+        .call(axisLeft(yScale));
+      
+      yAxis.selectAll('text')
+        .style('font-size', `${Math.max(10, Math.min(14, width / 40))}px`)
+        .style('font-weight', '500');
+
+      // Enhanced Y-axis label
       g.append('text')
         .attr('transform', 'rotate(-90)')
         .attr('y', -margin.left + 15)
         .attr('x', -innerHeight / 2)
         .attr('text-anchor', 'middle')
-        .style('font-size', `${Math.max(10, Math.min(14, width / 40))}px`) // Responsive font size
+        .style('font-size', `${Math.max(12, Math.min(16, width / 35))}px`)
+        .style('font-weight', '600')
+        .style('fill', '#374151')
         .text('Number of Occurrences');
-  
-      // Area path generator
-      const areaGenerator = area()
+
+      // Smooth curve area with curveCardinal
+      const smoothAreaGenerator = area()
         .x(d => xScale(d.range) + xScale.bandwidth() / 2)
         .y0(innerHeight)
-        .y1(innerHeight); // Start with all points at the bottom for animation
-  
-      // Area with initial state for animation
+        .y1(d => yScale(d.count))
+        .curve(curveCardinal.tension(0.3)); // Smooth curve with tension
+
+      // Create gradient for area fill
+      const gradient = svg.append('defs')
+        .append('linearGradient')
+        .attr('id', 'areaGradient')
+        .attr('gradientUnits', 'userSpaceOnUse')
+        .attr('x1', 0).attr('y1', 0)
+        .attr('x2', 0).attr('y2', innerHeight);
+
+      gradient.append('stop')
+        .attr('offset', '0%')
+        .attr('stop-color', '#b62121')
+        .attr('stop-opacity', 1);
+
+      gradient.append('stop')
+        .attr('offset', '100%')
+        .attr('stop-color', '#eb8e47')
+        .attr('stop-opacity', 0.5);
+
+      // Area path with smooth curves
       const areaPath = g.append('path')
         .datum(distributionData)
-        .attr('fill', '#FF446b')
-        .attr('fill-opacity', 0.6)
-        .attr('stroke', '#97001b')
-        .attr('stroke-width', 1.5)
-        .attr('d', areaGenerator);
-      
-      // Create real area generator for the animation target
-      const targetAreaGenerator = area()
-        .x(d => xScale(d.range) + xScale.bandwidth() / 2)
-        .y0(innerHeight)
-        .y1(d => yScale(d.count));
-        
-      // Animate the area
-      gsap.to(distributionData, {
-        duration: 1.2,
-        ease: "power2.out",
-        onUpdate: () => {
-          // Update the path during animation
-          areaPath.attr('d', targetAreaGenerator);
-        }
-      });
-  
-      // Points
+        .attr('fill', 'url(#areaGradient)')
+        .attr('stroke', '#eb8e47')
+        .attr('stroke-width', 2)
+
+        .attr('stroke-linecap', 'round')
+        .attr('stroke-linejoin', 'round')
+        .style('filter', 'drop-shadow(0 4px 8px rgba(255, 68, 107, 0.3))')
+        .attr('d', smoothAreaGenerator);
+
+      // Animate area path
+      const totalLength = areaPath.node().getTotalLength();
+      areaPath
+        .attr('stroke-dasharray', totalLength + ' ' + totalLength)
+        .attr('stroke-dashoffset', totalLength)
+        .transition()
+        .duration(1500)
+        .attr('stroke-dashoffset', 0);
+
+      // Enhanced points with glow effect
       const points = g.selectAll('.point')
         .data(distributionData)
         .enter()
         .append('circle')
         .attr('class', 'point')
         .attr('cx', d => xScale(d.range) + xScale.bandwidth() / 2)
-        .attr('cy', innerHeight) // Start from bottom
-        .attr('r', 0) // Start with zero radius
-        .attr('fill', '#FF446b');
-      
-      // Responsive point size
-      const pointRadius = Math.max(3, Math.min(5, width / 150));
-      
-      // Animate points with GSAP
+        .attr('cy', d => yScale(d.count))
+        .attr('r', 0)
+        .attr('fill', '#eb8e47')
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 2)
+        .style('filter', 'drop-shadow(0 2px 4px rgba(255, 68, 107, 0.5))')
+        .style('cursor', 'pointer');
+
+      // Animate points with elastic effect
+      const pointRadius = Math.max(4, Math.min(6, width / 120));
       points.each(function(d, i) {
-        gsap.to(this, {
-          cy: yScale(d.count),
+        const point = this;
+        gsap.fromTo(point, {
+          r: 0,
+          scale: 0
+        }, {
           r: pointRadius,
-          duration: 1,
+          scale: 1,
+          duration: 0.6,
           ease: "elastic.out(1, 0.3)",
-          delay: 0.2 + i * 0.1 // Staggered animation after area animation
+          delay: 0.5 + i * 0.1
         });
+
+        // Add hover effects
+        select(point)
+          .on('mouseenter', function() {
+            gsap.to(this, {
+              r: pointRadius * 1.5,
+              duration: 0.3,
+              ease: "power2.out"
+            });
+          })
+          .on('mouseleave', function() {
+            gsap.to(this, {
+              r: pointRadius,
+              duration: 0.3,
+              ease: "power2.out"
+            });
+          });
       });
 
-
+      // Enhanced tooltips for points
+      points.append('title')
+        .text(d => `${d.range}: ${d.count} occurrences`);
     }
-  
+
     // Handle window resize
     function handleResize() {
       updateDimensions();
     }
-    
-    // Make sure distribution chart observer is set up
-    function setupDistributionObserver() {
-      if (distributionChartRef && resizeObserver) {
-        resizeObserver.observe(distributionChartRef);
-      }
-    }
-  </script>
-  
-  <svelte:window on:resize={handleResize} />
-  
-  <div class="container">
-    <h4 class="text-sm">Average Delay Before Cancellation Per Year</h4>
+</script>
 
-    <div class="chart-container">
-      <div bind:this={barChartRef} class="chart"></div>
-    </div>
+<svelte:window on:resize={handleResize} />
+
+<div class="container" bind:this={mainContainer}>
+  <div class="header">
+    <h3>
+      {#if currentView === 'overview'}
+        Avg Delay Before Death
+      {:else}
+        {chartTitle}
+      {/if}
+    </h3>
     
-    <div class="distribution-controls">
-      <h4 class="text-sm">{chartTitle}</h4>
-    </div>
-      <div class="chart-container distribution-container">
-        <div bind:this={distributionChartRef} class="chart" use:setupDistributionObserver></div>
-      </div>
+    {#if currentView === 'overview'}
+      <button class="back-btn" on:click={handleAllTimeClick}>
+        View All-Time Distribution
+      </button>
+    {:else}
+      <button class="back-btn" on:click={handleBackToOverview}>
+        ← Back to Overview
+      </button>
+    {/if}
   </div>
-  
-  <style>
 
-  </style>
+  <div class="charts-container">
+    <div 
+      class="chart-wrapper"
+      class:hidden={currentView === 'distribution'}
+      bind:this={barChartRef}
+    ></div>
+    
+    <div 
+      class="chart-wrapper"
+      class:hidden={currentView === 'overview'}
+      bind:this={distributionChartRef}
+    ></div>
+  </div>
+</div>
+
+<style>
+  .container {
+    width: 100%;
+    /* max-width: 1200px; */
+    /* padding: 20px; */
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+
+
+  .back-btn {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  }
+
+  .back-btn:hover {
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+  }
+
+  .charts-container {
+    position: relative;
+    width: 100%;
+    min-height: 200px;
+  }
+
+  .chart-wrapper {
+    width: 100%;
+    height: 100px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .chart-wrapper.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 15px;
+    }
+
+    .header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .title {
+      font-size: 1.25rem;
+      text-align: center;
+    }
+
+    .all-time-btn, .back-btn {
+      width: 100%;
+      justify-self: center;
+    }
+  }
+</style>

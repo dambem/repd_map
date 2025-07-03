@@ -19,17 +19,27 @@
     export let minSize = 20;
     export let maxSize = 50;
     let coloringMode = 'nimby'; // Start with NIMBY coloring, options are 'nimby' or 'type'
-
+    let showControlPanel = false
     // DOM elements 
+    const NIMBY_TEST = "#b62121"
+    const NIMBY_POTENTIAL = "#eb8e47"
     let mapContainer;
     let nimbyRadarCanvas;
     let sidebarContent;
-    const typeItems = [
+    let typeItems = [
     { label: 'Battery', color: '#004C99' },
     { label: 'Solar', color: '#E6B800' },
     { label: 'Wind', color: '#00857D' },
     { label: 'Other', color: '#FFFFFF' }
-  ];
+    ];
+
+    let typeItems2 = [
+    { label: 'Not A NIMBY', color: '#d3d3d3' },
+    { label: 'Nimby Potential', color: NIMBY_POTENTIAL },
+    { label: 'NIMBY', color: NIMBY_TEST }
+    ]
+    let currentTypeLabel = typeItems2
+
     // State variables
     let map;
     let selectedFeature = null;
@@ -55,7 +65,7 @@
     const nimbyRefIds4 = new Set(accuracy3.map(item => item.refid || ''));
     let stats = [
         { label: 'Total Capacity Lost', value: '6584', calculate: calculateTotalCapacity, trend:'MW'},
-        { label: 'Application Withdrawn', value: '23', calculate: calculateLengthW, trend:'Since January 2020'},
+        { label: 'Applications Withdrawn', value: '23', calculate: calculateLengthW, trend:'Since January 2020'},
         { label: 'Permission Refused', value: '12', calculate: calculateLength, trend:'Since January 2020'},
         { label: 'Total Projects Cancelled', value: '156', calculate: calculateLengthA, trend:'Since January 2020'}
     ];
@@ -72,15 +82,15 @@
         map.setPaintProperty('unclustered-point', 'circle-color', [
             'case',
             ['in', ['get', refProperty], ['literal', [...nimbyRefIds]]],
-            '#97001b',  // Has nimby details - darker red
+            NIMBY_TEST,  // Has nimby details - darker red
             [
                 'case',
                 ['in', ['get', refProperty], ['literal', [...nimbyRefIds3]]],
-                '#FF446b',  // Has nimby details - darker red
+                NIMBY_POTENTIAL,  // Has nimby details - darker red
                 [
                     'case',    
                     ['in', ['get', refProperty], ['literal', [...nimbyRefIds2]]],
-                    '#a698b8',
+                    NIMBY_POTENTIAL,
                     '#d3d3d3'   // No nimby details - gray
                 ]
             ]
@@ -107,6 +117,7 @@
 }
 function toggleColorMode() {
         coloringMode = coloringMode === 'nimby' ? 'type' : 'nimby';
+        currentTypeLabel = coloringMode === 'nimby' ? typeItems : typeItems2;
         updateCircleColors();
     }
     function calculateTotalCapacity(points) {
@@ -369,7 +380,10 @@ function toggleColorMode() {
             ease: 'power2.out'
         });
     }
-    
+    function toggleControlPanel() {
+    showControlPanel = !showControlPanel;
+
+    }
     function resetSelection() {
         if (selectedFeature && map) {
             map.setFeatureState(
@@ -431,12 +445,12 @@ function toggleColorMode() {
     }
 </script>
 
-<div class="font-sans">
-    <div class="sidebar" transition:slide>
-        <div class="sidebar-header justify-center items-center ">
-            <div class=" mb-4">
+<div class="font-sans scrollbar">
+    <div class="glass3d p-5 sidebar overflow-y-scroll scrollbar" transition:slide>
+        <div class="sidebar-header justify-center items-center">
+            <div class=" mb-2">
                 {#if selectedFeature}
-                    <div class="bg-white rounded-xl p-4 shadow-md">
+                    <div class="bg-white  rounded-xl p-4 shadow-md">
                     <h2 class="text-md font-bold">{selectedFeature.properties['Site Name'] || 'NIMBYdex'}</h2>
                     <p class='text-xs'>Submitted: {selectedFeature.properties['Planning Application Submitted']}</p>
                     {#if selectedFeature.properties['Planning Permission Refused'] != 0}
@@ -480,7 +494,7 @@ function toggleColorMode() {
                             </div>
                           </div>
                         
-                        <div class="chat-bubble bg-primary shadow-xl">
+                        <div class="chat-bubble bg-orange-400 shadow-xl">
                         <p class="text-sm">{nimby_choice['header']}</p>
                         </div>
                         <div class="chat-footer opacity-50">Sent By NimbyDar - He may be wrong!</div>
@@ -489,7 +503,7 @@ function toggleColorMode() {
                     {/if}
 
                 {:else}
-                <div class="flex bg-white rounded-xl p-4 shadow-md">
+                <div class="glass3d2 flex bg-white rounded-xl p-4 shadow-md">
                     <div class="avatar">
                         <div class="w-12 rounded-md">
                             <img class='h-48' src="./lamplight.gif"/>
@@ -509,16 +523,16 @@ function toggleColorMode() {
                 <canvas bind:this={nimbyRadarCanvas}></canvas>
             </div>
             
-            <div class="grid grid-cols-2 gap-4" class:hidden={selectedFeature}>
+            <div class="grid grid-cols-2 gap-2" class:hidden={selectedFeature}>
                 {#each stats as stat}
-                    <div class="stat place-items-center shadow bg-base-100 rounded-xl">
-                        <div class="stat-title">{stat.label}</div>
-                        <span class="stat-value">{stat.value}</span>
+                    <div class="bg-white stat place-items-center shadow bg-base-100 rounded-xl">
+                        <div class=" stat-title">{stat.label}</div>
+                        <span class="stat-detail-l stat-value">{stat.value}</span>
                         <span class="stat-desc">{stat.trend}</span>
                     </div>
                 {/each}
             </div>
-            <div class="bg-white rounded-xl p-4 shadow-md mt-6">
+            <div class="bg-white rounded-xl p-4 shadow-md mt-2">
                 <DelayTimesVisualization delayData={refused}/>
             </div>
             <article class:hidden={selectedFeature} class="prose mt-5 bg-white p-4 rounded-xl shadow-xl">
@@ -535,18 +549,18 @@ function toggleColorMode() {
                 <p>
                     <b> On the map - Bright red denotes high certainty NIMBY-ness</b>
                 </p>
-                <div class="flex mt-5 justify-center items-center">
+                <div class="flex mt-5 justify-center items-center button">
 
-                 <a class='link', href='https://form.jotform.com/251386339530055'>Let's Talk!</a>
+                 <a class='btn', href='https://form.jotform.com/251386339530055'>Let's Talk!</a>
                 </div>
                 <div class="flex mt-5 justify-center items-center">
                     <br>
-                    <a class='link' href='https://www.bemben.co.uk'>Made by Damian Bemben</a>
+                    <a class='btn' href='https://www.bemben.co.uk'>Made by Damian Bemben</a>
                     <br>
                 </div>
                 <div class="flex mt-5 justify-center items-center">
 
-                    <a class="link" href="https://www.gov.uk/government/publications/renewable-energy-planning-database-monthly-extract"> V1.0.5 - REPD January 2025</a>
+                    <a class="btn" href="https://www.gov.uk/government/publications/renewable-energy-planning-database-monthly-extract"> V1.0.5 - REPD January 2025</a>
                 </div>
             </article>
         </div>
@@ -577,7 +591,7 @@ function toggleColorMode() {
                             src="./gif.gif" />
                         </div>
                       </div>
-                    <div class="chat-bubble bg-primary  shadow-xl">
+                    <div class="chat-bubble bg-orange-400  shadow-xl">
                         {nimby_choice['Snide Commentary']}
                     </div>
                     <div class="chat-footer opacity-50">Sent By NimbyDar - He may be wrong! </div>
@@ -603,23 +617,40 @@ function toggleColorMode() {
     
 
 
-    <div class='absolute top-2 right-2 transform bg-base-100 p-2 rounded-lg shadow-lg'>
+    <div class='control-content {showControlPanel ? 'expanded' : 'collapsed'} absolute top-2 right-2 transform bg-base-100 p-2 rounded-lg shadow-lg'>
+        <button class="control-toggle" on:click={toggleControlPanel}>
+        {#if showControlPanel}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+        {:else}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+        {/if}
+        </button>
+
         <div class="mb-2">
+            <h3 class="mb-2 bold"> </h3>
+            <br>
+            <br>
             <label class="mr-4"><b>From:</b>
                 <input type="date" bind:value={startDate} on:input={updateMapData} />
             </label>
+
             <label><b>To:</b>
                 <input type="date" bind:value={endDate} on:input={updateMapData} />
             </label>
-            <br>
+            <hr>
             <div class="mt-4">
-                <button class="btn-primary" on:click={toggleColorMode}>
-                    {coloringMode === 'nimby' ? 'Switch to Type Coloring' : 'Switch to NIMBY Coloring'}
+                <button class="back-btn" on:click={toggleColorMode}>
+                    {coloringMode === 'nimby' ? 'NIMBY Level' : 'Renewable Type'}
                 </button>
             </div>
-
+            <br>
+            
             <div class="legend-items">
-                {#each typeItems as item}
+                {#each currentTypeLabel as item}
                   <div class="legend-item">
                     <div class="color-swatch" style="background-color: {item.color}"></div>
                     <div class="label p-0">{item.label}</div>
@@ -644,16 +675,67 @@ function toggleColorMode() {
     .hidden {
         display: none;
     }
+    .stat-detail-r {
+        background: -webkit-radial-gradient(#b62121, #eb8e47);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent; 
+        -webkit-text-stroke: 1px red;
+
+    }
+    .stat-detail-l {
+        background: -webkit-radial-gradient(#eb8e47, #b62121);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent; 
+
+    }
     h1 {
         background: -webkit-radial-gradient(#b62121, #eb8e47);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent; 
     }
+      .control-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        max-width: 320px;
+        overflow: hidden;
+    }
+
+    .control-content.collapsed {
+        width: 48px;
+        height: 48px;
+    }
+
+    .control-content.expanded {
+        width: 320px;
+    }
+  .control-toggle {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+  }
+
+  .control-toggle:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
     .sidebar {
         position: absolute;
-        left: 2vw;
-        top: 1vw;
-        height: calc(100% - 2vw);
+        left: 0.5vw;
+        top: 0.5vw;
+        height: calc(100% - 1vw);
         background: var(--navbar-dark-primary);
         border-radius: 16px;
         display: flex;
