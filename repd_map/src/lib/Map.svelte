@@ -8,13 +8,18 @@
     import gsap from 'gsap';
     import DelayTimesVisualization from '$lib/components/DelayTimesVisualization.svelte'
     import Cards from '$lib/components/Cards.svelte'
-    // Props
+    import { PUBLIC_MAPTILER_API_KEY } from '$env/static/public';
+
+    import { fly } from 'svelte/transition';
+    let isCollapsed = false;
+    let config
+
     export let points = []; // GeoJSON features
     export let nimby_score = [];
+    export let councils = [];
     export let refused = [];
     export let sizeProperty = 'Installed Capacity (MWelec)';
     export let typeProperty = 'Technology Type';
-
     export let refProperty = 'Ref ID';
 
     export let minSize = 20;
@@ -230,7 +235,7 @@ function toggleColorMode() {
         
         map = new maplibregl.Map({
             container: mapContainer,
-            style: 'https://api.maptiler.com/maps/aquarelle/style.json?key=cyYG5tvmi6dhPXwxXQXr',
+            style: `https://api.maptiler.com/maps/landscape/style.json?key=${PUBLIC_MAPTILER_API_KEY}`,
             center: [-4, 55.20],
             zoom: 4.8
         });
@@ -238,7 +243,7 @@ function toggleColorMode() {
         map.on('load', () => {
             // Add source
             map.addSource('points', {
-                type: 'geojson',
+                type: 'geojson',    
                 data: {
                     type: 'FeatureCollection',
                     features: points
@@ -247,9 +252,33 @@ function toggleColorMode() {
                 clusterMaxZoom: 14,
                 clusterRadius: 50
             });
-            
+            map.addSource('local-authorities',  {
+                type: 'geojson',
+                // Use a URL for the value for the `data` property.
+                data: config
+            });
             // Create a Set of refids from nimby_score for quick lookup
-
+            map.addLayer({
+                'id': 'local-authorities-layer',
+                'source': 'local-authorities',
+                'type':'fill',
+                'paint': {
+                    'fill-outline-color': 'white',
+                    'fill-opacity': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        1,
+                        0.5
+                    ],
+                    'fill-color':'#fbb03b',
+                }
+            });
+            const popup = new maplibregl.Popup({
+                closeButton: false,
+                closeOnClick: false
+            });
+            let hoveredPointId = null;
+            let hoveredAuthorityId = null;
             // console.log(nimbyRefIds3)
             // const nimbyRefIds2 = new Set(nimby_score.map(item => [item.refid, ]));
             // console.log(nimbyRefIds2)
@@ -307,14 +336,73 @@ function toggleColorMode() {
                 map.setPaintProperty('unclustered-point', 'circle-opacity', 0.8);  // Final opacity
             }, 300);  // Wait 300ms after layer is added before starting animation
             // Add interactivity
-            map.on('mouseenter', 'unclustered-point', () => {
+        map.on('mousemove', (e) => {
+            // Use queryRenderedFeatures to check for features at the mouse position
+            // The first argument is the point, and the second is an object specifying the layers to query.
+            const features = map.queryRenderedFeatures(e.point, {
+                layers: ['unclustered-point', 'local-authorities-layer']
+            });
+            console.log(features)
+            // Reset cursor
+            map.getCanvas().style.cursor = '';
+            popup.remove();
+
+            // Reset previous hover states
+            if (hoveredPointId !== null) {
+                map.setFeatureState({ source: 'points', id: hoveredPointId }, { hover: false });
+                hoveredPointId = null;
+            }
+            if (hoveredAuthorityId !== null) {
+                map.setFeatureState({ source: 'local-authorities', id: hoveredAuthorityId }, { hover: false });
+                hoveredAuthorityId = null;
+            }
+
+            if (features.length > 0) {
                 map.getCanvas().style.cursor = 'pointer';
-            });
-            
-            map.on('mouseleave', 'unclustered-point', () => {
-                map.getCanvas().style.cursor = '';
-            });
-            
+                
+                // Prioritize the point feature if it's present
+                const pointFeature = features.find(f => f.layer.id === 'unclustered-point');
+                
+                if (pointFeature) {
+                    hoveredPointId = pointFeature.id;
+                    map.setFeatureState({ source: 'points', id: hoveredPointId }, { hover: true });
+                    popup.setLngLat(e.lngLat)
+                        .setHTML(`<h3>${pointFeature.properties["Planning Application Reference"]}</h3><p><b>Name:</b>${pointFeature.properties["Site Name"]}</p><p><b>Planning Authority:</b>${pointFeature.properties['Planning Authority']}</p>`)
+                        .addTo(map);
+                } else {
+                    // If no point, check for an authority feature
+                    const authorityFeature = features.find(f => f.layer.id === 'local-authorities-layer');
+                    if (authorityFeature) {
+                        hoveredAuthorityId = authorityFeature.id;
+                        map.setFeatureState({ source: 'local-authorities', id: hoveredAuthorityId }, { hover: true });
+                        popup.setLngLat(e.lngLat)
+                            .setHTML(`<h3>${authorityFeature.properties.LAD24NM}</h3>`)
+                            .addTo(map);
+                    }
+                }
+            }
+        });
+        
+        // Consolidated mouseleave event
+        map.on('mouseleave', 'unclustered-point', () => {
+             if (hoveredPointId !== null) {
+                map.setFeatureState({ source: 'points', id: hoveredPointId }, { hover: false });
+            }
+            hoveredPointId = null;
+            map.getCanvas().style.cursor = '';
+            popup.remove();
+        });
+
+        map.on('mouseleave', 'local-authorities-layer', () => {
+            if (hoveredAuthorityId !== null) {
+                map.setFeatureState({ source: 'local-authorities', id: hoveredAuthorityId }, { hover: false });
+            }
+            hoveredAuthorityId = null;
+            map.getCanvas().style.cursor = '';
+            popup.remove();
+        });
+
+
             // Handle click events
             map.on('click', 'unclustered-point', (e) => {
                 if (!e.features.length) return;
@@ -414,10 +502,23 @@ function toggleColorMode() {
         articleUrl = '';
         articleNotes = '';
     }
-    
-    // Lifecycle hooks
-    onMount(() => {
+      let buttonText = 'Copy Ref';
 
+    const copyToClipboard = () => {
+        let copy = selectedFeature.properties['Planning Application Reference']
+        navigator.clipboard.writeText(copy).then(() => {
+            buttonText = "Copied!"
+            setTimeout(() => {
+                buttonText = 'Copy Ref';
+            }, 2000); // Revert the button text after 2 seconds
+
+        })
+    }
+    // Lifecycle hooks
+    onMount(async () => {
+        console.log(councils)
+        let response = await fetch('/localauth.json')
+        config = await response.json();
 
         gsap.from(mapContainer, {
             opacity: 0,
@@ -447,13 +548,34 @@ function toggleColorMode() {
 </script>
 
 <div class="font-sans scrollbar">
-    <div class="glass3d p-5 sidebar overflow-y-scroll scrollbar" transition:slide>
+
+        <button on:click={() => isCollapsed = !isCollapsed} class="control-content toggle-sidebar-btn">
+            {#if isCollapsed}
+                <span>&gt;</span>
+            {:else}
+                <span>&lt;</span>
+            {/if}
+        </button>
+    {#if !isCollapsed}
+
+    <div class="glass3d-wrapper glass3d p-0 sidebar p-3 overflow-y-scroll scrollbar"transition:fly={{ x: -200, duration: 300 }} >
+
         <div class="sidebar-header justify-center items-center">
             <div class=" mb-2">
                 {#if selectedFeature}
                     <div class="bg-white  rounded-xl p-4 shadow-md">
-                    <h2 class="text-md font-bold">{selectedFeature.properties['Site Name'] || 'NIMBYdex'}</h2>
+                    <button class="text-xs text-orange-500 mt-1" on:click={resetSelection}>Back to overview</button>
+                    <h2 class="text-sm font-bold">{selectedFeature.properties['Site Name'] || 'NIMBYdex'}</h2>
+                    <h3 class="text-sm">Planning Authority: <b>{selectedFeature.properties['Planning Authority']}</b></h3>
                     <p class='text-xs'>Submitted: {selectedFeature.properties['Planning Application Submitted']}</p>
+                    <h3 class="text-xs font-italic">Reference:  <b>{selectedFeature.properties['Planning Application Reference']}</b></h3>
+                    <button on:click={copyToClipboard} class="px-3 py-1 text-sm bg-orange-500 text-white rounded hover:bg-blue-600">
+                        {buttonText}
+                    </button>
+                    <br>
+                    <a class='text-sm text-orange-500' target="_blank" href={councils[selectedFeature.properties['Planning Authority']]}> Link To Planning Authority Database</a>
+
+                    <br>
                     {#if selectedFeature.properties['Planning Permission Refused'] != 0}
                         <p class='text-xs'>Refused: {selectedFeature.properties['Planning Permission Refused']}</p>
                     {/if}
@@ -463,7 +585,6 @@ function toggleColorMode() {
                     {/if}
                     <p class="text-xs font-bold">Record Last Updated {selectedFeature.properties['Record Last Updated (dd/mm/yyyy)']}</p>
 
-                    <button class="text-xs text-blue-500 mt-1" on:click={resetSelection}>← Back to overview</button>
                     </div>
                     {#if nimby_choice}
                     <div class="collapse collapse-arrow border-base-300 mt-3 mb-2 border">
@@ -505,14 +626,9 @@ function toggleColorMode() {
 
                 {:else}
                 <div class="glass3d2 flex bg-white rounded-xl p-4 shadow-md">
-                    <div class="avatar">
-                        <div class="w-12 rounded-md">
-                            <img class='h-48' src="./lamplight.gif"/>
-                        </div>
-                    </div>
                     <div class='ml-1'>
-                        <h1 class="text-xl font-bold">NIMBYdex</h1>
-                        <p>UK Cancelled Renewable Projects Radar</p>
+                        <h1 class="text-xl font-bold">NIMBYdar - Clean Energy Graveyard</h1>
+                        <a href='https://www.bemben.co.uk'>Made by Damian Bemben</a>
                     </div>
                 </div>
 
@@ -528,7 +644,7 @@ function toggleColorMode() {
                 {#each stats as stat}
                     <div class="bg-white stat place-items-center shadow bg-base-100 rounded-xl">
                         <div class=" stat-title">{stat.label}</div>
-                        <span class="stat-detail-l stat-value">{stat.value}</span>
+                        <span class="stat-detail stat-value">{stat.value}</span>
                         <span class="stat-desc">{stat.trend}</span>
                     </div>
                 {/each}
@@ -536,10 +652,10 @@ function toggleColorMode() {
             <div class="bg-white rounded-xl p-4 shadow-md mt-2">
                 <DelayTimesVisualization delayData={refused}/>
             </div>
-            <article class:hidden={selectedFeature} class="prose mt-5 bg-white p-4 rounded-xl shadow-xl">
-                <h2 class="text-sm">What's the Nimbydex?</h2>
+            <article class:hidden={selectedFeature} class="prose text-xs mt-2 bg-white p-4 rounded-xl shadow-xl">
+                <h2 class="text-sm">What's the Nimbydar?</h2>
                 <p>
-                    The NimbyDex is an experiment into analyzing issues plaguing UK renewables progress.
+                    The NimbyDar is an experiment into analyzing issues plaguing UK renewables progress.
                     Gemini has been used in order to help identify potential news articles about sites.
                 </p>
 
@@ -550,20 +666,8 @@ function toggleColorMode() {
                 <p>
                     <b> On the map - Bright red denotes high certainty NIMBY-ness</b>
                 </p>
-                <div class="flex mt-5 justify-center items-center button">
-
-                 <a class='btn', href='https://form.jotform.com/251386339530055'>Let's Talk!</a>
-                </div>
-                <div class="flex mt-5 justify-center items-center">
-                    <br>
-                    <a class='btn' href='https://www.bemben.co.uk'>Made by Damian Bemben</a>
-                    <br>
-                </div>
-                <div class="flex mt-5 justify-center items-center">
-
-                    <a class="btn" href="https://www.gov.uk/government/publications/renewable-energy-planning-database-monthly-extract"> V1.0.5 - REPD January 2025</a>
-                </div>
             </article>
+
         </div>
 
 
@@ -602,21 +706,30 @@ function toggleColorMode() {
             
             <div class="flex mt-5 justify-center items-center">
                 {#if nimby_choice && nimby_choice['article_url']}
-                    <a href="{nimby_choice['article_url']}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                    <a href="{nimby_choice['article_url']}" target="_blank" rel="noopener noreferrer" class="btn btn-primary bg-orange-500 text-white">
                         Potential Link/Article About This Project
                     </a>
                 {:else}
-                    <button class="btn btn-primary" on:click={() => showSubmitForm = true}>
+                    <!-- <button class="btn btn-primary" on:click={() => showSubmitForm = true}>
                         Submit Information
-                    </button>
+                    </button> -->
                 {/if}
             </div>
         {/if}
-    </div>
-    
-    <div class="map-container" bind:this={mapContainer}></div>
-    <Cards></Cards>
+                    <div class="flex mt-5 justify-center items-center button">
 
+                 <a class='btn', href='https://form.jotform.com/251386339530055'>Let's Talk!</a>
+                </div>
+
+                <div class="flex mt-5 justify-center items-center">
+
+                    <a class="btn" href="https://www.gov.uk/government/publications/renewable-energy-planning-database-monthly-extract"> V1.0.5 - REPD January 2025</a>
+                </div>
+    </div>
+    {/if}
+
+    <div class="map-container" bind:this={mapContainer}></div>
+    <!-- <Cards></Cards> -->
 
     <div class='control-content {showControlPanel ? 'expanded' : 'collapsed'} absolute top-2 right-2 transform bg-base-100 p-2 rounded-lg shadow-lg'>
         <button class="control-toggle" on:click={toggleControlPanel}>
@@ -668,11 +781,11 @@ function toggleColorMode() {
 </div>
 
 <style>
-    @tailwind base;
-    @tailwind components;
-    @tailwind utilities;
-    @plugin "@tailwindcss/typography";
-    
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@plugin "@tailwindcss/typography";
     .hidden {
         display: none;
     }
@@ -732,24 +845,68 @@ function toggleColorMode() {
   .control-toggle:hover {
     background: rgba(0, 0, 0, 0.1);
   }
-    .sidebar {
+  .sidebar {
         position: absolute;
         left: 0.5vw;
         top: 0.5vw;
         height: calc(100% - 1vw);
-        background: var(--navbar-dark-primary);
+        background: rgba(90, 90, 90, 0.15);
+        backdrop-filter: blur(10px);
         border-radius: 16px;
         display: flex;
         flex-direction: column;
         color: var(--navbar-light-primary);
         font-family: Verdana, Geneva, Tahoma, sans-serif;
-        overflow: scroll;
-        user-select: none;
-        max-width: 33%;
-        z-index: 50;    
+        overflow-y: auto;
+        width: 33%;
+        max-width: 500px;
+        z-index: 50;
         overflow-x: hidden;
         padding-right: 5px;
     }
+
+    .toggle-sidebar-btn {
+        position: absolute;
+        top: 1rem;
+        left: 1vw;
+        z-index: 100;
+        background: rgba(45, 45, 45, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        color: white;
+
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5rem;
+    }
+  .toggle-sidebar-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+  }
+    /* Mobile Landscape */
+    @media (max-width: 768px) and (orientation: landscape) {
+        .sidebar {
+            width: 50%; /* Adjust as needed */
+            max-width: 280px;
+        }
+    }
+
+    /* Mobile Portrait */
+    @media (max-width: 480px) {
+        .sidebar {
+            width: 80%;
+            max-width: none;
+            height: 100%;
+            top: 0;
+            left: 0;
+            border-radius: 0;
+        }
+    }
+
     .chat {
         padding-left: 0.5rem;
     }

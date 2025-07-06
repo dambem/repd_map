@@ -6,6 +6,7 @@ export async function load({ fetch }) {
       const date_a_refused = await fetch('/df_withdrawn.json');  // Place your GeoJSON in the static folder
       const date_withdrawn = await fetch('/df_a_refused.json');  // Place your GeoJSON in the static folder
       const final_stats = await fetch('/final.json');  // Place your GeoJSON in the static folder
+      const councils = await fetch('/councils.json');  // Place your GeoJSON in the static folder
 
 
       const geojson = await response.json();
@@ -14,6 +15,7 @@ export async function load({ fetch }) {
       const a_refused = await date_a_refused.json();
       const withdrawn = await date_withdrawn.json();
       const final_stat = await final_stats.json();
+      const council = await councils.json();
 
       return {
         points: geojson.features,
@@ -21,7 +23,8 @@ export async function load({ fetch }) {
         refused: refused,
         a_refused: a_refused,
         withdrawn: withdrawn,
-        final_stats: final_stat
+        final_stats: final_stat,
+        council: council
       };
     } catch (error) {
       console.error('Error loading GeoJSON:', error);

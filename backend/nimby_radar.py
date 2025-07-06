@@ -5,7 +5,11 @@ import time
 import os 
 import sys
 import pandas as pd
+class NimbyParser:
+    def __init__(self):
+        pass
 
+    
 def nimby_parse():
     repd.repd_geojson_file()
     

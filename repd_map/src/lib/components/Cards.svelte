@@ -195,22 +195,22 @@
 <style>
   .carousel-container {
     position: absolute;
-    bottom: 30px;
+    bottom: 1rem;
     left: 50%;
     transform: translateX(-50%);
     width: 90%;
-    max-width: 800px;
-    background: rgba(255, 255, 255, 0.1);
+    max-width: 600px;
+    background: rgba(90, 90, 90, 0.15);
     backdrop-filter: blur(10px);
     border-radius: 20px;
-    padding: 20px;
+    padding: 10px;
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .carousel-wrapper {
     position: relative;
     overflow: hidden;
-    border-radius: 15px;
+    border-radius: 25%;
     height: 140px;
     mask: linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%);
     -webkit-mask: linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%);

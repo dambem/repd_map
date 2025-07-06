@@ -555,7 +555,7 @@
 
 <div class="container" bind:this={mainContainer}>
   <div class="header">
-    <h3>
+    <h3 class="text-xs">
       {#if currentView === 'overview'}
         Avg Delay Before Death
       {:else}
@@ -564,12 +564,12 @@
     </h3>
     
     {#if currentView === 'overview'}
-      <button class="back-btn" on:click={handleAllTimeClick}>
+      <button class="back-btn text-xs" on:click={handleAllTimeClick}>
         View All-Time Distribution
       </button>
     {:else}
-      <button class="back-btn" on:click={handleBackToOverview}>
-        ← Back to Overview
+      <button class="back-btn text-xs" on:click={handleBackToOverview}>
+        Back to Overview
       </button>
     {/if}
   </div>
@@ -590,6 +590,7 @@
 </div>
 
 <style>
+
   .container {
     width: 100%;
     /* max-width: 1200px; */
@@ -611,21 +612,15 @@
     margin: 0;
     line-height: 1.2;
   }
-
-
-
-  .back-btn {
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  .text-xs {
+    font-size: 1rem;
   }
 
-  .back-btn:hover {
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-  }
 
   .charts-container {
     position: relative;
     width: 100%;
-    min-height: 200px;
+    min-height: 150px;
   }
 
   .chart-wrapper {
