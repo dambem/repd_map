@@ -7,6 +7,7 @@
     import { slide } from 'svelte/transition';
     import gsap from 'gsap';
     import DelayTimesVisualization from '$lib/components/DelayTimesVisualization.svelte'
+    import Cards from '$lib/components/Cards.svelte'
     // Props
     export let points = []; // GeoJSON features
     export let nimby_score = [];
@@ -614,7 +615,7 @@ function toggleColorMode() {
     </div>
     
     <div class="map-container" bind:this={mapContainer}></div>
-    
+    <Cards></Cards>
 
 
     <div class='control-content {showControlPanel ? 'expanded' : 'collapsed'} absolute top-2 right-2 transform bg-base-100 p-2 rounded-lg shadow-lg'>
