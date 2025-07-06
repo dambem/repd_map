@@ -54,10 +54,10 @@
     const nimbyRefIds3 = new Set(accuracy2.map(item => item.refid || ''));
     const nimbyRefIds4 = new Set(accuracy3.map(item => item.refid || ''));
     let stats = [
-        { label: 'Total Capacity Lost', value: '6584', calculate: calculateTotalCapacity, trend:'MW'},
-        { label: 'Application Withdrawn', value: '23', calculate: calculateLengthW, trend:'Since January 2020'},
-        { label: 'Permission Refused', value: '12', calculate: calculateLength, trend:'Since January 2020'},
-        { label: 'Total Projects Cancelled', value: '156', calculate: calculateLengthA, trend:'Since January 2020'}
+        { label: 'Total Capacity Lost', value: '...', calculate: calculateTotalCapacity, trend:'MW'},
+        { label: 'Application Withdrawn', value: '...', calculate: calculateLengthW, trend:'Since January 2020'},
+        { label: 'Permission Refused', value: '...', calculate: calculateLength, trend:'Since January 2020'},
+        { label: 'Total Projects Cancelled', value: '...', calculate: calculateLengthA, trend:'Since January 2020'}
     ];
     
     const allowedProperties = ['Operator (or Applicant)', 'Site Name', 'Technology Type', 'Installed Capacity (MWelec)', 'Development Status', 'Planning Permission Refused', 'Planning Application Withdrawn', 'Planning Application Submitted'];
@@ -219,7 +219,7 @@ function toggleColorMode() {
         map = new maplibregl.Map({
             container: mapContainer,
             style: 'https://api.maptiler.com/maps/aquarelle/style.json?key=cyYG5tvmi6dhPXwxXQXr',
-            center: [-4, 55.20],
+            center: [-6, 55.20],
             zoom: 4.8
         });
         
@@ -406,9 +406,9 @@ function toggleColorMode() {
 
         gsap.from(mapContainer, {
             opacity: 0,
-            duration: 2, // Animation duration in seconds
-            ease: 'power2.out', // Easing function
-            delay: 0.5 // Optional: if you want to delay the animation
+            duration: 3, // Animation duration in seconds
+            ease: 'slow', // Easing function
+            delay: 1 // Optional: if you want to delay the animation
         });
         initMap();
         initAnimation();
@@ -496,8 +496,8 @@ function toggleColorMode() {
                         </div>
                     </div>
                     <div class='ml-1'>
-                        <h1 class="text-xl font-bold">NIMBYdex</h1>
-                        <p>UK Cancelled Renewable Projects Radar</p>
+                        <h1 class="text-xl font-bold">NimbyDex!</h1>
+                        <p>UK's Only Cancelled Renewables Graveyard</p>
                     </div>
                 </div>
 
@@ -518,7 +518,7 @@ function toggleColorMode() {
                     </div>
                 {/each}
             </div>
-            <div class="bg-white rounded-xl p-4 shadow-md mt-6">
+            <div class:hidden={selectedFeature} class="bg-white rounded-xl p-4 shadow-md mt-6">
                 <DelayTimesVisualization delayData={refused}/>
             </div>
             <article class:hidden={selectedFeature} class="prose mt-5 bg-white p-4 rounded-xl shadow-xl">
@@ -662,7 +662,7 @@ function toggleColorMode() {
         font-family: Verdana, Geneva, Tahoma, sans-serif;
         overflow: scroll;
         user-select: none;
-        max-width: 33%;
+        max-width: 35%;
         z-index: 50;    
         overflow-x: hidden;
         padding-right: 5px;

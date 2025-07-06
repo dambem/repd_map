@@ -9,45 +9,22 @@
     import { transition } from 'd3-transition';
     import { gsap } from 'gsap';
     export let delayData = null
-
-    // Generate sample data for 20 years
-    const generateData = () => {
-      const years = [];
-      const currentYear = new Date().getFullYear();
-      const startYear = currentYear - 5;
-      
-      // Create data for each year with random average delay and distribution data
-      for (let i = 0; i < 6; i++) {
-        const year = startYear + i;
-        const avgDelay = Math.round((Math.random() * 10 + 5) * 10) / 10; // Between 5-15 minutes
-        
-        // Create distribution data (delays in various ranges)
-        const distribution = [
-          { range: '0-5 min', count: Math.floor(Math.random() * 200 + 50) },
-          { range: '5-10 min', count: Math.floor(Math.random() * 300 + 100) },
-          { range: '10-15 min', count: Math.floor(Math.random() * 250 + 80) },
-          { range: '15-20 min', count: Math.floor(Math.random() * 150 + 40) },
-          { range: '20+ min', count: Math.floor(Math.random() * 100 + 20) }
-        ];
-        
-        years.push({
-          year,
-          avgDelay,
-          distribution
-        });
-      }
-      
-      return years;
-    };
   
     // Create all-time distribution by combining all years
     const calculateAllTimeDistribution = (data) => {
       const allTimeDistribution = [
         { range: '0-90 days', count: 0 },
         { range: '90-180 days', count: 0 },
-        { range: '180-365 days', count: 0 },
-        { range: '1 Year - 2 Years', count: 0 },
-        { range: 'Over 2 Years', count: 0 }
+        { range: '180-270 days', count: 0 },
+        { range: '270-360 days', count: 0 },
+        { range: '360-450 days', count: 0 },
+        { range: '450-540 days', count: 0 },
+        { range: '540-630 days', count: 0 },
+        { range: '630-720 days', count: 0 },
+        { range: '720-810 days', count: 0 },
+        { range: '810-900 days', count: 0 },
+        { range: 'Over 900 days', count: 0 },
+
       ];
       
       data.forEach(yearData => {
@@ -64,7 +41,7 @@
     let containerHeight;
     let width;
     let height;
-    let margin = { top: 20, right: 30, bottom: 40, left: 60 };
+    let margin = { top: 20, right: 0, bottom: 40, left: 60 };
     let innerWidth;
     let innerHeight;
     
@@ -212,7 +189,7 @@
       const xScale = scaleBand()
         .domain(data.map(d => d.year))
         .range([0, innerWidth])
-        .padding(0.2);
+        .padding(0);
   
       const yScale = scaleLinear()
         .domain([0, max(data, d => d.avgDelay) * 1.1])
@@ -238,7 +215,7 @@
         .attr('x', -innerHeight / 2)
         .attr('text-anchor', 'middle')
         .style('font-size', `${Math.max(10, Math.min(14, width / 40))}px`) // Responsive font size
-        .text('Average Delay (minutes)');
+        .text('Average Delay (Days)');
   
       // Bars - with GSAP animation
       const bars = g.selectAll('.bar')
@@ -254,7 +231,6 @@
         .style('cursor', 'pointer')
         .on('click', (event, d) => handleBarClick(d));
       
-      // Animate bars with GSAP
       bars.each(function(d, i) {
         gsap.to(this, {
           y: yScale(d.avgDelay),
@@ -270,7 +246,6 @@
         .text(d => `${d.year}: ${d.avgDelay} minutes`);
     }
   
-    // Render distribution chart
     function renderDistributionChart() {
       if (!distributionChartRef || !distributionData.length) return;
   
@@ -292,7 +267,6 @@
       const xScale = scaleBand()
         .domain(distributionData.map(d => d.range))
         .range([0, innerWidth])
-        .padding(0.2);
   
       const yScale = scaleLinear()
         .domain([0, max(distributionData, d => d.count) * 1.1])
@@ -300,11 +274,11 @@
   
       // Axes
       g.append('g')
-        .attr('transform', `translate(0, ${innerHeight})`)
+        .attr('transform', `translate(0, ${innerHeight+5})`)
         .call(axisBottom(xScale))
         .selectAll('text')
         .style('text-anchor', 'middle')
-        .style('font-size', `${Math.max(8, Math.min(12, width / 50))}px`); // Responsive font size
+        .style('font-size', `${Math.max(6, Math.min(8, width / 50))}px`); // Responsive font size
   
       g.append('g')
         .call(axisLeft(yScale))
@@ -334,6 +308,8 @@
         .attr('stroke', '#97001b')
         .attr('stroke-width', 1.5)
         .attr('d', areaGenerator);
+
+
       
       // Create real area generator for the animation target
       const targetAreaGenerator = area()
@@ -342,11 +318,10 @@
         .y1(d => yScale(d.count));
         
       // Animate the area
-      gsap.to(distributionData, {
-        duration: 1.2,
+      gsap.to(areaPath, {
+        duration: 2,
         ease: "power2.out",
         onUpdate: () => {
-          // Update the path during animation
           areaPath.attr('d', targetAreaGenerator);
         }
       });
