@@ -9,7 +9,7 @@
     import DelayTimesVisualization from '$lib/components/DelayTimesVisualization.svelte'
     import Cards from '$lib/components/Cards.svelte'
     import { PUBLIC_MAPTILER_API_KEY } from '$env/static/public';
-
+    import Timeline from '$lib/components/Timeline.svelte'
     import { fly } from 'svelte/transition';
     let isCollapsed = false;
     let config
@@ -32,19 +32,19 @@
     let mapContainer;
     let nimbyRadarCanvas;
     let sidebarContent;
-    let typeItems = [
+    let typeItems2 = [
     { label: 'Battery', color: '#004C99' },
     { label: 'Solar', color: '#E6B800' },
     { label: 'Wind', color: '#00857D' },
     { label: 'Other', color: '#FFFFFF' }
     ];
 
-    let typeItems2 = [
+    let typeItems = [
     { label: 'Not A NIMBY', color: '#d3d3d3' },
     { label: 'Nimby Potential', color: NIMBY_POTENTIAL },
     { label: 'NIMBY', color: NIMBY_TEST }
     ]
-    let currentTypeLabel = typeItems2
+    let currentTypeLabel = typeItems
 
     // State variables
     let map;
@@ -730,34 +730,13 @@ function toggleColorMode() {
 
     <div class="map-container" bind:this={mapContainer}></div>
     <!-- <Cards></Cards> -->
+    <Timeline bind:startDate bind:endDate minDate='2019-01-01', maxDate='2025-01-01' on:change{updateMapData}></Timeline>
+    <div class='glass3d-wrapper control-content expanded absolute top-2 right-2 transform bg-base-100 p-2 rounded-lg shadow-lg'>
 
-    <div class='control-content {showControlPanel ? 'expanded' : 'collapsed'} absolute top-2 right-2 transform bg-base-100 p-2 rounded-lg shadow-lg'>
-        <button class="control-toggle" on:click={toggleControlPanel}>
-        {#if showControlPanel}
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 6L6 18M6 6l12 12"/>
-            </svg>
-        {:else}
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-            </svg>
-        {/if}
-        </button>
 
-        <div class="mb-2">
-            <h3 class="mb-2 bold"> </h3>
-            <br>
-            <br>
-            <label class="mr-4"><b>From:</b>
-                <input type="date" bind:value={startDate} on:input={updateMapData} />
-            </label>
-
-            <label><b>To:</b>
-                <input type="date" bind:value={endDate} on:input={updateMapData} />
-            </label>
-            <hr>
-            <div class="mt-4">
-                <button class="back-btn" on:click={toggleColorMode}>
+        <div>
+            <div>
+                <button class="p-2 text-xs btn bg-orange-400 text-white" on:click={toggleColorMode}>
                     {coloringMode === 'nimby' ? 'NIMBY Level' : 'Renewable Type'}
                 </button>
             </div>
@@ -808,7 +787,7 @@ function toggleColorMode() {
         -webkit-text-fill-color: transparent; 
     }
       .control-content {
-        background: rgba(255, 255, 255, 0.95);
+        background: rgba(255, 255, 255, 0.2);
         backdrop-filter: blur(10px);
         border-radius: 16px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -824,7 +803,7 @@ function toggleColorMode() {
     }
 
     .control-content.expanded {
-        width: 320px;
+        width: 200px;
     }
   .control-toggle {
     position: absolute;
