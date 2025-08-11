@@ -71,8 +71,6 @@
     const nimbyRefIds4 = new Set(accuracy3.map(item => item.refid || ''));
     let stats = [
         { label: 'Total Capacity Lost', value: '6584', calculate: calculateTotalCapacity, trend:'MW'},
-        { label: 'Applications Withdrawn', value: '23', calculate: calculateLengthW, trend:'Since January 2020'},
-        { label: 'Permission Refused', value: '12', calculate: calculateLength, trend:'Since January 2020'},
         { label: 'Total Projects Cancelled', value: '156', calculate: calculateLengthA, trend:'Since January 2020'}
     ];
     
@@ -619,7 +617,7 @@ function toggleColorMode() {
                         <div class="chat-bubble bg-orange-400 shadow-xl">
                         <p class="text-sm">{nimby_choice['header']}</p>
                         </div>
-                        <div class="chat-footer opacity-50">Sent By NimbyDar - He may be wrong!</div>
+                        <div class="chat-footer opacity-50">Sent By Nimbydex - He may be wrong!</div>
 
                     </div>
                     {/if}
@@ -627,7 +625,7 @@ function toggleColorMode() {
                 {:else}
                 <div class="glass3d2 flex bg-white rounded-xl p-4 shadow-md">
                     <div class='ml-1'>
-                        <h1 class="text-xl font-bold">NIMBYdar - Clean Energy Graveyard</h1>
+                        <h1 class="text-xl font-bold">Nimbydex - Clean Energy Graveyard</h1>
                         <a href='https://www.bemben.co.uk'>Made by Damian Bemben</a>
                     </div>
                 </div>
@@ -653,9 +651,9 @@ function toggleColorMode() {
                 <DelayTimesVisualization delayData={refused}/>
             </div>
             <article class:hidden={selectedFeature} class="prose text-xs mt-2 bg-white p-4 rounded-xl shadow-xl">
-                <h2 class="text-sm">What's the Nimbydar?</h2>
+                <h2 class="text-sm">What's the Nimbydex?</h2>
                 <p>
-                    The NimbyDar is an experiment into analyzing issues plaguing UK renewables progress.
+                    The Nimbydex is an experiment into analyzing issues plaguing UK renewables progress.
                     Gemini has been used in order to help identify potential news articles about sites.
                 </p>
 
@@ -699,7 +697,7 @@ function toggleColorMode() {
                     <div class="chat-bubble bg-orange-400  shadow-xl">
                         {nimby_choice['Snide Commentary']}
                     </div>
-                    <div class="chat-footer opacity-50">Sent By NimbyDar - He may be wrong! </div>
+                    <div class="chat-footer opacity-50">Sent By Nimbydex - He may be wrong! </div>
 
                 </div>
             </div>
