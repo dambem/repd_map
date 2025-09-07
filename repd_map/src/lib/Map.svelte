@@ -197,7 +197,7 @@ function toggleColorMode() {
             data: {
                 labels: ['NIMBY', 'Accuracy', 'Petty', 'Organized', 'Political'],
                 datasets: [{
-                    label: 'NimbyDEX',
+                    label: 'C.E.G',
                     data: [
                         nimby_choice["Nimby Score"], 
                         nimby_choice["Accuracy Score"], 
@@ -541,7 +541,7 @@ function toggleColorMode() {
                 {#if selectedFeature}
                     <div class="bg-white  rounded-xl p-4 shadow-md">
                     <button class="text-xs text-orange-500 mt-1" on:click={resetSelection}>Back to overview</button>
-                    <h2 class="text-sm font-bold">{selectedFeature.properties['Site Name'] || 'NIMBYdex'}</h2>
+                    <h2 class="text-sm font-bold">{selectedFeature.properties['Site Name'] || 'C.E.G'}</h2>
                     <h3 class="text-sm">Planning Authority: <b>{selectedFeature.properties['Planning Authority']}</b></h3>
                     <p class='text-xs'>Submitted: {selectedFeature.properties['Planning Application Submitted']}</p>
                     <h3 class="text-xs font-italic">Reference:  <b>{selectedFeature.properties['Planning Application Reference']}</b></h3>
@@ -583,27 +583,13 @@ function toggleColorMode() {
                         </div>
                     </div>
                     
-                    <div class="chat chat-start">
-                        <div class="chat-image avatar">
-                            <div class="w-10 rounded-full ring-primary ring ring-offset-2">
-                              <img
-                                alt="A small butterfly, illustrated"
-                                src="./gif.gif" />
-                            </div>
-                          </div>
-                        
-                        <div class="chat-bubble bg-orange-400 shadow-xl">
-                        <p class="text-sm">{nimby_choice['header']}</p>
-                        </div>
-                        <div class="chat-footer opacity-50">Sent By Nimbydex - He may be wrong!</div>
 
-                    </div>
                     {/if}
 
                 {:else}
                 <div class="glass3d2 flex bg-white rounded-xl p-4 shadow-md">
                     <div class='ml-1'>
-                        <h1 class="text-xl font-bold">Clean Energy Graveyard (C.E.G)</h1>
+                        <h1 class="text-xxl ">Clean Energy Graveyard (C.E.G)</h1>
                         <a href='https://www.bemben.co.uk'>Made by Damian Bemben</a>
                     </div>
                 </div>
@@ -612,7 +598,7 @@ function toggleColorMode() {
             </div>
 
             <div style="height: 300px" class='bg-white p-4 rounded-xl shadow-xl'    class:hidden={!selectedFeature}>
-                <h3 class="text-md font-bold align-center">NimbyDex Score</h3>
+                <h3 class="text-md font-bold align-center">C.E.G Score</h3>
                 <canvas bind:this={nimbyRadarCanvas}></canvas>
             </div>
             
@@ -629,9 +615,9 @@ function toggleColorMode() {
                 <DelayTimesVisualization delayData={refused}/>
             </div>
             <article class:hidden={selectedFeature} class="prose text-xs mt-2 bg-white p-4 rounded-xl shadow-xl">
-                <h2 class="text-sm">What's the Nimbydex?</h2>
+                <h2 class="text-sm">What's the C.E.G?</h2>
                 <p>
-                    The Nimbydex is an experiment into analyzing issues plaguing UK renewables progress.
+                    The C.E.G is an experiment into analyzing issues plaguing UK renewables progress.
                     Gemini has been used in order to help identify potential news articles about sites.
                 </p>
 
@@ -665,6 +651,9 @@ function toggleColorMode() {
                 
 
                 <div class="chat chat-start">
+
+
+
                     <div class="chat-image avatar">
                         <div class="w-10 rounded-full ring-primary ring ring-offset-2">
                           <img
@@ -675,7 +664,10 @@ function toggleColorMode() {
                     <div class="chat-bubble bg-orange-400  shadow-xl">
                         {nimby_choice['Snide Commentary']}
                     </div>
-                    <div class="chat-footer opacity-50">Sent By Nimbydex - He may be wrong! </div>
+                    <div class="chat-bubble bg-orange-400 shadow-xl mt-2">
+                    <p class="text-sm">{nimby_choice['header']}</p>
+                    </div>
+                    <div class="chat-footer opacity-50">Sent By C.E.G - He may be wrong! </div>
 
                 </div>
             </div>
