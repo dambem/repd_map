@@ -11,6 +11,8 @@
     import { PUBLIC_MAPTILER_API_KEY } from '$env/static/public';
     import Timeline from '$lib/components/Timeline.svelte'
     import { fly } from 'svelte/transition';
+    import marker from '/src/icons/marker.svg'
+    import { addMarkerLayer, addLocalAuthoritiesSource, addLocalAuthoritiesLayer, addRenewableProjectsSource } from '$lib/utils/mapUtils.js'
     let isCollapsed = false;
     let config
 
@@ -167,7 +169,6 @@ function toggleColorMode() {
             ['>=', ['get', 'Planning Application Submitted'], startDate],
             ['<=', ['get', 'Planning Application Submitted'], endDate]
         ];
-        console.log(technologyType)
         if (technologyType == 'All') {
             filter.push(['==', ['get', 'Technology Type'], technologyType]);
         }
@@ -179,7 +180,6 @@ function toggleColorMode() {
 
         })
         stats = stats.map(stat => ({...stat}))
-        // console.log(stats)
     }
     
 
@@ -227,7 +227,7 @@ function toggleColorMode() {
             }
         });
     }
-    
+
     function initMap() {
         if (map) return;
         
@@ -240,46 +240,25 @@ function toggleColorMode() {
         
         map.on('load', () => {
             // Add source
+            addLocalAuthoritiesSource(map, config);
             map.addSource('points', {
                 type: 'geojson',    
                 data: {
                     type: 'FeatureCollection',
                     features: points
-                },
-                cluster: false,
-                clusterMaxZoom: 14,
-                clusterRadius: 50
-            });
-            map.addSource('local-authorities',  {
-                type: 'geojson',
-                // Use a URL for the value for the `data` property.
-                data: config
-            });
-            // Create a Set of refids from nimby_score for quick lookup
-            map.addLayer({
-                'id': 'local-authorities-layer',
-                'source': 'local-authorities',
-                'type':'fill',
-                'paint': {
-                    'fill-outline-color': 'white',
-                    'fill-opacity': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        1,
-                        0.5
-                    ],
-                    'fill-color':'#fbb03b',
                 }
             });
+            addLocalAuthoritiesLayer(map);
+
             const popup = new maplibregl.Popup({
                 closeButton: false,
                 closeOnClick: false
             });
             let hoveredPointId = null;
             let hoveredAuthorityId = null;
-            // console.log(nimbyRefIds3)
-            // const nimbyRefIds2 = new Set(nimby_score.map(item => [item.refid, ]));
-            // console.log(nimbyRefIds2)
+
+            addMarkerLayer(map);
+
             map.addLayer({ 
                 id: 'unclustered-point',
                 type: 'circle',
@@ -419,7 +398,6 @@ function toggleColorMode() {
                 
                 // Find corresponding nimby score by refid
                 const featureId = feature.properties["Ref ID"];
-                console.log(featureId)
                 nimby_choice = nimby_score.find(score => score.refid === featureId);
                 
                 // Set new selection state
@@ -625,7 +603,7 @@ function toggleColorMode() {
                 {:else}
                 <div class="glass3d2 flex bg-white rounded-xl p-4 shadow-md">
                     <div class='ml-1'>
-                        <h1 class="text-xl font-bold">Nimbydex - Clean Energy Graveyard</h1>
+                        <h1 class="text-xl font-bold">Clean Energy Graveyard (C.E.G)</h1>
                         <a href='https://www.bemben.co.uk'>Made by Damian Bemben</a>
                     </div>
                 </div>
