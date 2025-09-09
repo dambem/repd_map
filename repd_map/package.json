@@ -10,12 +10,14 @@
 		"prepare": "svelte-kit sync || echo ''"
 	},
 	"devDependencies": {
-		"@lucide/svelte": "^0.543.0",
+		"@internationalized/date": "^3.9.0",
+		"@lucide/svelte": "^0.515.0",
 		"@sveltejs/adapter-auto": "^4.0.0",
 		"@sveltejs/kit": "^2.16.0",
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
 		"@tailwindcss/typography": "^0.5.16",
 		"autoprefixer": "^10.4.20",
+		"bits-ui": "^2.9.6",
 		"daisyui": "^4.12.23",
 		"postcss": "^8.5.2",
 		"svelte": "^5.0.0",
