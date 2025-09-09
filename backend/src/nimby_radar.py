@@ -73,8 +73,8 @@ def nimby_parse():
 if __name__ == "__main__":    
     # scrape.convert_points_geojson()
     # dorset.main()
-    df = repd.get_repd_dataframe()
-    df = df.sort_values(by=['Installed Capacity (MWelec)'], ascending=False)
-    print(df)
-    df.to_csv("test.csv")
+    # df = repd.get_repd_dataframe()
+    # df = df.sort_values(by=['Installed Capacity (MWelec)'], ascending=False)
+    # print(df)
+    # df.to_csv("test.csv")
     repd.repd_geojson_file()

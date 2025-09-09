@@ -70,7 +70,7 @@ def search_news(site_name, cancelled=True):
     return links[:5] # Return top 5 links
 
 def get_repd_dataframe(date='2015-01-01'):
-    df = pd.read_csv('data/repd-q1-apr-2025.csv', encoding='cp1252')
+    df = pd.read_csv('data/repd-q2-jul-2025.csv', encoding='cp1252')
     
     df = df[df['Development Status (short)'].isin(['Application Refused', 'Abandoned', 'Application Withdrawn', 'Appeal Refused'])]
     
@@ -155,7 +155,9 @@ def get_repd_dataframe(date='2015-01-01'):
 
 def repd_geojson_file():
     df = get_repd_dataframe()
+    
     geojson = create_geojson(df)
+    print(geojson)
     with open('points.geojson', 'w') as f:
         json.dump(geojson, f, indent=2)
 
