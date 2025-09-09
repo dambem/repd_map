@@ -11,8 +11,12 @@
     import { PUBLIC_MAPTILER_API_KEY } from '$env/static/public';
     import Timeline from '$lib/components/Timeline.svelte'
     import { fly } from 'svelte/transition';
+    import About from '$lib/components/About.svelte';
+    import Badge from './components/ui/badge/badge.svelte';
     import marker from '/src/icons/marker.svg'
-    import { addMarkerLayer, addLocalAuthoritiesSource, addLocalAuthoritiesLayer, addRenewableProjectsSource } from '$lib/utils/mapUtils.js'
+    import SelectedFeatureUI from './components/sidebar/SelectedFeatureUI.svelte';
+    import SideBarMain from './components/sidebar/SideBarMain.svelte';
+    import { addMarkerLayer, addLocalAuthoritiesSource, addNimbyLayer, addLocalAuthoritiesLayer, addRenewableProjectsSource } from '$lib/utils/mapUtils.js'
     let isCollapsed = false;
     let config
 
@@ -184,49 +188,6 @@ function toggleColorMode() {
     
 
     
-    function initNimbyRadarChart() {
-        if (!nimbyRadarCanvas || !nimby_choice) return;
-        
-        if (radarChart) {
-            radarChart.destroy();
-        }
-        
-        const ctx = nimbyRadarCanvas.getContext('2d');
-        radarChart = new Chart(ctx, {
-            type: 'radar',
-            data: {
-                labels: ['NIMBY', 'Accuracy', 'Petty', 'Organized', 'Political'],
-                datasets: [{
-                    label: 'C.E.G',
-                    data: [
-                        nimby_choice["Nimby Score"], 
-                        nimby_choice["Accuracy Score"], 
-                        nimby_choice["Petty Score"], 
-                        nimby_choice["Organized Score"], 
-                        nimby_choice["Political Leaning"]
-                    ],
-                    backgroundColor: 'rgba(168, 200, 58, 0.2)',
-                    borderColor: '#fbb03b',
-                    pointBackgroundColor: '#fbb03b'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    r: {
-                        angleLines: { display: true },
-                        suggestedMin: 0,
-                        suggestedMax: 100
-                    }
-                },
-                plugins: {
-                    legend: { display: false }
-                    
-                }
-            }
-        });
-    }
 
     function initMap() {
         if (map) return;
@@ -409,7 +370,6 @@ function toggleColorMode() {
                 // Initialize nimby radar chart if nimby_choice exists
                 if (nimby_choice) {
                     setTimeout(() => {
-                        initNimbyRadarChart();
                         animateProperties();
                     }, 10);
                 } else {
@@ -535,155 +495,19 @@ function toggleColorMode() {
     {#if !isCollapsed}
 
     <div class="glass3d-wrapper glass3d p-0 sidebar p-3 overflow-y-scroll scrollbar"transition:fly={{ x: -200, duration: 300 }} >
-
         <div class="sidebar-header justify-center items-center">
             <div class=" mb-2">
                 {#if selectedFeature}
-                    <div class="bg-white  rounded-xl p-4 shadow-md">
-                    <button class="text-xs text-orange-500 mt-1" on:click={resetSelection}>Back to overview</button>
-                    <h2 class="text-sm font-bold">{selectedFeature.properties['Site Name'] || 'C.E.G'}</h2>
-                    <h3 class="text-sm">Planning Authority: <b>{selectedFeature.properties['Planning Authority']}</b></h3>
-                    <p class='text-xs'>Submitted: {selectedFeature.properties['Planning Application Submitted']}</p>
-                    <h3 class="text-xs font-italic">Reference:  <b>{selectedFeature.properties['Planning Application Reference']}</b></h3>
-                    <button on:click={copyToClipboard} class="px-3 py-1 text-sm bg-orange-500 text-white rounded hover:bg-blue-600">
-                        {buttonText}
-                    </button>
-                    <br>
-                    <a class='text-sm text-orange-500' target="_blank" href={councils[selectedFeature.properties['Planning Authority']]}> Link To Planning Authority Database</a>
-
-                    <br>
-                    {#if selectedFeature.properties['Planning Permission Refused'] != 0}
-                        <p class='text-xs'>Refused: {selectedFeature.properties['Planning Permission Refused']}</p>
-                    {/if}
-
-                    {#if selectedFeature.properties['Planning Permission Withdraw'] != 0}
-                        <p class='text-xs'>Withdrawn: {selectedFeature.properties['Planning Permission Withdrawn']}</p>
-                    {/if}
-                    <p class="text-xs font-bold">Record Last Updated {selectedFeature.properties['Record Last Updated (dd/mm/yyyy)']}</p>
-
-                    </div>
-                    {#if nimby_choice}
-                    <div class="collapse collapse-arrow border-base-300 mt-3 mb-2 border">
-                        <input type="checkbox" />
-                        <div class="collapse-title text-sm mb-0 pb-0 bg-white">{selectedFeature.properties['Development Status']}</div>
-                        <div class="collapse-content bg-white">
-                            <table class="w-full table rounded-box border border-base-content/5 bg-base-100">
-
-                                <tbody>
-                                    {#each Object.entries(selectedFeature.properties).filter(([key]) => allowedProperties.includes(key)) as [key, value]}
-                                        {#if key !== 'title'}
-                                            <tr class="property-row"  style="opacity: 1;">
-                                                <td>{key.replace(/_/g, ' ')}</td>
-                                                <td>{value}</td>
-                                            </tr>
-                                        {/if}
-                                    {/each}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-
-                    {/if}
-
-                {:else}
-                <div class="glass3d2 flex bg-white rounded-xl p-4 shadow-md">
-                    <div class='ml-1'>
-                        <h1 class="text-xxl ">Clean Energy Graveyard (C.E.G)</h1>
-                        <a href='https://www.bemben.co.uk'>Made by Damian Bemben</a>
-                    </div>
-                </div>
-
+                    <SelectedFeatureUI nimbyRadarCanvas={nimbyRadarCanvas} councils={councils} resetSelection={resetSelection} selectedFeature={selectedFeature} nimby_choice={nimby_choice} />
+                    {:else}
+                    <SideBarMain stat={stats} refused={refused}/>
                 {/if}
             </div>
 
-            <div style="height: 300px" class='bg-white p-4 rounded-xl shadow-xl'    class:hidden={!selectedFeature}>
-                <h3 class="text-md font-bold align-center">C.E.G Score</h3>
-                <canvas bind:this={nimbyRadarCanvas}></canvas>
-            </div>
-            
-            <div class="grid grid-cols-2 gap-2" class:hidden={selectedFeature}>
-                {#each stats as stat}
-                    <div class="bg-white stat place-items-center shadow bg-base-100 rounded-xl">
-                        <div class=" stat-title">{stat.label}</div>
-                        <span class="stat-detail stat-value">{stat.value}</span>
-                        <span class="stat-desc">{stat.trend}</span>
-                    </div>
-                {/each}
-            </div>
-            <div class="bg-white rounded-xl p-4 shadow-md mt-2">
-                <DelayTimesVisualization delayData={refused}/>
-            </div>
-            <article class:hidden={selectedFeature} class="prose text-xs mt-2 bg-white p-4 rounded-xl shadow-xl">
-                <h2 class="text-sm">What's the C.E.G?</h2>
-                <p>
-                    The C.E.G is an experiment into analyzing issues plaguing UK renewables progress.
-                    Gemini has been used in order to help identify potential news articles about sites.
-                </p>
-
-                <p>
-                    The actual site information is factual and is using the governmental REPD dataset for cancelled renewable projects.
-                    <b>The opinions themselves are made up, and the points don't matter.</b>
-                </p>
-                <p>
-                    <b> On the map - Bright red denotes high certainty NIMBY-ness</b>
-                </p>
-            </article>
 
         </div>
 
 
-
-        {#if selectedFeature && nimby_choice}
-            <div class="sidebar-content" bind:this={sidebarContent}>
-                <hr/>
-                <ul  class="list bg-base-100 rounded-box shadow-md mt-2 mb-2">
-                    <li class="p-4 pb-2 text-xs opacity-60 tracking-wide">3 'Fun' Facts about this Failure</li>
-
-                    {#each nimby_choice['Interesting Tidbits'] || [] as tidbit}
-                        <li class="list-row p-4">
-                            <div class='list-col-grow text-sm'>
-                                {tidbit}
-                            </div>
-                        </li>
-                    {/each}
-                </ul>
-                
-
-                <div class="chat chat-start">
-
-
-
-                    <div class="chat-image avatar">
-                        <div class="w-10 rounded-full ring-primary ring ring-offset-2">
-                          <img
-                            alt="A small butterfly, illustrated"
-                            src="./gif.gif" />
-                        </div>
-                      </div>
-                    <div class="chat-bubble bg-orange-400  shadow-xl">
-                        {nimby_choice['Snide Commentary']}
-                    </div>
-                    <div class="chat-bubble bg-orange-400 shadow-xl mt-2">
-                    <p class="text-sm">{nimby_choice['header']}</p>
-                    </div>
-                    <div class="chat-footer opacity-50">Sent By C.E.G - He may be wrong! </div>
-
-                </div>
-            </div>
-            
-            <div class="flex mt-5 justify-center items-center">
-                {#if nimby_choice && nimby_choice['article_url']}
-                    <a href="{nimby_choice['article_url']}" target="_blank" rel="noopener noreferrer" class="btn btn-primary bg-orange-500 text-white">
-                        Potential Link/Article About This Project
-                    </a>
-                {:else}
-                    <!-- <button class="btn btn-primary" on:click={() => showSubmitForm = true}>
-                        Submit Information
-                    </button> -->
-                {/if}
-            </div>
-        {/if}
                     <div class="flex mt-5 justify-center items-center button">
 
                  <a class='btn', href='https://form.jotform.com/251386339530055'>Let's Talk!</a>
@@ -697,11 +521,8 @@ function toggleColorMode() {
     {/if}
 
     <div class="map-container" bind:this={mapContainer}></div>
-    <!-- <Cards></Cards> -->
     <Timeline bind:startDate bind:endDate minDate='2019-01-01', maxDate='2025-01-01' on:change{updateMapData}></Timeline>
     <div class='glass3d-wrapper control-content expanded absolute top-2 right-2 transform bg-base-100 p-2 rounded-lg shadow-lg'>
-
-
         <div>
             <div>
                 <button class="p-2 text-xs btn bg-orange-400 text-white" on:click={toggleColorMode}>
@@ -729,10 +550,6 @@ function toggleColorMode() {
 
 <style>
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-@plugin "@tailwindcss/typography";
     .hidden {
         display: none;
     }
@@ -875,10 +692,7 @@ function toggleColorMode() {
     .map-container {
         height: 100vh;
     }
-    /* .sidebar {
-        padding: 20px;
-        overflow-y: auto;
-    } */
+
     
     .chat-bubble {
         max-width: 90%;
