@@ -155,7 +155,9 @@ def get_repd_dataframe(date='2015-01-01'):
 
 def repd_geojson_file():
     df = get_repd_dataframe()
+    
     geojson = create_geojson(df)
+    print(geojson)
     with open('points.geojson', 'w') as f:
         json.dump(geojson, f, indent=2)
 

@@ -75,5 +75,7 @@ if __name__ == "__main__":
     # dorset.main()
     # df = repd.get_repd_dataframe()
     # df = df.sort_values(by=['Installed Capacity (MWelec)'], ascending=False)
+
+    # print(df)
     # df.to_csv("test.csv")
-    # repd.repd_geojson_file()
+    repd.repd_geojson_file()
