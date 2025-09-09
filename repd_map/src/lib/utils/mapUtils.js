@@ -43,6 +43,50 @@ export async function addLocalAuthoritiesLayer(map) {
     });
 }
 
+export async function addNimbyLayer(map, nimbyRefIds, nimbyRefIds2, nimbyRefIds3) {
+    let refProperty = 'Ref ID';
+    map.addLayer({ 
+        id: 'unclustered-point',
+        type: 'circle',
+        source: 'points',
+        paint: {
+            'circle-radius': [
+                'interpolate',
+                ['linear'],
+                ['coalesce', ['get', sizeProperty], 0],
+                0, 5,
+                200, 20
+            ],
+            'circle-stroke-width': 0,
+            'circle-stroke-opacity':0.5,
+
+            'circle-color': [
+                'case',
+                ['boolean', ['feature-state', 'selected'], false],
+                '#fbb03b',  // Selected color
+                [
+                    'case',
+                    ['in', ['get', refProperty], ['literal', [...nimbyRefIds]]],
+                    '#97001b',  // Has nimby details - darker red
+                    [
+                        'case',
+                        ['in', ['get', refProperty], ['literal', [...nimbyRefIds3]]],
+                        '#FF446b',  // Has nimby details - darker red
+                        [
+                            'case',    
+                                ['in', ['get', refProperty], ['literal', [...nimbyRefIds2]]],
+                                '#a698b8',
+                                '#d3d3d3'   // No nimby details - gray
+                        ]
+                    ]
+                ]
+            ],
+            'circle-opacity': 0
+        }
+    });
+
+}
+
 export async function addRenewableProjectsSource(map, geojsonData) {
     map.addSource('points', {
         type: 'geojson',
