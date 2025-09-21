@@ -7,8 +7,8 @@
 
 <div class="glass3d2 flex bg-white rounded-xl p-4 shadow-md">
     <div class="ml-1">
-        <h1 class="text-xxl">Clean Energy Graveyard (C.E.G)</h1>
-        <a href="https://www.bemben.co.uk">Made by Damian Bemben</a>
+        <h1 class="text-xl font-semibold text-gray-900">Clean Energy Graveyard (C.E.G)</h1>
+        <a class="text-sm font-medium text-gray-900" href="https://www.bemben.co.uk">Made by Damian Bemben</a>
     </div>
 </div>
 <div class="grid grid-cols-2 gap-2" >

@@ -631,20 +631,29 @@
                     {/if}
                 </div>
             </div>
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-6 rounded-xl shadow-xl border border-gray-100">
+            <div class="flex  items-center button">
 
-            <div class="flex mt-5 justify-center items-center button">
-                <a class="btn" , href="https://form.jotform.com/251386339530055"
-                    >Let's Talk!</a
+                <a class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium rounded-md shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-sm" , href="https://form.jotform.com/251386339530055"
+                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+                    Let's Talk!</a
                 >
             </div>
 
-            <div class="flex mt-5 justify-center items-center">
+            <div class="flex align-right items-center">
                 <a
-                    class="btn"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-green-700 text-white font-medium rounded-md shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-sm"
                     href="https://www.gov.uk/government/publications/renewable-energy-planning-database-monthly-extract"
                 >
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                    </svg>
                     V1.0.5 - REPD January 2025</a
                 >
+            </div>
             </div>
         </div>
     {/if}
@@ -664,7 +673,7 @@
         <div>
             <div>
                 <button
-                    class="p-2 text-xs btn bg-orange-400 text-white"
+                    class="p-2 text-xs btn bg-orange-400 text-white rounded-xl"
                     on:click={toggleColorMode}
                 >
                     {coloringMode === "nimby"
