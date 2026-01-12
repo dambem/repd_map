@@ -34,7 +34,6 @@ class RepdProcessor:
         return df   
     
     def en_to_latlon(self, df:DataFrame, east_col='X-coordinate', nor_col='Y-coordinate'):
-        #TODO - move this logic into a geospatial engine
         from pyproj import Transformer
         transformer = Transformer.from_crs("EPSG:27700", "EPSG:4326")   
         lat,lon = transformer.transform(df[east_col].values, df[nor_col].values)
