@@ -42,7 +42,7 @@ export const TECH_COLORS = {
 };
 
 export const NIMBY_LEGEND = [
-  { label: 'Confirmed NIMBY', color: COLORS.vermillion },
+  { label: 'NIMBY interference detected', color: COLORS.vermillion },
   { label: 'NIMBY potential', color: COLORS.ember },
   { label: 'No community data', color: COLORS.ash },
 ];
