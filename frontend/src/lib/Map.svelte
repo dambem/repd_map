@@ -1,976 +1,426 @@
 <script>
-    import { onMount, onDestroy } from "svelte";
-    import maplibregl from "maplibre-gl";
-    import "maplibre-gl/dist/maplibre-gl.css";
-    import Chart from "chart.js/auto";
-    import { cubicIn, cubicOut } from "svelte/easing";
-    import { slide } from "svelte/transition";
-    import gsap from "gsap";
-    import DelayTimesVisualization from "$lib/components/DelayTimesVisualization.svelte";
-    import Cards from "$lib/components/Cards.svelte";
-    import { PUBLIC_MAPTILER_API_KEY } from "$env/static/public";
-    import Timeline from "$lib/components/Timeline.svelte";
-    import { fly } from "svelte/transition";
-    import About from "$lib/components/About.svelte";
-    import Badge from "./components/ui/badge/badge.svelte";
-    import marker from "/src/icons/marker.svg";
-    import SelectedFeatureUI from "./components/sidebar/SelectedFeatureUI.svelte";
-    import SideBarMain from "./components/sidebar/SideBarMain.svelte";
+    import { onMount, onDestroy } from 'svelte';
+    import maplibregl from 'maplibre-gl';
+    import 'maplibre-gl/dist/maplibre-gl.css';
+    import { fly } from 'svelte/transition';
+    import { PUBLIC_MAPTILER_API_KEY } from '$env/static/public';
+
+    import Timeline from '$lib/components/Timeline.svelte';
+    import ControlPanel from '$lib/components/ControlPanel.svelte';
+    import SideBarMain from '$lib/components/sidebar/SideBarMain.svelte';
+    import SelectedFeatureUI from '$lib/components/sidebar/SelectedFeatureUI.svelte';
+
+    import { PROPS, TECH, DATE_RANGE } from '$lib/config/constants.js';
+    import { buildNimbyIndex } from '$lib/data/nimby.js';
+    import { vitalRecord, lifespanLabel } from '$lib/data/projects.js';
+    import { registerHeadstoneImages } from '$lib/map/headstones.js';
     import {
-        addMarkerLayer,
-        addLocalAuthoritiesSource,
-        addNimbyLayer,
-        addLocalAuthoritiesLayer,
-        addRenewableProjectsSource,
-    } from "$lib/utils/mapUtils.js";
-    let isCollapsed = false;
-    let config;
+        aggregateByAuthority,
+        totalCapexLostM,
+        formatPoundsM,
+    } from '$lib/data/financials.js';
+    import {
+        LAYER,
+        SOURCE,
+        addProjectsSource,
+        addProjectsLayer,
+        addAuthoritiesSource,
+        addAuthoritiesLayer,
+        nimbyStoneExpression,
+        typeStoneExpression,
+        setChoroplethMode,
+        setLayerVisible,
+        setProjectFilter,
+        buildProjectFilter,
+    } from '$lib/map/layers.js';
 
-    export let points = []; // GeoJSON features
+    export let points = [];
     export let nimby_score = [];
-    export let councils = [];
+    export let councils = {};
     export let refused = [];
-    export let sizeProperty = "Installed Capacity (MWelec)";
-    export let typeProperty = "Technology Type";
-    export let refProperty = "Ref ID";
 
-    export let minSize = 20;
-    export let maxSize = 50;
-    let coloringMode = "nimby"; // Start with NIMBY coloring, options are 'nimby' or 'type'
-    let showControlPanel = false;
-    let filterSolar = true;
-    let filterWind = true;
-    let filterBattery = true;
-    let filterOther = true;
-    let showLocalAuthorities = true;
+    /* ----------------------------------------------------------- UI state */
+    let sidebarOpen = true;
+    let colorMode = 'nimby';
+    let choroplethMode = 'count';
+    let activeTechs = new Set(Object.values(TECH));
+    let includeOther = true;
+    let showAuthorities = true;
     let showProjects = true;
-    // DOM elements
-    const NIMBY_TEST = "#b62121";
-    const NIMBY_POTENTIAL = "#eb8e47";
+    let startDate = '2020-01-01';
+    let endDate = DATE_RANGE.max;
+
+    /* ---------------------------------------------------------- map state */
     let mapContainer;
-    let nimbyRadarCanvas;
-    let sidebarContent;
-    let typeItems2 = [
-        { label: "Battery", color: "#004C99" },
-        { label: "Solar", color: "#E6B800" },
-        { label: "Wind", color: "#00857D" },
-        { label: "Other", color: "#FFFFFF" },
-    ];
-
-    let typeItems = [
-        { label: "Not A NIMBY", color: "#d3d3d3" },
-        { label: "Nimby Potential", color: NIMBY_POTENTIAL },
-        { label: "NIMBY", color: NIMBY_TEST },
-    ];
-    let currentTypeLabel = typeItems;
-
-    // State variables
     let map;
+    let mapReady = false;
     let selectedFeature = null;
-    let nimby_choice = null;
-    let speed = 0;
-    let rpm = 0;
-    let radarChart = null;
-    let showSubmitForm = false;
-    let articleUrl = "";
-    let articleNotes = "";
+    let nimbyChoice = null;
 
-    // Date filter
-    let startDate = "2020-01-01";
-    let endDate = "2025-01-01";
-    let technologyType = "all";
-    const accuracy2 = nimby_score.filter(
-        (item) => item["Accuracy Score"] >= 30,
-    );
-    const accuracy3 = nimby_score.filter(
-        (item) => item["Accuracy Score"] < 70 && item["Accuracy Score"] >= 50,
-    );
-    const accuracy1 = nimby_score.filter(
-        (item) => item["Accuracy Score"] >= 70,
-    );
-    const accuracy_bad = nimby_score.filter(
-        (item) => item["Accuracy Score"] < 30,
-    );
-    const nimbyRefIds = new Set(accuracy1.map((item) => item.refid || ""));
-    const nimbyRefIds2 = new Set(accuracy_bad.map((item) => item.refid || ""));
-    const nimbyRefIds3 = new Set(accuracy2.map((item) => item.refid || ""));
-    const nimbyRefIds4 = new Set(accuracy3.map((item) => item.refid || ""));
-    let stats = [
+    const nimbyIndex = buildNimbyIndex(nimby_score);
+
+    /* -------------------------------------------------------------- stats */
+    // Headline figures follow the active filters and timeline.
+    $: filteredPoints = points.filter((p) => {
+        const submitted = p.properties[PROPS.SUBMITTED];
+        if (submitted < startDate || submitted > endDate) return false;
+        const tech = p.properties[PROPS.TECH_TYPE];
+        return Object.values(TECH).includes(tech) ? activeTechs.has(tech) : includeOther;
+    });
+
+    $: stats = [
         {
-            label: "Total Capacity Lost",
-            value: "6584",
-            calculate: calculateTotalCapacity,
-            trend: "MW",
+            label: 'Projects buried',
+            value: filteredPoints.length.toLocaleString(),
+            trend: 'in current view',
         },
         {
-            label: "Total Projects Cancelled",
-            value: "156",
-            calculate: calculateLengthA,
-            trend: "Since January 2020",
+            label: 'Capacity interred',
+            value: Math.round(
+                filteredPoints.reduce(
+                    (sum, p) => sum + (parseFloat(p.properties[PROPS.CAPACITY]) || 0),
+                    0,
+                ),
+            ).toLocaleString(),
+            trend: 'MW',
+        },
+        {
+            label: 'Est. investment lost',
+            value: formatPoundsM(totalCapexLostM(filteredPoints)),
+            trend: 'capex, indicative',
+            isMoney: true,
         },
     ];
 
-    const allowedProperties = [
-        "Operator (or Applicant)",
-        "Site Name",
-        "Technology Type",
-        "Installed Capacity (MWelec)",
-        "Development Status",
-        "Planning Permission Refused",
-        "Planning Application Withdrawn",
-        "Planning Application Submitted",
-    ];
-
-    // Animation timer
-    let animationTimer;
-    function updateCircleColors() {
-        if (!map || !map.getLayer("unclustered-point")) return;
-        if (coloringMode === "nimby") {
-            // NIMBY-based coloring
-            map.setPaintProperty(
-                "unclustered-point",
-                "circle-color",
-                "#ffffff",
-            ); // Base color
-
-            map.setPaintProperty("unclustered-point", "circle-color", [
-                "case",
-                ["in", ["get", refProperty], ["literal", [...nimbyRefIds]]],
-                NIMBY_TEST, // Has nimby details - darker red
-                [
-                    "case",
-                    [
-                        "in",
-                        ["get", refProperty],
-                        ["literal", [...nimbyRefIds3]],
-                    ],
-                    NIMBY_POTENTIAL, // Has nimby details - darker red
-                    [
-                        "case",
-                        [
-                            "in",
-                            ["get", refProperty],
-                            ["literal", [...nimbyRefIds2]],
-                        ],
-                        NIMBY_POTENTIAL,
-                        "#d3d3d3", // No nimby details - gray
-                    ],
-                ],
-            ]);
-            // Reset stroke to a simple style
-            map.setPaintProperty(
-                "unclustered-point",
-                "circle-stroke-color",
-                "#000000",
-            );
-            map.setPaintProperty(
-                "unclustered-point",
-                "circle-stroke-width",
-                0.5,
-            );
-        } else {
-            // Type-based coloring
-            map.setPaintProperty(
-                "unclustered-point",
-                "circle-color",
-                "#ffffff",
-            ); // Base color
-            // Use the type colors for the stroke
-            map.setPaintProperty("unclustered-point", "circle-color", [
-                "match",
-                ["get", typeProperty], // Get the value of typeProperty
-                "Battery",
-                "#004C99", // Blue for battery
-                "Solar Photovoltaics",
-                "#E6B800", // Gold for solar
-                "Wind Onshore",
-                "#00CC66", // Green for wind
-                "#FFFFFF", // Default color if none match
-            ]);
-            map.setPaintProperty("unclustered-point", "circle-stroke-width", 2);
+    /* ----------------------------------------------------------- map init */
+    function enrichAuthorities(authoritiesGeojson) {
+        const byAuthority = aggregateByAuthority(points);
+        for (const feature of authoritiesGeojson.features) {
+            const entry = byAuthority.get(feature.properties.LAD24NM);
+            feature.properties.project_count = entry?.count ?? 0;
+            feature.properties.total_capacity = Math.round(entry?.capacityMW ?? 0);
+            feature.properties.capex_lost_m = Math.round(entry?.capexLostM ?? 0);
         }
-    }
-    function toggleColorMode() {
-        coloringMode = coloringMode === "nimby" ? "type" : "nimby";
-        currentTypeLabel = coloringMode === "nimby" ? typeItems : typeItems2;
-        updateCircleColors();
+        return authoritiesGeojson;
     }
 
-    function toggleLayerVisibility(layerId, visible) {
-        if (!map || !map.getLayer(layerId)) return;
-        map.setLayoutProperty(layerId, "visibility", visible ? "visible" : "none");
-    }
-
-    function enrichAuthoritiesWithProjectCounts(authoritiesData, projectFeatures) {
-        const projectCounts = {};
-        const capacityCounts = {};
-        projectFeatures.forEach((feature) => {
-            const authority =
-                feature.properties["Planning Authority"] || "Unknown";
-            projectCounts[authority] = (projectCounts[authority] || 0) + 1;
-            capacityCounts[authority] =
-                (capacityCounts[authority] || 0) +
-                (parseFloat(
-                    feature.properties["Installed Capacity (MWelec)"],
-                ) || 0);
-        });
-
-        authoritiesData.features.forEach((feature) => {
-            const name = feature.properties.LAD24NM;
-            feature.properties.project_count = projectCounts[name] || 0;
-            feature.properties.total_capacity = Math.round(
-                capacityCounts[name] || 0,
-            );
-        });
-    }
-    function calculateTotalCapacity(points) {
-        const total = points.reduce((sum, point) => {
-            const capacity =
-                parseFloat(point.properties["Installed Capacity (MWelec)"]) ||
-                0;
-            return sum + capacity;
-        }, 0);
-        return `${Math.round(total)}`;
-    }
-    function calculateLength(points) {
-        // Count points with appeal information
-        const appealsCount = points.filter(
-            (point) =>
-                point.properties["Development Status"] ===
-                "Planning Permission Refused",
-        ).length;
-        return appealsCount.toString();
-    }
-    function calculateLengthW(points) {
-        // Count points with appeal information
-        const appealsCount = points.filter(
-            (point) =>
-                point.properties["Development Status"] ===
-                "Planning Application Withdrawn",
-        ).length;
-        return appealsCount.toString();
-    }
-    function calculateLengthA(points) {
-        // Count points with appeal information
-        const appealsCount = points.length;
-        return appealsCount.toString();
-    }
-
-    function initAnimation() {
-        clearInterval(animationTimer);
-        animationTimer = setInterval(() => {
-            const timeFraction = (Date.now() % 6000) / 5000;
-            speed = cubicIn(timeFraction) * 100;
-            rpm = cubicOut(timeFraction) * 8000;
-        }, 500);
-    }
-
-    function getActiveTypes() {
-        const types = [];
-        if (filterSolar) types.push("Solar Photovoltaics");
-        if (filterWind) types.push("Wind Onshore");
-        if (filterBattery) types.push("Battery");
-        if (filterOther) types.push("Other");
-        return types;
-    }
-
-    function updateMapData() {
-        if (!map) return;
-        const activeTypes = getActiveTypes();
-        var filter = [
-            "all",
-            [">=", ["get", "Planning Application Submitted"], startDate],
-            ["<=", ["get", "Planning Application Submitted"], endDate],
-        ];
-        if (activeTypes.length < 4) {
-            // Build a match expression: true if type is in activeTypes, also allow through types
-            // that don't match any known category when "Other" is on
-            filter.push([
-                "any",
-                ["in", ["get", "Technology Type"], ["literal", activeTypes]],
-                ...(filterOther
-                    ? [
-                          [
-                              "all",
-                              ["!=", ["get", "Technology Type"], "Solar Photovoltaics"],
-                              ["!=", ["get", "Technology Type"], "Wind Onshore"],
-                              ["!=", ["get", "Technology Type"], "Battery"],
-                          ],
-                      ]
-                    : []),
-            ]);
-        }
-        map.setFilter("unclustered-point", filter);
-
-        stats.forEach((stat) => {
-            const currentValue = stat.calculate(points);
-            stat.value = currentValue;
-        });
-        stats = stats.map((stat) => ({ ...stat }));
-    }
-
-    function initMap() {
-        if (map) return;
-
+    function initMap(authoritiesGeojson) {
         map = new maplibregl.Map({
             container: mapContainer,
-            style: `https://api.maptiler.com/maps/landscape/style.json?key=${PUBLIC_MAPTILER_API_KEY}`,
+            style: `https://api.maptiler.com/maps/dataviz-dark/style.json?key=${PUBLIC_MAPTILER_API_KEY}`,
             center: [-4, 55.2],
             zoom: 4.8,
+            attributionControl: { compact: true },
         });
 
-        map.on("load", () => {
-            // Enrich local authorities with project counts before adding source
-            enrichAuthoritiesWithProjectCounts(config, points);
+        map.on('load', () => {
+            registerHeadstoneImages(map);
+            addAuthoritiesSource(map, enrichAuthorities(authoritiesGeojson));
+            addAuthoritiesLayer(map);
+            addProjectsSource(map, points);
+            addProjectsLayer(map, nimbyIndex);
+            applyFilters();
+            wireInteractions();
+            mapReady = true;
+            selectFromHash();
+        });
+    }
 
-            // Add source
-            addLocalAuthoritiesSource(map, config);
-            map.addSource("points", {
-                type: "geojson",
-                data: {
-                    type: "FeatureCollection",
-                    features: points,
-                },
-            });
-            addLocalAuthoritiesLayer(map);
+    /* -------------------------------------------------------- interaction */
+    function wireInteractions() {
+        const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+        let hoveredPointId = null;
+        let hoveredAuthorityId = null;
 
-            const popup = new maplibregl.Popup({
-                closeButton: false,
-                closeOnClick: false,
-            });
-            let hoveredPointId = null;
-            let hoveredAuthorityId = null;
-
-            // Add circle layer for project markers
-            map.addLayer({
-                id: "unclustered-point",
-                type: "circle",
-                source: "points",
-                paint: {
-                    "circle-radius": [
-                        "interpolate",
-                        ["linear"],
-                        ["coalesce", ["get", sizeProperty], 0],
-                        0, 6,
-                        50, 14,
-                        200, 22,
-                    ],
-                    "circle-color": [
-                        "case",
-                        ["boolean", ["feature-state", "selected"], false],
-                        "#fbb03b",
-                        [
-                            "case",
-                            ["in", ["get", refProperty], ["literal", [...nimbyRefIds]]],
-                            NIMBY_TEST,
-                            [
-                                "case",
-                                ["in", ["get", refProperty], ["literal", [...nimbyRefIds3]]],
-                                NIMBY_POTENTIAL,
-                                [
-                                    "case",
-                                    ["in", ["get", refProperty], ["literal", [...nimbyRefIds2]]],
-                                    NIMBY_POTENTIAL,
-                                    "#d3d3d3",
-                                ],
-                            ],
-                        ],
-                    ],
-                    "circle-stroke-color": "#000000",
-                    "circle-stroke-width": 0.5,
-                    "circle-opacity": 0,
-                },
-            });
-
-            // Fade in the circles
-            setTimeout(() => {
-                map.setPaintProperty(
-                    "unclustered-point",
-                    "circle-opacity-transition",
-                    { duration: 800, delay: 100 },
-                );
-                map.setPaintProperty(
-                    "unclustered-point",
-                    "circle-opacity",
-                    0.85,
-                );
-            }, 300);
-            // Add interactivity
-            map.on("mousemove", (e) => {
-                // Use queryRenderedFeatures to check for features at the mouse position
-                // The first argument is the point, and the second is an object specifying the layers to query.
-                const queryLayers = ["local-authorities-layer"];
-                if (map.getLayer("unclustered-point")) queryLayers.unshift("unclustered-point");
-                const features = map.queryRenderedFeatures(e.point, {
-                    layers: queryLayers,
-                });
-                // Reset cursor
-                map.getCanvas().style.cursor = "";
-                popup.remove();
-
-                // Reset previous hover states
-                if (hoveredPointId !== null) {
-                    map.setFeatureState(
-                        { source: "points", id: hoveredPointId },
-                        { hover: false },
-                    );
-                    hoveredPointId = null;
-                }
-                if (hoveredAuthorityId !== null) {
-                    map.setFeatureState(
-                        { source: "local-authorities", id: hoveredAuthorityId },
-                        { hover: false },
-                    );
-                    hoveredAuthorityId = null;
-                }
-
-                if (features.length > 0) {
-                    map.getCanvas().style.cursor = "pointer";
-
-                    // Prioritize the point feature if it's present
-                    const pointFeature = features.find(
-                        (f) => f.layer.id === "unclustered-point",
-                    );
-
-                    if (pointFeature) {
-                        hoveredPointId = pointFeature.id;
-                        map.setFeatureState(
-                            { source: "points", id: hoveredPointId },
-                            { hover: true },
-                        );
-                        popup
-                            .setLngLat(e.lngLat)
-                            .setHTML(
-                                `<h3>${pointFeature.properties["Planning Application Reference"]}</h3><p><b>Name:</b>${pointFeature.properties["Site Name"]}</p><p><b>Planning Authority:</b>${pointFeature.properties["Planning Authority"]}</p>`,
-                            )
-                            .addTo(map);
-                    } else {
-                        // If no point, check for an authority feature
-                        const authorityFeature = features.find(
-                            (f) => f.layer.id === "local-authorities-layer",
-                        );
-                        if (authorityFeature) {
-                            hoveredAuthorityId = authorityFeature.id;
-                            map.setFeatureState(
-                                {
-                                    source: "local-authorities",
-                                    id: hoveredAuthorityId,
-                                },
-                                { hover: true },
-                            );
-                            const count = authorityFeature.properties.project_count || 0;
-                            const capacity = authorityFeature.properties.total_capacity || 0;
-                            popup
-                                .setLngLat(e.lngLat)
-                                .setHTML(
-                                    `<h3>${authorityFeature.properties.LAD24NM}</h3>` +
-                                    (count > 0
-                                        ? `<p><b>Projects:</b> ${count}</p><p><b>Total Capacity:</b> ${capacity} MW</p>`
-                                        : ``),
-                                )
-                                .addTo(map);
-                        }
-                    }
-                }
-            });
-
-            // Consolidated mouseleave event
-            map.on("mouseleave", "unclustered-point", () => {
-                if (hoveredPointId !== null) {
-                    map.setFeatureState(
-                        { source: "points", id: hoveredPointId },
-                        { hover: false },
-                    );
-                }
+        const clearHover = () => {
+            if (hoveredPointId !== null) {
+                map.setFeatureState({ source: SOURCE.PROJECTS, id: hoveredPointId }, { hover: false });
                 hoveredPointId = null;
-                map.getCanvas().style.cursor = "";
-                popup.remove();
-            });
-
-            map.on("mouseleave", "local-authorities-layer", () => {
-                if (hoveredAuthorityId !== null) {
-                    map.setFeatureState(
-                        { source: "local-authorities", id: hoveredAuthorityId },
-                        { hover: false },
-                    );
-                }
-                hoveredAuthorityId = null;
-                map.getCanvas().style.cursor = "";
-                popup.remove();
-            });
-
-            // Handle click events
-            map.on("click", "unclustered-point", (e) => {
-                if (!e.features.length) return;
-
-                // Clear previous selection
-                if (selectedFeature) {
-                    map.setFeatureState(
-                        {
-                            source: "points",
-                            id: selectedFeature.properties["Ref ID"],
-                        },
-                        { selected: false },
-                    );
-                }
-
-                const feature = e.features[0];
-                selectedFeature = feature;
-
-                // Find corresponding nimby score by refid
-                const featureId = feature.properties["Ref ID"];
-                nimby_choice = nimby_score.find(
-                    (score) => score.refid === featureId,
-                );
-
-                // Set new selection state
+            }
+            if (hoveredAuthorityId !== null) {
                 map.setFeatureState(
-                    {
-                        source: "points",
-                        id: selectedFeature.properties["Ref ID"],
-                    },
-                    { selected: true },
+                    { source: SOURCE.AUTHORITIES, id: hoveredAuthorityId },
+                    { hover: false },
                 );
+                hoveredAuthorityId = null;
+            }
+        };
 
-                // Initialize nimby radar chart if nimby_choice exists
-                if (nimby_choice) {
-                    setTimeout(() => {
-                        animateProperties();
-                    }, 10);
-                } else {
-                    // Show UI for submitting a new article
-                    nimby_choice = {
-                        header: "No community information available yet",
-                        "Interesting Tidbits": [
-                            "No information has been added for this project yet.",
-                        ],
-                        "Snide Commentary":
-                            "Help us build our database by submitting information about this project!",
-                    };
-                }
-            });
+        map.on('mousemove', (e) => {
+            const queryLayers = [LAYER.PROJECTS, LAYER.AUTHORITIES].filter((id) =>
+                map.getLayer(id),
+            );
+            const features = map.queryRenderedFeatures(e.point, { layers: queryLayers });
 
-            // Click on local authority to zoom to its bounds
-            map.on("click", "local-authorities-layer", (e) => {
-                if (!e.features.length) return;
-                const feature = e.features[0];
-                const coords = feature.geometry.coordinates;
-                const bounds = new maplibregl.LngLatBounds();
+            map.getCanvas().style.cursor = '';
+            popup.remove();
+            clearHover();
+            if (!features.length) return;
 
-                if (feature.geometry.type === "Polygon") {
-                    coords[0].forEach((coord) => bounds.extend(coord));
-                } else if (feature.geometry.type === "MultiPolygon") {
-                    coords.forEach((polygon) =>
-                        polygon[0].forEach((coord) => bounds.extend(coord)),
-                    );
-                }
+            map.getCanvas().style.cursor = 'pointer';
+            const point = features.find((f) => f.layer.id === LAYER.PROJECTS);
 
-                map.fitBounds(bounds, { padding: 40, maxZoom: 12 });
-            });
+            if (point) {
+                hoveredPointId = point.id;
+                map.setFeatureState({ source: SOURCE.PROJECTS, id: hoveredPointId }, { hover: true });
+                popup
+                    .setLngLat(e.lngLat)
+                    .setHTML(
+                        `<div class="epitaph-eyebrow">Here lies</div>` +
+                            `<h3>${point.properties[PROPS.SITE_NAME]}</h3>` +
+                            `<div class="epitaph-dates">✝ ${lifespanLabel(point.properties)}</div>` +
+                            `<div>${point.properties[PROPS.AUTHORITY]}</div>` +
+                            `<div class="popup-figure">${point.properties[PROPS.CAPACITY]} MW never built</div>`,
+                    )
+                    .addTo(map);
+                return;
+            }
 
-            // Initialize map data filter
-            updateMapData();
+            const authority = features.find((f) => f.layer.id === LAYER.AUTHORITIES);
+            if (authority) {
+                hoveredAuthorityId = authority.id;
+                map.setFeatureState(
+                    { source: SOURCE.AUTHORITIES, id: hoveredAuthorityId },
+                    { hover: true },
+                );
+                const { LAD24NM, project_count, total_capacity, capex_lost_m } = authority.properties;
+                popup
+                    .setLngLat(e.lngLat)
+                    .setHTML(
+                        `<h3>${LAD24NM}</h3>` +
+                            (project_count > 0
+                                ? `<div>${project_count} cancelled · ${total_capacity} MW</div>` +
+                                  `<div class="popup-figure">≈ £${capex_lost_m}m est. investment lost</div>`
+                                : `<div>No cancelled projects recorded</div>`),
+                    )
+                    .addTo(map);
+            }
+        });
+
+        map.on('mouseleave', LAYER.PROJECTS, () => {
+            clearHover();
+            map.getCanvas().style.cursor = '';
+            popup.remove();
+        });
+
+        map.on('click', LAYER.PROJECTS, (e) => {
+            if (e.features.length) selectFeature(e.features[0]);
+        });
+
+        map.on('click', LAYER.AUTHORITIES, (e) => {
+            // Only zoom when no project marker was under the cursor.
+            const hits = map.queryRenderedFeatures(e.point, { layers: [LAYER.PROJECTS] });
+            if (hits.length) return;
+            zoomToAuthority(e.features[0]);
         });
     }
 
-    function animateProperties() {
-        if (!sidebarContent) return;
-
-        // Get all property rows
-        const rows = sidebarContent.querySelectorAll(".property-row");
-
-        // Reset any existing animations
-        gsap.set(rows, { opacity: 0, y: 20 });
-
-        // Create stagger animation for the rows
-        gsap.to(rows, {
-            duration: 0.5,
-            opacity: 1,
-            y: 0,
-            stagger: 0.1,
-            ease: "power2.out",
-        });
+    function selectFeature(feature) {
+        if (selectedFeature) {
+            map.setFeatureState(
+                { source: SOURCE.PROJECTS, id: selectedFeature.properties[PROPS.REF_ID] },
+                { selected: false },
+            );
+        }
+        selectedFeature = feature;
+        map.setFeatureState(
+            { source: SOURCE.PROJECTS, id: feature.properties[PROPS.REF_ID] },
+            { selected: true },
+        );
+        history.replaceState(null, '', `#grave-${feature.properties[PROPS.REF_ID]}`);
+        nimbyChoice = nimbyIndex.scoreOf(feature.properties[PROPS.REF_ID]) ?? {
+            header: 'No community information available yet',
+            'Interesting Tidbits': [],
+            'Snide Commentary':
+                'Nothing on record for this one. Either the locals were quiet, or nobody wrote it down.',
+        };
+        sidebarOpen = true;
     }
-    function toggleControlPanel() {
-        showControlPanel = !showControlPanel;
-    }
+
     function resetSelection() {
         if (selectedFeature && map) {
             map.setFeatureState(
-                { source: "points", id: selectedFeature.id },
+                { source: SOURCE.PROJECTS, id: selectedFeature.properties[PROPS.REF_ID] },
                 { selected: false },
             );
-            selectedFeature = null;
-            nimby_choice = null;
-            showSubmitForm = false;
-            articleUrl = "";
-            articleNotes = "";
         }
+        selectedFeature = null;
+        nimbyChoice = null;
+        history.replaceState(null, '', window.location.pathname);
     }
 
-    function handleSubmitArticle() {
-        // This function would handle the submission - in a real app, you'd send this to your backend
-        console.log("Article submitted:", {
-            refid: selectedFeature?.properties?.id || selectedFeature?.id,
-            siteName: selectedFeature?.properties["Site Name"],
-            articleUrl,
-            articleNotes,
-        });
-
-        // Show success message and reset form
-        alert("Thank you for your submission! We will review it shortly.");
-        showSubmitForm = false;
-        articleUrl = "";
-        articleNotes = "";
+    /** Fly to a grave and open its record — used by the burial register and deep links. */
+    function selectByRef(refId) {
+        const feature = points.find((p) => String(p.properties[PROPS.REF_ID]) === String(refId));
+        if (!feature || !map) return;
+        map.flyTo({ center: feature.geometry.coordinates, zoom: 10.5, duration: 1600 });
+        selectFeature(feature);
     }
-    let buttonText = "Copy Ref";
 
-    const copyToClipboard = () => {
-        let copy = selectedFeature.properties["Planning Application Reference"];
-        navigator.clipboard.writeText(copy).then(() => {
-            buttonText = "Copied!";
-            setTimeout(() => {
-                buttonText = "Copy Ref";
-            }, 2000); // Revert the button text after 2 seconds
-        });
-    };
-    // Lifecycle hooks
+    function selectFromHash() {
+        const match = window.location.hash.match(/^#grave-(.+)$/);
+        if (match) selectByRef(decodeURIComponent(match[1]));
+    }
+
+    function zoomToAuthority(feature) {
+        const bounds = new maplibregl.LngLatBounds();
+        const geometry = feature.geometry;
+        const rings =
+            geometry.type === 'Polygon' ? [geometry.coordinates[0]] : geometry.coordinates.map((p) => p[0]);
+        rings.forEach((ring) => ring.forEach((coord) => bounds.extend(coord)));
+        map.fitBounds(bounds, { padding: 40, maxZoom: 12 });
+    }
+
+    /* ------------------------------------------------------------ updates */
+    function applyFilters() {
+        if (!map?.getLayer(LAYER.PROJECTS)) return;
+        setProjectFilter(
+            map,
+            buildProjectFilter({ startDate, endDate, activeTypes: [...activeTechs], includeOther }),
+        );
+    }
+
+    function applyControls() {
+        if (!mapReady) return;
+        map.setLayoutProperty(
+            LAYER.PROJECTS,
+            'icon-image',
+            colorMode === 'nimby' ? nimbyStoneExpression(nimbyIndex) : typeStoneExpression(),
+        );
+        setChoroplethMode(map, choroplethMode);
+        setLayerVisible(map, LAYER.PROJECTS, showProjects);
+        setLayerVisible(map, LAYER.AUTHORITIES, showAuthorities);
+        applyFilters();
+    }
+
+    $: if (mapReady && (startDate || endDate)) applyFilters();
+
+    /* ---------------------------------------------------------- lifecycle */
     onMount(async () => {
-        console.log(councils);
-        let response = await fetch("/localauth.json");
-        config = await response.json();
-
-        gsap.from(mapContainer, {
-            opacity: 0,
-            duration: 2, // Animation duration in seconds
-            ease: "power2.out", // Easing function
-            delay: 0.5, // Optional: if you want to delay the animation
-        });
-        initMap();
-        initAnimation();
+        const response = await fetch('/localauth.json');
+        const authoritiesGeojson = await response.json();
+        initMap(authoritiesGeojson);
     });
 
-    onDestroy(() => {
-        // Clean up resources
-        if (map) map.remove();
-        if (radarChart) radarChart.destroy();
-        clearInterval(animationTimer);
-    });
-
-    // Reactive statements
-    $: if (selectedFeature) {
-        setTimeout(animateProperties, 0);
-    }
-
-    $: if (startDate || endDate || technologyType || filterSolar || filterWind || filterBattery || filterOther) {
-        updateMapData();
-    }
+    onDestroy(() => map?.remove());
 </script>
 
-<div class="font-sans scrollbar">
+<div class="app">
+    <button
+        class="sidebar-toggle font-data"
+        on:click={() => (sidebarOpen = !sidebarOpen)}
+        aria-label={sidebarOpen ? 'Hide panel' : 'Show panel'}
+    >
+        {sidebarOpen ? '‹' : '›'}
+    </button>
 
-    {#if !isCollapsed}
-        <div
-            class="glass3d-wrapper glass3d p-0 sidebar p-3 overflow-y-scroll scrollbar"
-            transition:fly={{ x: -200, duration: 300 }}
-        >
-            <div class="sidebar-header justify-center items-center">
-                <div class=" mb-2">
-                    {#if selectedFeature}
-                        <SelectedFeatureUI
-                            {nimbyRadarCanvas}
-                            {councils}
-                            {resetSelection}
-                            {selectedFeature}
-                            {nimby_choice}
-                        />
-                    {:else}
-                        <SideBarMain stat={stats} {refused} />
-                    {/if}
-                </div>
-            </div>
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-6 rounded-xl shadow-xl border border-gray-100">
-            <div class="flex  items-center button">
+    {#if sidebarOpen}
+        <aside class="sidebar ceg-scroll" transition:fly={{ x: -240, duration: 250 }}>
+            {#if selectedFeature}
+                <SelectedFeatureUI {councils} {selectedFeature} {nimbyChoice} onBack={resetSelection} />
+            {:else}
+                <SideBarMain {stats} {refused} points={filteredPoints} onSelect={selectByRef} />
+            {/if}
 
-                <a class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium rounded-md shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-sm" , href="https://form.jotform.com/251386339530055"
-                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                </svg>
-                    Let's Talk!</a
-                >
-            </div>
-
-            <div class="flex align-right items-center">
+            <footer class="sidebar-footer font-data">
+                <a href="https://form.jotform.com/251386339530055">Suggest a correction</a>
                 <a
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-green-700 text-white font-medium rounded-md shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-sm"
                     href="https://www.gov.uk/government/publications/renewable-energy-planning-database-monthly-extract"
                 >
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
-                    </svg>
-                    V1.0.5 - REPD January 2025</a
-                >
-            </div>
-            </div>
-        </div>
+                    REPD · Jan 2025 · v1.1
+                </a>
+            </footer>
+        </aside>
     {/if}
 
     <div class="map-container" bind:this={mapContainer}></div>
-    <Timeline
-        bind:startDate
-        bind:endDate
-        minDate="2019-01-01"
-        ,
-        maxDate="2025-01-01"
-        on:change{updateMapData}
-    ></Timeline>
-    <div
-        class="glass3d-wrapper control-content expanded absolute top-2 right-2 transform bg-base-100 p-2 rounded-lg shadow-lg"
-    >
-        <div>
-            <div>
-                <button
-                    class="p-2 text-xs btn bg-orange-400 text-white rounded-xl"
-                    on:click={toggleColorMode}
-                >
-                    {coloringMode === "nimby"
-                        ? "NIMBY Level"
-                        : "Renewable Type"}
-                </button>
-            </div>
-            <br />
+    <div class="vignette" aria-hidden="true"></div>
 
-            <div class="legend-items">
-                {#each currentTypeLabel as item}
-                    <div class="legend-item">
-                        <div
-                            class="color-swatch"
-                            style="background-color: {item.color}"
-                        ></div>
-                        <div class="label p-0">{item.label}</div>
-                    </div>
-                {/each}
-            </div>
-        </div>
+    <ControlPanel
+        bind:colorMode
+        bind:choroplethMode
+        bind:activeTechs
+        bind:includeOther
+        bind:showAuthorities
+        bind:showProjects
+        onChange={applyControls}
+    />
 
-        <hr class="my-2 border-gray-300/40" />
-
-        <div class="text-xs font-semibold mb-1 opacity-70">Filter by Type</div>
-        <div class="filter-items">
-            <label class="filter-item">
-                <input type="checkbox" bind:checked={filterSolar} />
-                <span class="filter-swatch" style="background-color: #E6B800"></span>
-                Solar
-            </label>
-            <label class="filter-item">
-                <input type="checkbox" bind:checked={filterWind} />
-                <span class="filter-swatch" style="background-color: #00CC66"></span>
-                Wind
-            </label>
-            <label class="filter-item">
-                <input type="checkbox" bind:checked={filterBattery} />
-                <span class="filter-swatch" style="background-color: #004C99"></span>
-                Battery
-            </label>
-            <label class="filter-item">
-                <input type="checkbox" bind:checked={filterOther} />
-                <span class="filter-swatch" style="background-color: #FFFFFF"></span>
-                Other
-            </label>
-        </div>
-
-        <hr class="my-2 border-gray-300/40" />
-
-        <div class="text-xs font-semibold mb-1 opacity-70">Layers</div>
-        <div class="filter-items">
-            <label class="layer-toggle">
-                <input type="checkbox" bind:checked={showLocalAuthorities}
-                    on:change={() => toggleLayerVisibility("local-authorities-layer", showLocalAuthorities)} />
-
-                Local Authorities
-            </label>
-            <label class="layer-toggle">
-                <input type="checkbox" bind:checked={showProjects}
-                    on:change={() => toggleLayerVisibility("unclustered-point", showProjects)} />
-                Projects
-            </label>
-        </div>
-    </div>
+    <Timeline bind:startDate bind:endDate minDate={DATE_RANGE.min} maxDate={DATE_RANGE.max} />
 </div>
 
 <style>
-    .hidden {
-        display: none;
-    }
-    .stat-detail-r {
-        background: -webkit-radial-gradient(#b62121, #eb8e47);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        -webkit-text-stroke: 1px red;
-    }
-    .stat-detail-l {
-        background: -webkit-radial-gradient(#eb8e47, #b62121);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    h1 {
-        background: -webkit-radial-gradient(#b62121, #eb8e47);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .control-content {
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(10px);
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        max-width: 320px;
+    .app {
+        position: relative;
+        height: 100vh;
+        height: 100dvh;
         overflow: hidden;
+        background: var(--ceg-ink);
     }
-
-    .control-content.collapsed {
-        width: 48px;
-        height: 48px;
+    .map-container {
+        height: 100%;
     }
-
-    .control-content.expanded {
-        width: 200px;
-    }
-    .control-toggle {
+    .vignette {
         position: absolute;
-        top: 12px;
-        right: 12px;
-        width: 24px;
-        height: 24px;
-        border: none;
-        background: transparent;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 6px;
-        transition: background-color 0.2s;
-    }
-
-    .control-toggle:hover {
-        background: rgba(0, 0, 0, 0.1);
+        inset: 0;
+        pointer-events: none;
+        z-index: 30;
+        background: radial-gradient(ellipse at center, transparent 52%, rgba(8, 9, 12, 0.5) 100%);
     }
     .sidebar {
         position: absolute;
-        left: 0.5vw;
-        top: 0.5vw;
-        height: calc(100% - 1vw);
-        background: rgba(90, 90, 90, 0.15);
-        backdrop-filter: blur(10px);
-        border-radius: 16px;
-        display: flex;
-        flex-direction: column;
-        color: var(--navbar-light-primary);
-        font-family: Verdana, Geneva, Tahoma, sans-serif;
-        overflow-y: auto;
-        width: 33%;
-        max-width: 500px;
+        inset: 0 auto 0 0;
+        width: min(420px, 92vw);
+        background: var(--ceg-parchment);
+        border-right: 1px solid rgba(232, 228, 218, 0.2);
+        box-shadow: 8px 0 32px rgba(0, 0, 0, 0.35);
         z-index: 50;
+        overflow-y: auto;
         overflow-x: hidden;
-        padding-right: 5px;
+        padding: 0.9rem 1.1rem 1rem;
+        color: var(--ceg-ink);
     }
-
-    .toggle-sidebar-btn {
+    .sidebar-toggle {
         position: absolute;
-        top: 1rem;
-        left: 1vw;
-        z-index: 100;
-        background: rgba(45, 45, 45, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        color: white;
-
+        top: 0.75rem;
+        left: 0.75rem;
+        z-index: 60;
         width: 30px;
         height: 30px;
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 1.5rem;
-    }
-    .toggle-sidebar-btn:hover {
-        background: rgba(255, 255, 255, 0.3);
-        transform: scale(1.05);
-    }
-    /* Mobile Landscape */
-    @media (max-width: 768px) and (orientation: landscape) {
-        .sidebar {
-            width: 50%; /* Adjust as needed */
-            max-width: 280px;
-        }
-    }
-
-    /* Mobile Portrait */
-    @media (max-width: 480px) {
-        .sidebar {
-            width: 80%;
-            max-width: none;
-            height: 100%;
-            top: 0;
-            left: 0;
-            border-radius: 0;
-        }
-    }
-
-    .chat {
-        padding-left: 0.5rem;
-    }
-    .container {
-        height: 100vh;
-    }
-    .color-swatch {
-        width: 16px;
-        height: 16px;
-        border-radius: 4px;
-        border: 1px solid rgba(0, 0, 0, 0.1);
-    }
-
-    .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .filter-items {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-    .filter-item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.75rem;
-        cursor: pointer;
-    }
-    .filter-item input[type="checkbox"] {
-        width: 14px;
-        height: 14px;
-        cursor: pointer;
-        accent-color: #f97316;
-    }
-    .filter-swatch {
-        display: inline-block;
-        width: 12px;
-        height: 12px;
         border-radius: 3px;
-        border: 1px solid rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(232, 228, 218, 0.3);
+        background: var(--ceg-ink);
+        color: var(--ceg-bone);
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    .map-container {
-        height: 100vh;
+    .sidebar-toggle:hover {
+        border-color: var(--ceg-vermillion);
+        color: var(--ceg-vermillion);
     }
-
-    .chat-bubble {
-        max-width: 90%;
+    .sidebar-footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 1rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--ceg-rule);
+        font-size: 0.62rem;
     }
-
-    .property-row {
-        opacity: 0;
+    .sidebar-footer a {
+        color: var(--ceg-ink-soft);
+        text-decoration: none;
+        letter-spacing: 0.05em;
+    }
+    .sidebar-footer a:hover {
+        color: var(--ceg-vermillion);
+    }
+    @media (max-width: 640px) {
+        .sidebar {
+            width: 88vw;
+        }
     }
 </style>

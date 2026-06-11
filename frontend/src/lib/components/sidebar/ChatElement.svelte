@@ -1,49 +1,107 @@
 <script>
-    export let chats = []
-    let isTyping = false
-    let displayedChats = []
-    async function animateChats() {
-        displayedChats = []
-        
-        for (let i = 0; i < chats.length; i++) {
-            isTyping = true
-            await new Promise(resolve => setTimeout(resolve, 1200))
-            
-            isTyping = false
-            displayedChats = [...displayedChats, chats[i]]
-            
-            if (i < chats.length - 1) {
-                await new Promise(resolve => setTimeout(resolve, 400))
-            }
+    export let chats = [];
+
+    let isTyping = false;
+    let displayedChats = [];
+    let runId = 0;
+
+    async function animateChats(messages) {
+        const id = ++runId;
+        displayedChats = [];
+        for (const message of messages) {
+            isTyping = true;
+            await new Promise((resolve) => setTimeout(resolve, 900));
+            if (id !== runId) return; // a newer selection superseded this run
+            isTyping = false;
+            displayedChats = [...displayedChats, message];
+            await new Promise((resolve) => setTimeout(resolve, 300));
         }
     }
-    $: if (chats.length > 0) animateChats()
 
+    $: if (chats.length > 0) animateChats(chats);
 </script>
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-    <div class="flex items-start space-x-3">
-        <div class="flex-shrink-0">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-amber-400 flex items-center justify-center text-white font-bold text-sm shadow-md">
-                CEG
-            </div>
-        </div>
-        <div class="flex-1 space-y-2">
-            {#each displayedChats  as chat}
-            <div class="bg-gradient-to-r from-orange-100 to-amber-100 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm">
-                <p class="text-sm text-gray-800">{chat}</p>
-            </div>
-            {/each}
-            {#if isTyping}
-            <div class="animate-in slide-in-from-left-2 fade-in duration-300 bg-gradient-to-r from-orange-100 to-amber-100 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm">
-                <div class="flex space-x-1">
-                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]"></div>
-                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]"></div>
-                </div>
-            </div>
-            {/if}
-            
-            <p class="text-xs text-gray-500 mt-2 ml-2">Analysis by C.E.G - He may be wrong!</p>
-        </div>
+
+<div class="ceg-card chat">
+    <div class="avatar font-display">C.E.G</div>
+    <div class="messages">
+        {#each displayedChats as chat}
+            <p class="bubble">{chat}</p>
+        {/each}
+        {#if isTyping}
+            <p class="bubble typing">
+                <span></span><span></span><span></span>
+            </p>
+        {/if}
+        <p class="disclaimer font-data">Analysis by C.E.G — it may well be wrong.</p>
     </div>
 </div>
+
+<style>
+    .chat {
+        display: flex;
+        gap: 0.7rem;
+        padding: 0.85rem 1rem;
+    }
+    .avatar {
+        flex-shrink: 0;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--ceg-ink);
+        color: var(--ceg-bone);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 700;
+    }
+    .messages {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+    .bubble {
+        background: var(--ceg-parchment);
+        border: 1px solid var(--ceg-rule);
+        border-radius: 3px 10px 10px 10px;
+        padding: 0.55rem 0.7rem;
+        font-size: 0.76rem;
+        line-height: 1.5;
+        color: var(--ceg-ink);
+    }
+    .typing {
+        display: flex;
+        gap: 4px;
+        width: fit-content;
+    }
+    .typing span {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--ceg-ink-soft);
+        animation: bounce 1s infinite;
+    }
+    .typing span:nth-child(2) {
+        animation-delay: 0.15s;
+    }
+    .typing span:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+    @keyframes bounce {
+        0%,
+        60%,
+        100% {
+            transform: translateY(0);
+        }
+        30% {
+            transform: translateY(-4px);
+        }
+    }
+    .disclaimer {
+        font-size: 0.6rem;
+        color: var(--ceg-ink-soft);
+        opacity: 0.75;
+        margin-top: 0.1rem;
+    }
+</style>
