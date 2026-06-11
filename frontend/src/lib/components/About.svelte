@@ -74,7 +74,6 @@
                     {/each}
                 </tbody>
             </table>
-
         </div>
     </details>
 </article>
