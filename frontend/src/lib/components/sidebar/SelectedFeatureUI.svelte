@@ -32,7 +32,7 @@
         PROPS.WITHDRAWN,
     ];
 </script>
-
+<br>
 <button class="back font-data" on:click={onBack}>← Back to register</button>
 
 <article class="entry">

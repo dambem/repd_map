@@ -38,9 +38,7 @@
         <summary class="ceg-eyebrow">How the £ figures are worked out</summary>
         <div class="methods-body">
             <p>
-                Every financial figure is an <strong>indicative estimate</strong>, not project
-                accounts. Three steps, all from the project's installed capacity (MW) in the REPD
-                record:
+                Every financial figure is an <strong>indicative estimate</strong> rather than true information. If you have an improved calculation - please contribute to the project!
             </p>
             <ol>
                 <li>
@@ -76,11 +74,7 @@
                     {/each}
                 </tbody>
             </table>
-            <p class="caveat">
-                Authority shading and headline totals sum these per-project estimates. Real costs
-                vary with scale, grid connection and land — treat everything as
-                order-of-magnitude.
-            </p>
+
         </div>
     </details>
 </article>

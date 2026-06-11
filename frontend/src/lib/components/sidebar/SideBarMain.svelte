@@ -44,9 +44,8 @@
 </script>
 
 <header class="masthead">
-    <p class="ceg-eyebrow ornament">✦ &nbsp;a register of the departed&nbsp; ✦</p>
     <h1 class="font-display">Clean Energy<br />Graveyard</h1>
-    <p class="motto font-display">Hic iacet potentia — here lies the power that never was</p>
+    <p class="motto font-display">Hic actus iacet potentia</p>
     <a class="byline font-data" href="https://www.bemben.co.uk">kept by Damian Bemben</a>
 </header>
 
@@ -126,8 +125,7 @@
     .masthead {
         text-align: center;
         padding: 1.1rem 0 0.9rem;
-        border-bottom: 2px solid var(--ceg-ink);
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.2rem;
     }
     .ornament {
         letter-spacing: 0.2em;
@@ -138,7 +136,6 @@
         line-height: 0.98;
         color: var(--ceg-ink);
         margin: 0.35rem 0 0.3rem;
-        /* letterpress — pressed into the parchment */
         text-shadow:
             0 1px 0 rgba(255, 255, 255, 0.55),
             0 -1px 0 rgba(21, 23, 28, 0.2);
