@@ -155,173 +155,97 @@
     left: 50%;
     transform: translateX(-50%);
     width: 90%;
-    max-width: 300px;
-    background: rgba(90, 90, 90, 0.15);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 5px;
-    padding-right: 50px;
-    padding-left: 50px;
-
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    z-index: 1000;
+    max-width: 340px;
+    background: rgba(21, 23, 28, 0.88);
+    backdrop-filter: blur(6px);
+    border-radius: 4px;
+    border: 1px solid rgba(232, 228, 218, 0.2);
+    padding: 10px 40px 6px;
+    z-index: 45;
   }
-  
+
   .timeline-wrapper {
     position: relative;
     width: 100%;
   }
-  
+
   .date-labels {
     position: relative;
-    height: 60px;
-    margin-bottom: 15px;
+    height: 22px;
+    margin-bottom: 4px;
   }
-  
+
   .date-label {
     position: absolute;
+    top: 0;
     transform: translateX(-50%);
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: rgba(255, 255, 255, 0.95);
-    padding: 6px 12px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 500;
+    color: var(--ceg-bone);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.05em;
     white-space: nowrap;
     pointer-events: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
-  
-  .date-label.start {
-    top: 0;
-    background: rgba(232, 148, 12, 0.3);
-    border-color: rgba(232, 148, 12, 0.786);
-  }
-  
+
   .date-label.end {
-    bottom: 0;
-    background: rgba(232, 148, 12, 0.3);
-    border-color: rgba(232, 148, 12, 0.786);  }
-  
+    color: var(--ceg-ember);
+  }
+
   .timeline-track {
     position: relative;
-    height: 12px;
-    margin: 15px 0;
+    height: 8px;
+    margin: 8px 0 10px;
     cursor: pointer;
-    border-radius: 6px;
-    overflow: hidden;
+    border-radius: 2px;
   }
-  
+
   .track-bg {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 6px;
-    backdrop-filter: blur(3px);
+    inset: 0;
+    background: rgba(232, 228, 218, 0.12);
+    border-radius: 2px;
   }
-  
+
   .track-active {
     position: absolute;
     top: 0;
     height: 100%;
-    background: linear-gradient(90deg, 
-      rgba(246, 62, 38, 0.4) 0%, 
-      rgba(185, 160, 16, 0.6) 25%,
-      rgba(239, 173, 68, 0.6) 75%, 
-      rgba(236, 113, 12, 0.4) 100%
-    );
-    border-radius: 6px;
-    transition: all 0.1s ease;
-    backdrop-filter: blur(2px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--ceg-vermillion);
+    border-radius: 2px;
   }
-  
+
   .handle {
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 24px;
-    height: 24px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.6);
+    background: var(--ceg-bone);
+    border: 2px solid var(--ceg-vermillion);
     cursor: grab;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(5px);
+    transition: transform 0.15s ease;
   }
-  
-  .handle:hover {
-    transform: translate(-50%, -50%) scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    border-color: rgba(255, 255, 255, 0.8);
+
+  .handle:hover,
+  .handle:focus-visible {
+    transform: translate(-50%, -50%) scale(1.2);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(200, 64, 31, 0.35);
   }
-  
+
   .handle:active {
     cursor: grabbing;
-    transform: translate(-50%, -50%) scale(0.95);
   }
-  
-  .start-handle {
-    background: rgba(232, 148, 12, 0.3);
-    border-color: rgba(108, 59, 36, 0.6);
-  }
-  
-  .start-handle:hover {
-    background: rgba(15, 92, 237, 0.4);
-    border-color: white;
-  }
-  
-  .end-handle {
-    background: rgba(232, 148, 12, 0.3);
-    border-color: rgba(108, 59, 36, 0.6);
-  }
-  
-  .end-handle:hover {
-    background: rgba(15, 92, 237, 0.4);
-    border-color: white;
-  }
-  
-  .timeline-labels {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
-  }
-  
-  .timeline-info {
-    text-align: center;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 11px;
-    margin-top: 8px;
-    font-weight: 400;
-  }
-  
-  /* Mobile responsiveness */
+
   @media (max-width: 640px) {
     .timeline-container {
       width: 95%;
-      padding: 12px;
+      padding: 8px 28px 4px;
     }
-    
     .handle {
-      width: 28px;
-      height: 28px;
-    }
-    
-    .date-label {
-      font-size: 12px;
-      padding: 5px 10px;
-    }
-    
-    .timeline-track {
-      height: 14px;
+      width: 22px;
+      height: 22px;
     }
   }
 </style>

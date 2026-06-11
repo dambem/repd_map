@@ -1,35 +1,35 @@
+const SOURCES = {
+  geojson: '/points.geojson',
+  nimby_score: '/nimby_score.json',
+  refused: '/df_refused.json',
+  withdrawn: '/df_withdrawn.json',
+  a_refused: '/df_a_refused.json',
+  final_stats: '/final.json',
+  councils: '/councils.json',
+};
+
 export async function load({ fetch }) {
-    try {
-      const response = await fetch('/points.geojson');  // Place your GeoJSON in the static folder
-      const nimby_r = await fetch('/nimby_score.json');  // Place your GeoJSON in the static folder
-      const date_refused = await fetch('/df_refused.json');  // Place your GeoJSON in the static folder
-      const date_a_refused = await fetch('/df_withdrawn.json');  // Place your GeoJSON in the static folder
-      const date_withdrawn = await fetch('/df_a_refused.json');  // Place your GeoJSON in the static folder
-      const final_stats = await fetch('/final.json');  // Place your GeoJSON in the static folder
-      const councils = await fetch('/councils.json');  // Place your GeoJSON in the static folder
+  try {
+    const entries = await Promise.all(
+      Object.entries(SOURCES).map(async ([key, url]) => {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`${url} → ${response.status}`);
+        return [key, await response.json()];
+      }),
+    );
+    const data = Object.fromEntries(entries);
 
-
-      const geojson = await response.json();
-      const nimby_score = await nimby_r.json();
-      const refused = await date_refused.json();
-      const a_refused = await date_a_refused.json();
-      const withdrawn = await date_withdrawn.json();
-      const final_stat = await final_stats.json();
-      const council = await councils.json();
-
-      return {
-        points: geojson.features,
-        nimby_score: nimby_score,
-        refused: refused,
-        a_refused: a_refused,
-        withdrawn: withdrawn,
-        final_stats: final_stat,
-        council: council
-      };
-    } catch (error) {
-      console.error('Error loading GeoJSON:', error);
-      return {
-        points: []
-      };
-    }
+    return {
+      points: data.geojson.features,
+      nimby_score: data.nimby_score,
+      refused: data.refused,
+      a_refused: data.a_refused,
+      withdrawn: data.withdrawn,
+      final_stats: data.final_stats,
+      council: data.councils,
+    };
+  } catch (error) {
+    console.error('Error loading map data:', error);
+    return { points: [], nimby_score: [], refused: [], a_refused: [], withdrawn: [], final_stats: [], council: {} };
   }
+}
