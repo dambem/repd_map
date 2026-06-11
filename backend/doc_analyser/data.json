@@ -1,0 +1,24 @@
+{
+    "doc_a":
+    {
+        "status": "refused",
+        "type": "map",
+        "src": "./data/doc_a.pdf",
+        "location":
+        {
+            "easting": 365589,
+            "northing": 81012
+        }
+    },
+    "doc_b":
+    {
+        "status": "refused",
+        "type": "report",
+        "src": "./data/doc_b.pdf",
+        "location":
+        {
+            "easting": 365589,
+            "northing": 81012
+        }
+    }
+}

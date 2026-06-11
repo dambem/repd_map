@@ -1,0 +1,829 @@
+/* ============================================
+   Integrity by Design — Global Style System
+   Dark mode, sharp edges, textured — bemben.co.uk aesthetic
+
+   Design approach: near-black surfaces, deep orange + gold
+   accents, SVG noise grain, no rounded corners.
+
+   v2 — View Transitions · Neo-Retro refinements
+   ============================================ */
+
+:root {
+  /* Override Slidev theme primary */
+  --slidev-theme-primary: oklch(64% 0.19 35);
+
+  /* ── Origin colour ── derive everything from one hue */
+  --c-origin-h: 35;
+
+  /* Primary accents — oklch for perceptual uniformity
+     Hue 35° = orange, Hue 80° = warm gold (analogous harmony) */
+  --c-primary:       oklch(64% 0.19 var(--c-origin-h));
+  --c-primary-light: oklch(84% 0.14 80);
+  --c-primary-subtle: oklch(64% 0.19 var(--c-origin-h) / 0.08);
+
+  /* Surfaces — micro warm tint at origin hue, prevents cold blue-black */
+  --c-surface:       oklch(8%  0.012 var(--c-origin-h));
+  --c-surface-raised: oklch(11% 0.012 var(--c-origin-h));
+  --c-surface-muted:  oklch(15% 0.012 var(--c-origin-h));
+
+  /* Text hierarchy — uniform oklch lightness steps, warm-tinted
+     97 / 76 / 60 / 40 gives even perceptual steps */
+  --c-text:           oklch(97% 0.008 var(--c-origin-h));
+  --c-text-secondary: oklch(76% 0.012 var(--c-origin-h));
+  --c-text-muted:     oklch(60% 0.012 var(--c-origin-h));
+  --c-text-faint:     oklch(40% 0.010 var(--c-origin-h));
+
+  /* Semantic: danger — H:18, warm red near orange family */
+  --c-danger:    oklch(68% 0.20 18);
+  --c-danger-bg: oklch(68% 0.20 18 / 0.10);
+
+  /* Semantic: warning — H:72, amber, analogous with gold */
+  --c-warning:    oklch(78% 0.17 72);
+  --c-warning-bg: oklch(78% 0.17 72 / 0.10);
+
+  /* Semantic: success — H:148, cool teal-green, temperature contrast */
+  --c-success:    oklch(72% 0.17 148);
+  --c-success-bg: oklch(72% 0.17 148 / 0.10);
+
+  /* Borders */
+  --border-hairline: 1px solid oklch(97% 0 0 / 0.06);
+  --border-subtle:   1px solid oklch(97% 0 0 / 0.10);
+
+  /* Radii — sharp, no rounding */
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+
+  /* Shadows — deep for dark surfaces */
+  --shadow-sm:       0 1px 2px rgb(0 0 0 / 0.4), 0 0 0 1px oklch(97% 0 0 / 0.03);
+  --shadow-card:     0 1px 3px rgb(0 0 0 / 0.5), 0 0 0 1px oklch(97% 0 0 / 0.04), inset 0 1px 0 oklch(97% 0 0 / 0.04);
+  --shadow-elevated: 0 4px 20px rgb(0 0 0 / 0.6), 0 0 0 1px oklch(97% 0 0 / 0.04);
+
+  /* Neo-retro glow — phosphor warmth on accents */
+  --glow-primary:  0 0 12px oklch(64% 0.19 35 / 0.35), 0 0 4px oklch(64% 0.19 35 / 0.15);
+  --glow-gold:     0 0 10px oklch(84% 0.14 80 / 0.25);
+
+  /* Easing — fixed cubic-bezier + spring */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-retro:  cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* Code blocks */
+  --slidev-code-background: #141414;
+  --slidev-code-foreground: #d4d4d4;
+  --slidev-slide-container-background: #0a0a0a;
+  --slidev-controls-foreground: #a0a0a0;
+
+  /* ── View Transition durations ── */
+  --vt-duration-morph: 350ms;
+  --vt-duration-fade:  250ms;
+}
+
+
+/* ============================================
+   VIEW TRANSITIONS
+   ============================================ */
+
+/* Opt in to cross-document/slide transitions */
+@view-transition {
+  navigation: auto;
+}
+
+/* ── Named transition: slide titles ── */
+h1 { view-transition-name: slide-title; }
+
+::view-transition-old(slide-title) {
+  animation: vt-title-out var(--vt-duration-morph) var(--ease-retro) both;
+}
+::view-transition-new(slide-title) {
+  animation: vt-title-in var(--vt-duration-morph) var(--ease-retro) both;
+}
+
+@keyframes vt-title-out {
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+    filter: blur(2px);
+  }
+}
+@keyframes vt-title-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+    filter: blur(2px);
+  }
+}
+
+/* ── Named transition: h2 subtitles ── */
+h2 { view-transition-name: slide-subtitle; }
+
+::view-transition-old(slide-subtitle) {
+  animation: vt-fade-blur-out var(--vt-duration-fade) var(--ease-out) both;
+}
+::view-transition-new(slide-subtitle) {
+  animation: vt-fade-blur-in var(--vt-duration-fade) var(--ease-out) 80ms both;
+}
+
+/* ── Named transition: code blocks ── */
+.slidev-layout pre { view-transition-name: code-block; }
+
+::view-transition-old(code-block) {
+  animation: vt-fade-blur-out var(--vt-duration-fade) var(--ease-out) both;
+}
+::view-transition-new(code-block) {
+  animation: vt-fade-blur-in var(--vt-duration-fade) var(--ease-out) 60ms both;
+}
+
+/* ── Shared fade+blur keyframes ── */
+@keyframes vt-fade-blur-out {
+  to {
+    opacity: 0;
+    filter: blur(3px);
+  }
+}
+@keyframes vt-fade-blur-in {
+  from {
+    opacity: 0;
+    filter: blur(3px);
+  }
+}
+
+/* ── Default slide cross-fade (everything else) ── */
+::view-transition-old(root) {
+  animation: var(--vt-duration-fade) var(--ease-out) both fade-out;
+}
+::view-transition-new(root) {
+  animation: var(--vt-duration-fade) var(--ease-out) both fade-in;
+}
+
+@keyframes fade-out { to   { opacity: 0; } }
+@keyframes fade-in  { from { opacity: 0; } }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0ms !important;
+  }
+}
+
+
+/* ============================================
+   FONTS
+   ============================================ */
+
+@font-face {
+  font-family: 'Advercase';
+  src: url('./AdvercaseFont.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+
+/* ============================================
+   GLOBAL TYPOGRAPHY — Neo-Retro warmth
+   ============================================ */
+
+h1, h2, h3 {
+  text-wrap: balance;
+}
+
+h1 {
+  font-family: 'Advercase', 'DM Sans', sans-serif;
+  letter-spacing: 0.02em;
+  /* Warm phosphor glow — subtle, not neon */
+  text-shadow:
+    0 0 30px oklch(64% 0.19 35 / 0.12),
+    0 1px 0 oklch(8% 0.012 35 / 0.6);
+}
+
+h2 {
+  font-family: 'Advercase', 'DM Sans', sans-serif;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+@keyframes bar-shimmer {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.55; }
+}
+
+h2::before {
+  content: '';
+  display: inline-block;
+  flex-shrink: 0;
+  width: 3px;
+  height: 1.2em;
+  background: linear-gradient(180deg, var(--c-primary-light), var(--c-primary));
+  animation: bar-shimmer 4s ease-in-out infinite;
+  box-shadow: var(--glow-primary);
+}
+
+/* ── Retro small-caps for h3 ── */
+h3 {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.06em;
+  color: var(--c-text-secondary);
+}
+
+
+/* ============================================
+   SLIDE LAYOUT OVERRIDES
+   ============================================ */
+
+.slidev-layout {
+  background: var(--c-surface);
+  color: var(--c-text);
+  position: relative;
+}
+
+/* SVG noise grain overlay — matches bemben.co.uk body::before */
+.slidev-layout::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.045;
+  z-index: -1;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter2'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.02' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter2)' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 300px 300px, 600px 600px;
+}
+
+/* ── Scanline overlay — subtle CRT nod ── */
+.slidev-layout::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    oklch(0% 0 0 / 0.03) 3px,
+    oklch(0% 0 0 / 0.03) 4px
+  );
+  mix-blend-mode: multiply;
+}
+
+/* Section slides — vignette + radial warmth */
+.slidev-layout.section {
+  background:
+    radial-gradient(ellipse at 50% 50%, transparent 40%, oklch(4% 0.01 35 / 0.7) 100%),
+    radial-gradient(ellipse at 70% 20%, oklch(64% 0.19 35 / 0.09) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 80%, oklch(84% 0.14 80 / 0.04) 0%, transparent 50%),
+    var(--c-surface);
+}
+
+
+/* ============================================
+   SLIDE ENTER ANIMATIONS
+   ============================================ */
+
+/* Content fades up on slide enter */
+.slidev-layout > * {
+  animation: slide-content-enter 0.5s var(--ease-out) both;
+}
+
+/* Stagger children — h1 first, then sequential */
+.slidev-layout > :nth-child(1) { animation-delay: 0ms; }
+.slidev-layout > :nth-child(2) { animation-delay: 60ms; }
+.slidev-layout > :nth-child(3) { animation-delay: 120ms; }
+.slidev-layout > :nth-child(4) { animation-delay: 180ms; }
+.slidev-layout > :nth-child(5) { animation-delay: 240ms; }
+.slidev-layout > :nth-child(n+6) { animation-delay: 300ms; }
+
+@keyframes slide-content-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+
+/* ============================================
+   CARDS
+   ============================================ */
+
+.card {
+  background: oklch(97% 0 0 / 0.03);
+  border: 1px solid oklch(97% 0 0 / 0.08);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+  position: relative;
+  z-index: 1;
+}
+
+/* Warm inner edge-light — the "lit from above" retro monitor feel */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 1px 0 oklch(97% 0.01 35 / 0.06);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-elevated);
+  transform: translateY(-1px);
+}
+
+.card--accent {
+  background: oklch(64% 0.19 35 / 0.06);
+  border-color: oklch(64% 0.19 35 / 0.2);
+}
+
+.card--accent::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--c-primary), transparent);
+  opacity: 0.4;
+}
+
+.card--lg {
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+}
+
+
+/* ============================================
+   CALLOUT BOXES
+   Dark tint + coloured left accent line
+   ============================================ */
+
+.callout-danger {
+  background: var(--c-danger-bg);
+  border: var(--border-hairline);
+  border-left: 3px solid color-mix(in oklch, var(--c-danger) 60%, transparent);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.callout-info {
+  background: var(--c-primary-subtle);
+  border: var(--border-hairline);
+  border-left: 3px solid color-mix(in oklch, var(--c-primary) 50%, transparent);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.callout-success {
+  background: var(--c-success-bg);
+  border: var(--border-hairline);
+  border-left: 3px solid color-mix(in oklch, var(--c-success) 60%, transparent);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.callout-warning {
+  background: var(--c-warning-bg);
+  border: var(--border-hairline);
+  border-left: 3px solid color-mix(in oklch, var(--c-warning) 60%, transparent);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.callout-info--lg,
+.callout-danger--lg,
+.callout-success--lg,
+.callout-warning--lg {
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+}
+
+
+/* ============================================
+   STAT DISPLAYS — Retro data readout
+   ============================================ */
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+.stat-value--danger {
+  color: var(--c-danger);
+  text-shadow: 0 0 18px oklch(68% 0.20 18 / 0.3);
+}
+
+.stat-value--primary {
+  color: var(--c-primary);
+  text-shadow: 0 0 18px oklch(64% 0.19 35 / 0.3);
+}
+
+.stat-value--success {
+  color: var(--c-success);
+  text-shadow: 0 0 18px oklch(72% 0.17 148 / 0.3);
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--c-text-muted);
+  margin-top: 0.35rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-caps: all-small-caps;
+}
+
+
+/* ============================================
+   TEXT COLOR UTILITIES
+   ============================================ */
+
+.text-accent    { color: var(--c-primary); }
+.text-gold      { color: var(--c-primary-light); }
+.text-danger    { color: var(--c-danger); }
+.text-success   { color: var(--c-success); }
+.text-warning   { color: var(--c-warning); }
+.text-secondary { color: var(--c-text-secondary); }
+.text-muted     { color: var(--c-text-muted); }
+.text-faint     { color: var(--c-text-faint); }
+
+
+/* ============================================
+   SECTION HEADERS
+   ============================================ */
+
+.section-subtitle {
+  color: var(--c-text-secondary);
+  margin-top: 1rem;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+
+/* ============================================
+   ATTRIBUTIONS
+   ============================================ */
+
+.attribution {
+  font-size: 0.75rem;
+  color: var(--c-text-faint);
+}
+
+.attribution--subtle {
+  font-size: 0.7rem;
+  color: var(--c-text-faint);
+  opacity: 0.6;
+}
+
+
+/* ============================================
+   SPECIAL EFFECTS
+   ============================================ */
+
+.glass {
+  background: oklch(97% 0 0 / 0.04);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border: 1px solid oklch(97% 0 0 / 0.08);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-elevated), inset 0 1px 0 oklch(97% 0 0 / 0.06);
+}
+
+.highlight-box {
+  background: var(--c-surface-muted);
+  border: var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Retro terminal / readout block ── */
+.retro-readout {
+  font-family: 'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace;
+  background: oklch(6% 0.015 35);
+  border: 1px solid oklch(64% 0.19 35 / 0.15);
+  padding: 1.25rem;
+  position: relative;
+  box-shadow:
+    inset 0 0 40px oklch(64% 0.19 35 / 0.04),
+    var(--shadow-card);
+}
+
+.retro-readout::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    oklch(64% 0.19 35 / 0.5) 20%,
+    oklch(84% 0.14 80 / 0.6) 50%,
+    oklch(64% 0.19 35 / 0.5) 80%,
+    transparent
+  );
+}
+
+/* ── Horizontal rule — warm gradient line ── */
+hr, .divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    oklch(97% 0.008 35 / 0.12) 20%,
+    oklch(64% 0.19 35 / 0.25) 50%,
+    oklch(97% 0.008 35 / 0.12) 80%,
+    transparent
+  );
+  margin: 1.5rem 0;
+}
+
+
+/* ============================================
+   CODE BLOCKS
+   ============================================ */
+
+.slidev-layout pre {
+  border-radius: 0 !important;
+  border: var(--border-subtle) !important;
+  box-shadow: inset 0 0 30px oklch(0% 0 0 / 0.3);
+}
+
+
+/* ============================================
+   LISTS — tighter, crisper
+   ============================================ */
+
+.slidev-layout li + li {
+  margin-top: 0.15em;
+}
+
+.slidev-layout li::marker {
+  color: var(--c-primary);
+}
+
+/* ── Retro bullet variant — em-dash style ── */
+.list-retro {
+  list-style: none;
+  padding-left: 1.5em;
+}
+
+.list-retro li::before {
+  content: '—';
+  position: absolute;
+  margin-left: -1.5em;
+  color: var(--c-primary);
+  opacity: 0.7;
+}
+
+.list-retro li {
+  position: relative;
+}
+
+
+/* ============================================
+   SOURCE CITATIONS
+   ============================================ */
+
+.source {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 2rem;
+  font-size: 0.6rem;
+  color: var(--c-text-faint);
+  opacity: 0.7;
+  max-width: 40%;
+  text-align: right;
+  line-height: 1.4;
+  font-style: italic;
+}
+
+.source a {
+  color: var(--c-text-faint);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: color-mix(in oklch, var(--c-text-faint) 40%, transparent);
+  transition: color 0.2s var(--ease-out), text-decoration-color 0.2s var(--ease-out);
+}
+
+.source a:hover {
+  color: var(--c-primary);
+  text-decoration-color: color-mix(in oklch, var(--c-primary) 40%, transparent);
+}
+
+
+/* ============================================
+   SLIDE PROGRESS BAR
+   ============================================ */
+
+.slidev-progress {
+  background: linear-gradient(90deg, var(--c-primary-light), var(--c-primary)) !important;
+  box-shadow: 0 0 8px oklch(64% 0.19 35 / 0.4);
+}
+
+
+/* ============================================
+   MERMAID DIAGRAMS
+   ============================================ */
+
+/* Transparent SVG background */
+.mermaid svg,
+.slidev-mermaid svg {
+  background: transparent !important;
+}
+
+/* Default node shapes */
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node ellipse,
+.mermaid .node polygon,
+.mermaid .node path,
+.mermaid .node .label-container {
+  fill: #141414 !important;
+  stroke: oklch(97% 0 0 / 0.15) !important;
+  stroke-width: 1px !important;
+}
+
+/* Node label text */
+.mermaid .node .label,
+.mermaid .nodeLabel,
+.mermaid .node foreignObject div,
+.mermaid text {
+  color: #e0e0e0 !important;
+  fill: #e0e0e0 !important;
+}
+
+/* Edge lines */
+.mermaid .edgePath .path,
+.mermaid .flowchart-link {
+  stroke: oklch(97% 0 0 / 0.3) !important;
+  stroke-width: 1.5px !important;
+}
+
+/* Arrowhead markers */
+.mermaid marker path,
+.mermaid .arrowheadPath {
+  fill: oklch(97% 0 0 / 0.3) !important;
+  stroke: oklch(97% 0 0 / 0.3) !important;
+}
+
+/* Edge labels */
+.mermaid .edgeLabel,
+.mermaid .edgeLabel foreignObject,
+.mermaid .edgeLabel p {
+  background: var(--c-surface-raised) !important;
+  background-color: var(--c-surface-raised) !important;
+  color: var(--c-text-muted) !important;
+  border-radius: 0 !important;
+}
+
+.mermaid .edgeLabel rect {
+  fill: var(--c-surface-raised) !important;
+  opacity: 1 !important;
+}
+
+/* Cluster / subgraph borders */
+.mermaid .cluster rect {
+  fill: oklch(97% 0 0 / 0.02) !important;
+  stroke: oklch(97% 0 0 / 0.08) !important;
+}
+
+
+/* ============================================
+   SELECTION + FOCUS
+   ============================================ */
+
+::selection {
+  background: oklch(64% 0.19 35 / 0.25);
+  color: #ffffff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--c-primary);
+  outline-offset: 2px;
+  border-radius: 0;
+}
+
+
+/* ============================================
+   INLINE CODE — warm retro tint
+   ============================================ */
+
+.slidev-layout :not(pre) > code {
+  background: oklch(64% 0.19 35 / 0.08);
+  color: var(--c-primary-light);
+  padding: 0.15em 0.4em;
+  font-size: 0.88em;
+  border: 1px solid oklch(64% 0.19 35 / 0.12);
+}
+
+
+/* ============================================
+   BLOCKQUOTES — vertical glow bar
+   ============================================ */
+
+.slidev-layout blockquote {
+  border-left: 2px solid var(--c-primary);
+  padding-left: 1.25rem;
+  margin-left: 0;
+  color: var(--c-text-secondary);
+  font-style: italic;
+  position: relative;
+}
+
+.slidev-layout blockquote::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  box-shadow: var(--glow-primary);
+}
+
+
+/* ============================================
+   LINKS — warm underline
+   ============================================ */
+
+.slidev-layout a:not(.source a) {
+  color: var(--c-primary-light);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: oklch(84% 0.14 80 / 0.3);
+  transition:
+    color 0.2s var(--ease-out),
+    text-decoration-color 0.2s var(--ease-out),
+    text-shadow 0.2s var(--ease-out);
+}
+
+.slidev-layout a:not(.source a):hover {
+  color: var(--c-primary);
+  text-decoration-color: var(--c-primary);
+  text-shadow: 0 0 8px oklch(64% 0.19 35 / 0.2);
+}
+
+
+/* ============================================
+   STRONG / EMPHASIS — neo-retro warmth
+   ============================================ */
+
+.slidev-layout strong {
+  color: var(--c-text);
+  font-weight: 700;
+  /* Barely-there warm tint on bold text */
+  text-shadow: 0 0 20px oklch(64% 0.19 35 / 0.06);
+}
+
+.slidev-layout em {
+  color: var(--c-text-secondary);
+}
+
+
+/* ============================================
+   TABLES — retro data grid
+   ============================================ */
+
+.slidev-layout table {
+  border-collapse: collapse;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+
+.slidev-layout th {
+  text-align: left;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-caps: all-small-caps;
+  color: var(--c-text-muted);
+  border-bottom: 1px solid oklch(64% 0.19 35 / 0.2);
+  padding: 0.5rem 0.75rem;
+}
+
+.slidev-layout td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: var(--border-hairline);
+  color: var(--c-text-secondary);
+}
+
+.slidev-layout tr:hover td {
+  background: oklch(97% 0 0 / 0.02);
+}
