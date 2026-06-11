@@ -1,134 +1,283 @@
 <script>
-    import ChatElement from "$lib/components/sidebar/ChatElement.svelte";
-    import BentoBox from "$lib/components/sidebar/BentoBox.svelte"
-    const allowedProperties = [
-        "Operator (or Applicant)",
-        "Site Name",
-        "Technology Type",
-        "Installed Capacity (MWelec)",
-        "Development Status",
-        "Planning Permission Refused",
-        "Planning Application Withdrawn",
-        "Planning Application Submitted",
-    ];
-    export let councils = null;
-    export let selectedFeature = null;
-    export let nimby_choice = null;
-    export let resetSelection;
-    export let nimbyRadarCanvas;
+    import ChatElement from '$lib/components/sidebar/ChatElement.svelte';
+    import FinancialCard from '$lib/components/sidebar/FinancialCard.svelte';
+    import { PROPS } from '$lib/config/constants.js';
+    import { vitalRecord } from '$lib/data/projects.js';
 
-    let buttonText = "Copy Ref";
-    console.log("nimby Choice:", nimby_choice)
-    console.log("Selected Feature:", selectedFeature);
-    const copyToClipboard = () => {
-        let copy = selectedFeature.properties["Planning Application Reference"];
-        navigator.clipboard.writeText(copy).then(() => {
-            buttonText = "Copied!";
-            setTimeout(() => {
-                buttonText = "Copy Ref";
-            }, 2000); // Revert the button text after 2 seconds
+    export let councils = {};
+    export let selectedFeature;
+    export let nimbyChoice = null;
+    export let onBack = () => {};
+
+    $: props = selectedFeature.properties;
+    $: vital = vitalRecord(props);
+    $: councilUrl = councils?.[props[PROPS.AUTHORITY]];
+    $: articleUrl = nimbyChoice?.article_url;
+
+    let copyLabel = 'Copy';
+    function copyReference() {
+        navigator.clipboard.writeText(props[PROPS.PLANNING_REF]).then(() => {
+            copyLabel = 'Copied';
+            setTimeout(() => (copyLabel = 'Copy'), 2000);
         });
-    };
+    }
+
+    const detailKeys = [
+        PROPS.OPERATOR,
+        PROPS.TECH_TYPE,
+        PROPS.CAPACITY,
+        PROPS.STATUS,
+        PROPS.SUBMITTED,
+        PROPS.REFUSED,
+        PROPS.WITHDRAWN,
+    ];
 </script>
 
-<div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden animate-fade-in">
-    <div class="border-b border-gray-100 px-6 py-4 bg-gradient-to-r from-gray-50 to-white">
-        <button class="inline-flex items-center text-sm text-gray-600 hover:text-orange-600 transition-colors mb-3 group">
-            <svg class="w-4 h-4 mr-1.5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            <span on:click={resetSelection} >Back to overview</span>
-        </button>
-        
-        <h2 class="text-lg font-semibold text-gray-900">
-            {selectedFeature.properties["Site Name"]}
-        </h2>
-    </div>
-    <div class="px-6 py-4 space-y-4">
-        <!-- Authority and Reference Section -->
-        <div class="space-y-3">
-            <div class="flex items-start justify-between">
-                <span class="text-sm text-gray-500">Planning Authority</span>
-                <span class="text-sm font-medium text-gray-900 text-right">{selectedFeature.properties["Planning Authority"]}</span>
-            </div>
-        </div>
-        <div class="flex items-start justify-between">
-            <span class="text-sm text-gray-500">Reference</span>
-            <div class="text-right">
-                <span class="text-sm font-mono font-medium text-gray-900">{selectedFeature.properties["Planning Application Reference"]}</span>
-                <button  on:click={copyToClipboard} class="ml-2 inline-flex items-center justify-center w-6 h-6 rounded hover:bg-gray-100 transition-colors group">
-                    <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                    </svg>
+<button class="back font-data" on:click={onBack}>← Back to register</button>
 
-                </button>
-            </div>
-        </div>
-        <div class="flex items-start justify-between">
-            <span class="text-sm text-gray-500">Submitted</span>
-            <span class="text-sm text-gray-900">{selectedFeature.properties["Planning Application Submitted"]}</span>
-        </div>
-
-        <div class="space-y-2 pt-2">
-            <a         href={councils[selectedFeature.properties["Planning Authority"]]}
- class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all group">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                </svg>
-                View Planning Database (Copy Reference)
-            </a>
-
-            <a  href={nimby_choice["article_url"]} class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-orange-200 text-sm font-medium rounded-md text-orange-700 bg-orange-50 hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all group">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                View Possible Article
-            </a>
-        </div>
-    </div>
-    <BentoBox data={selectedFeature.properties}/>
-
-    <!-- {#if selectedFeature.properties["Planning Permission Refused"] != 0}
-        <p class="text-xs">
-            Refused: {selectedFeature.properties["Planning Permission Refused"]}
+<article class="entry">
+    <header class="memorial">
+        <span class="dagger font-display">†</span>
+        <h2 class="font-display">{props[PROPS.SITE_NAME]}</h2>
+        <p class="lifespan font-data">
+            {vital.born ?? '?'} — {vital.died ?? 'unknown'}
+            <span class="verb">({vital.cause})</span>
         </p>
-    {/if}
+        <p class="epitaph font-display">Requiescat in pace</p>
+        <p class="resting font-data">{props[PROPS.AUTHORITY]}</p>
+    </header>
 
-    {#if selectedFeature.properties["Planning Permission Withdraw"] != 0}
-        <p class="text-xs">
-            Withdrawn: {selectedFeature.properties[
-                "Planning Permission Withdrawn"
-            ]}
-        </p>
-    {/if}
-    <p class="text-xs font-bold">
-        Record Last Updated {selectedFeature.properties[
-            "Record Last Updated (dd/mm/yyyy)"
-        ]}
-    </p> -->
-</div>
-{#if nimby_choice}
+    <FinancialCard properties={props} />
 
-    <div class="bg-white rounded-xl gap-4 mt-2 mb-2"  bind:this={sidebarContent}>
-        <hr />
-        <ul class="list bg-base-100 rounded-box shadow-md mt-2 mb-2">
-            <li class="p-4 pb-2 text-xs opacity-60 tracking-wide">
-                3 'Fun' Facts about this Failure
-            </li>
-
-            {#each nimby_choice["Interesting Tidbits"] || [] as tidbit}
-                <li class="list-row p-4">
-                    <div class="list-col-grow text-sm">
-                        {tidbit}
-                    </div>
-                </li>
-            {/each}
-        </ul>
-        <ChatElement chats={[nimby_choice["header"], nimby_choice["Snide Commentary"]]}/>
-
+    <div class="ceg-card facts">
+        <div class="fact">
+            <span class="ceg-eyebrow">Capacity</span>
+            <span class="font-data value">{props[PROPS.CAPACITY]} MW</span>
+        </div>
+        <div class="fact">
+            <span class="ceg-eyebrow">Technology</span>
+            <span class="font-data value">{props[PROPS.TECH_TYPE]}</span>
+        </div>
+        <div class="fact full">
+            <span class="ceg-eyebrow">Planning reference</span>
+            <span class="ref-line">
+                <span class="font-data value">{props[PROPS.PLANNING_REF]}</span>
+                <button class="copy font-data" on:click={copyReference}>{copyLabel}</button>
+            </span>
+        </div>
     </div>
 
-    <div class="flex mt-5 justify-center items-center">
-
+    <div class="links">
+        {#if councilUrl}
+            <a class="link primary font-data" href={councilUrl} target="_blank" rel="noopener">
+                Council planning portal ↗
+            </a>
+        {/if}
+        {#if articleUrl}
+            <a class="link font-data" href={articleUrl} target="_blank" rel="noopener">
+                Related news article ↗
+            </a>
+        {/if}
     </div>
-{/if}
+
+    <details class="ceg-card all-details">
+        <summary class="ceg-eyebrow">All record fields</summary>
+        <table class="font-data">
+            <tbody>
+                {#each detailKeys.filter((k) => props[k] !== undefined && props[k] !== 0) as key}
+                    <tr>
+                        <td class="key">{key}</td>
+                        <td class="val">{props[key]}</td>
+                    </tr>
+                {/each}
+            </tbody>
+        </table>
+    </details>
+
+    {#if nimbyChoice}
+        <section class="community">
+            <p class="ceg-eyebrow">Community opposition</p>
+            {#if nimbyChoice['Interesting Tidbits']?.length}
+                <ul class="tidbits">
+                    {#each nimbyChoice['Interesting Tidbits'] as tidbit}
+                        <li>{tidbit}</li>
+                    {/each}
+                </ul>
+            {/if}
+            <ChatElement chats={[nimbyChoice.header, nimbyChoice['Snide Commentary']].filter(Boolean)} />
+        </section>
+    {/if}
+</article>
+
+<style>
+    .back {
+        background: none;
+        border: none;
+        padding: 0.25rem 0;
+        font-size: 0.7rem;
+        color: var(--ceg-ink-soft);
+        cursor: pointer;
+        letter-spacing: 0.05em;
+    }
+    .back:hover {
+        color: var(--ceg-vermillion);
+    }
+    .memorial {
+        text-align: center;
+        padding: 1.25rem 0.75rem 1rem;
+        border-top: 2px solid var(--ceg-ink);
+        border-bottom: 1px solid var(--ceg-rule);
+        margin-bottom: 0.25rem;
+    }
+    .dagger {
+        display: block;
+        font-size: 1.5rem;
+        color: var(--ceg-vermillion);
+        line-height: 1;
+    }
+    .memorial h2 {
+        font-size: 1.7rem;
+        font-weight: 600;
+        line-height: 1.15;
+        color: var(--ceg-ink);
+        margin: 0.25rem 0;
+    }
+    .lifespan {
+        font-size: 0.75rem;
+        color: var(--ceg-ink-soft);
+    }
+    .lifespan .verb {
+        color: var(--ceg-vermillion);
+    }
+    .epitaph {
+        font-style: italic;
+        font-size: 0.78rem;
+        color: var(--ceg-ink-soft);
+        margin-top: 0.15rem;
+    }
+    .resting {
+        margin-top: 0.2rem;
+        font-size: 0.65rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--ceg-ink-soft);
+        opacity: 0.75;
+    }
+    .facts {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem 1rem;
+        padding: 0.85rem 1rem;
+        margin-top: 0.5rem;
+    }
+    .fact {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+    .fact.full {
+        grid-column: 1 / -1;
+    }
+    .value {
+        font-size: 0.82rem;
+        color: var(--ceg-ink);
+    }
+    .ref-line {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .copy {
+        font-size: 0.62rem;
+        padding: 0.1rem 0.45rem;
+        border: 1px solid var(--ceg-rule);
+        border-radius: 3px;
+        background: transparent;
+        color: var(--ceg-ink-soft);
+        cursor: pointer;
+    }
+    .copy:hover {
+        border-color: var(--ceg-vermillion);
+        color: var(--ceg-vermillion);
+    }
+    .links {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        margin-top: 0.6rem;
+    }
+    .link {
+        display: block;
+        text-align: center;
+        font-size: 0.72rem;
+        padding: 0.55rem;
+        border: 1px solid var(--ceg-ink);
+        border-radius: 3px;
+        color: var(--ceg-ink);
+        text-decoration: none;
+        transition: background 0.15s ease, color 0.15s ease;
+    }
+    .link:hover {
+        background: var(--ceg-ink);
+        color: var(--ceg-bone);
+    }
+    .link.primary {
+        background: var(--ceg-vermillion);
+        border-color: var(--ceg-vermillion);
+        color: var(--ceg-bone);
+    }
+    .link.primary:hover {
+        background: #a8351a;
+    }
+    .all-details {
+        margin-top: 0.6rem;
+        padding: 0.6rem 1rem;
+    }
+    .all-details summary {
+        cursor: pointer;
+        list-style: none;
+    }
+    .all-details summary::after {
+        content: ' +';
+    }
+    .all-details[open] summary::after {
+        content: ' −';
+    }
+    .all-details table {
+        width: 100%;
+        margin-top: 0.5rem;
+        font-size: 0.68rem;
+        border-collapse: collapse;
+    }
+    .all-details td {
+        padding: 0.3rem 0;
+        border-top: 1px solid var(--ceg-rule);
+        vertical-align: top;
+    }
+    .all-details .key {
+        color: var(--ceg-ink-soft);
+        padding-right: 0.75rem;
+    }
+    .all-details .val {
+        text-align: right;
+        color: var(--ceg-ink);
+    }
+    .community {
+        margin-top: 1rem;
+    }
+    .tidbits {
+        list-style: none;
+        padding: 0;
+        margin: 0.4rem 0 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+    .tidbits li {
+        font-size: 0.78rem;
+        line-height: 1.45;
+        color: var(--ceg-ink);
+        padding-left: 0.75rem;
+        border-left: 2px solid var(--ceg-ember);
+    }
+</style>
