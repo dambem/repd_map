@@ -1,24 +1,47 @@
-import pandas as pd
-import geopandas as gpd
-from pyproj import Transformer
 from datetime import datetime
 
+import geopandas as gpd
+import pandas as pd
+from pyproj import Transformer
 
-DATETIME_COLS = ['Record Last Updated (dd/mm/yyyy)', 
-                    'Planning Application Submitted',
-                    'Planning Application Withdrawn',
-                    'Planning Permission Refused',
-                    'Appeal Lodged',
-                    'Appeal Withdrawn',
-                    'Appeal Refused',
-                    'Appeal Granted',
-                    'Planning Permission Granted',
-                    'Secretary of State - Intervened',
-                    'Secretary of State - Refusal',
-                    'Secretary of State - Granted',
-                    'Planning Permission Expired',
-                    'Under Construction',
-                    'Operational']
+SUCCESSFUL_DEVELOPMENT_TYPES = [
+    "Under Construction",
+    "Operational",
+]
+
+UNSUCCESSFUL_DEVELOPMENT_TYPES = [
+    "Decommissioned",
+    "Planning Permission Expired",
+    "Application Refused",
+    "Abandoned",
+    "Application Withdrawn",
+    "Appeal Withdrawn",
+]
+
+NEUTRAL_DEVELOPMENT_TYPES = [
+    "Awaiting Construction",
+    "Application Submitted",
+    "Revised",
+    "No Application Required",
+]
+
+DATETIME_COLS = [
+    "Record Last Updated (dd/mm/yyyy)",
+    "Planning Application Submitted",
+    "Planning Application Withdrawn",
+    "Planning Permission Refused",
+    "Appeal Lodged",
+    "Appeal Withdrawn",
+    "Appeal Refused",
+    "Appeal Granted",
+    "Planning Permission Granted",
+    "Secretary of State - Intervened",
+    "Secretary of State - Refusal",
+    "Secretary of State - Granted",
+    "Planning Permission Expired",
+    "Under Construction",
+    "Operational",
+]
 
 TECHNOLOGY_TYPES = {
     "Solar Photovoltaics",
@@ -91,8 +114,8 @@ class REPDProcessor:
 
     def __init__(
         self,
-        src: str = "src/data/REPD_Publication_Q3_2025.csv",
-        encoding: str = "cp1252",
+        src: str = "src/data/REPD_Publication_Q4_2025.csv",
+        encoding: str = "utf-8",
     ):
         self.src = src
         self._df: pd.DataFrame | None = None
@@ -120,8 +143,14 @@ class REPDProcessor:
         Returns:
             pd.DataFrame: Parsed dataframe.
         """
-        df.dropna(subset=[northing_col, easting_col])
         transformer = Transformer.from_crs(from_crs, to_crs)
+        df[easting_col] = pd.to_numeric(
+            df[easting_col].astype(str).str.strip(), errors="coerce"
+        )
+        df[northing_col] = pd.to_numeric(
+            df[northing_col].astype(str).str.strip(), errors="coerce"
+        )
+        df = df.dropna(subset=[northing_col, easting_col])
         lat, lon = transformer.transform(
             df[easting_col].values, df[northing_col].values
         )
@@ -133,8 +162,10 @@ class REPDProcessor:
     def load(self) -> pd.DataFrame:
         """Load dataframe."""
         return pd.read_csv(self.src, encoding=self.encoding)
-    
-    def filter_by_planning_authority(self, df: pd.DataFrame, planning_authority:str) -> pd.DataFrame:
+
+    def filter_by_planning_authority(
+        self, df: pd.DataFrame, planning_authority: str
+    ) -> pd.DataFrame:
         """Filter by local authority.
 
         Args:
@@ -145,9 +176,11 @@ class REPDProcessor:
         Returns:
             pd.DataFrame: _description_
         """
-        return df[df['Planning Authority'] == planning_authority]
-    
-    def filter_by_date(self, df: pd.DataFrame, date_col:str, date:datetime) -> pd.DataFrame:
+        return df[df["Planning Authority"] == planning_authority]
+
+    def filter_by_date(
+        self, df: pd.DataFrame, date_col: str, date: datetime
+    ) -> pd.DataFrame:
         """Filter by date
 
         Args:
@@ -213,30 +246,29 @@ class REPDProcessor:
         df[df.geometry.notna()]
 
         return df
-    
-    def create_geojson(self, df:pd.DataFrame):
+
+    def create_geojson(self, df: pd.DataFrame):
         features = []
         for _, row in df.iterrows():
             feature = {
                 "type": "Feature",
                 "geometry": {
                     "type": "Point",
-                    "coordinates": [float(row['lon']), float(row['lat'])]
+                    "coordinates": [float(row["lon"]), float(row["lat"])],
                 },
-                "properties": row.drop(['latitude', 'longitude']).to_dict()
+                "properties": row.drop(["latitude", "longitude"]).to_dict(),
             }
             features.append(feature)
-        return {
-            "type": "FeatureCollection",
-            "features": features
-        }
+        return {"type": "FeatureCollection", "features": features}
+
     def get_google_query_string(self, row: pd.Series) -> str:
         return f"{row['Site Name'], {row['Country']}, {row['Technology Type']}}, around {row['Record Last Updated (dd/mm/yyyy)']} "
 
-    def process_pipeline(self, 
-                         date:datetime | None = None,
-                         planning_authority: str | None = None,
-                           ) -> pd.DataFrame:
+    def process_pipeline(
+        self,
+        date: datetime | None = None,
+        planning_authority: str | None = None,
+    ) -> pd.DataFrame:
         """Perform necessary pipeline filtering for a cleaned dataset.
 
         Args:
@@ -249,10 +281,15 @@ class REPDProcessor:
         df = self.load()
         df = self.convert_datetime(df)
         if date is not None:
-            df = self.filter_by_date(df=df, date=date, date_col='Record Last Updated (dd/mm/yyyy)')
+            df = self.filter_by_date(
+                df=df, date=date, date_col="Record Last Updated (dd/mm/yyyy)"
+            )
+            print(f"Filtered by date: {date}, remaining records: {len(df)}")
         if planning_authority is not None:
-            df = self.filter_by_planning_authority(df, planning_authority=planning_authority)
+            df = self.filter_by_planning_authority(
+                df, planning_authority=planning_authority
+            )
         df = self.coordinates_to_lat_lon(df)
         df = self.df_to_gpd(df, df.lon, df.lat)
-       
+
         return df

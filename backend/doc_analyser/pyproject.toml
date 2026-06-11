@@ -1,0 +1,16 @@
+[project]
+name = "doc-analyser"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.79.0",
+    "contextily>=1.7.0",
+    "dotenv>=0.9.9",
+    "folium>=0.20.0",
+    "geopandas>=1.1.2",
+    "pdfplumber>=0.11.9",
+    "pydantic>=2.12.5",
+    "pymupdf>=1.27.1",
+]

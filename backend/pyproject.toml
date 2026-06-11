@@ -19,6 +19,7 @@ dependencies = [
     "geopandas>=1.1.2",
     "matplotlib>=3.10.8",
     "asyncio>=4.0.0",
+    "scikit-learn>=1.9.0",
 ]
 
 [project.optional-dependencies]
@@ -29,3 +30,8 @@ dev = ["pytest>=8.0", "httpx>=0.27"]
 
 [project.scripts]
 nimby-batch = "scripts.run_nimby:main"
+
+[tool.uv.workspace]
+members = [
+    "doc_analyser",
+]
